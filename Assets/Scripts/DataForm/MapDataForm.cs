@@ -9,7 +9,7 @@ public class MapDataForm : ScriptableObject, IDataLoad
     public Dictionary<uint, MapData> DB { get; private set; } = null;
 
     [SerializeField]
-    public MapData[] AnimationData;
+    public MapData[] MapData;
 
 
     public void LoadData()
@@ -23,7 +23,7 @@ public class MapDataForm : ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in AnimationData)
+        foreach (var data in MapData)
         {
             MapData newData = new MapData
             {

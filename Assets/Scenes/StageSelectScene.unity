@@ -262,12 +262,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 237556403}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 531d66fbfd32f7b4d83fb30a8c3e7682, type: 3}
+  m_Script: {fileID: 11500000, guid: e2b0de8a97c3bae468cbc7f6fd5532f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageSelectScene
   canvasRT: {fileID: 65176698}
   mainScene:
-    m_AssetGUID: 99c9720ab356a0642a771bea13969a05
+    m_AssetGUID: 1179236c113c8cd469f9034784d2306a
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 

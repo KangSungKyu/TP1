@@ -145,7 +145,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 501079697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7783c14eed62fd4c9f1daeb91342f48, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f1762502857ee14d983ba2292d7eaf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourceManager
 --- !u!4 &501079699
@@ -204,11 +204,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 578531570}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 103f4fc7df013934ea62319b42cdd92b, type: 3}
+  m_Script: {fileID: 11500000, guid: cf9cbde097632684fa09149acdfde7e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.InitScene
   selectSceneRef:
-    m_AssetGUID: 2daf9b854f093794893ce8f3a4794a66
+    m_AssetGUID: 53ac51f5309336541bac255fa53c5a9f
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 
@@ -239,7 +239,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 944555727}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fde393d9f90eda84682a13df4c9b3f48, type: 3}
+  m_Script: {fileID: 11500000, guid: 69f1ea7e93d2c5f4795a83a514e7cf65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameSceneManager
 --- !u!4 &944555729
@@ -283,7 +283,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1214714243}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0054fdca4851f2249b966f5d79350196, type: 3}
+  m_Script: {fileID: 11500000, guid: 57ce9871bfc4a874383f7ab08e0fb991, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SODataTable
 --- !u!4 &1214714245
@@ -327,7 +327,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1251344301}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9285eef0067b6374a8ff20251841414a, type: 3}
+  m_Script: {fileID: 11500000, guid: 02acbe32904b0274c900911b4f248aaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SaveLoadManager
 --- !u!4 &1251344303

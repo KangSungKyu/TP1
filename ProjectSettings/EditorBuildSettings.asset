@@ -7,17 +7,17 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/InitScene.unity
-    guid: 2767452003baffd4aad05d684fc4aebd
+    guid: 0820cce3ade448343be8ffb857d9b5d6
   - enabled: 1
     path: Assets/Scenes/LoadingScene.unity
-    guid: 231010f308b54504885a627485b0b3f6
-  - enabled: 0
+    guid: d223375d6d49baa47a851bab2cf6731f
+  - enabled: 1
     path: Assets/Scenes/MainScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 0
+    guid: 1179236c113c8cd469f9034784d2306a
+  - enabled: 1
     path: Assets/Scenes/StageSelectScene.unity
-    guid: 2daf9b854f093794893ce8f3a4794a66
+    guid: 53ac51f5309336541bac255fa53c5a9f
   m_configObjects:
-    com.unity.addressableassets: {fileID: 11400000, guid: 139f5255ca66a1246a01dbab44ae64d0, type: 2}
+    com.unity.addressableassets: {fileID: 11400000, guid: 0a757462dd39001469b10b59e73ddea1, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 99f9c9493070a9d4c979a8fec7c5a8d3, type: 2}
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: c0c56ac7a3b53d0429d3d595f5e8822a, type: 3}
+    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 9b9b878f993a51345a1e5e25c531614d, type: 3}
