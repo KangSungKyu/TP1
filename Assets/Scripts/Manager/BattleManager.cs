@@ -74,7 +74,7 @@ public class BattleManager : Singleton<BattleManager>
         player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
         player.Subscribe_HP(OnPlayerDeath);
         // subscribe to ATB ready for player
-        player.OnATBReady.Subscribe(_ => OnUnitATBReady(player)).AddTo(this);
+        player.OnATBReady.Subscribe(_ => OnUnitATBReady(player)).AddTo(player);
 
         Image playerPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
 
@@ -104,7 +104,7 @@ public class BattleManager : Singleton<BattleManager>
                     monsterUnit.LoadFromSO(stageData.MonsterIdx[i]);
                     monsterUnit.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
                     monsterUnit.Subscribe_HP(OnMonsterDeath);
-                    monsterUnit.OnATBReady.Subscribe(_ => OnUnitATBReady(monsterUnit)).AddTo(this);
+                    monsterUnit.OnATBReady.Subscribe(_ => OnUnitATBReady(monsterUnit)).AddTo(monsterUnit);
 
                     BBoard board = Factory.Instance.GetBoard(boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, 7.5f);
 
