@@ -397,7 +397,7 @@ public static class Commons
     {
         public static T Instance { get; private set; }
 
-        protected virtual void Awake()
+        protected void Awake()
         {
             if (Instance == null)
             {
@@ -406,14 +406,20 @@ public static class Commons
                 DontDestroyOnLoad(gameObject);
                 OnSingletonAwake();
             }
+            else
+            {
+                Destroy(Instance);
+            }
         }
 
-        protected virtual void OnDestroy()
+        protected void OnDestroy()
         {
             OnSingletonDestroyed();
 
             if (Instance == this)
+            {
                 Instance = null;
+            }
         }
 
         // 파생 클래스는 이 훅들만 오버라이드하면 됨
@@ -574,6 +580,7 @@ public static class Commons
 
                 if (isAddressable)
                 {
+                    pooled.Instance.transform.SetParent(null);
                     ResourceManager.Instance.ReleaseInstance(pooled.Instance as GameObject);
                 }
                 else
