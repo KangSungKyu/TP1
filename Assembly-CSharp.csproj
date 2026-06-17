@@ -65,7 +65,7 @@
     <Compile Include="Assets\Scripts\UI\StageUI.cs" />
     <Compile Include="Assets\Scripts\DataForm\TextDataForm.cs" />
     <Compile Include="Assets\Scripts\Manager\SODataTable.cs" />
-    <Compile Include="Assets\Scripts\Manager\BattleManager.cs" />
+    <Compile Include="Assets\Scripts\Manager\BattleStage.cs" />
     <Compile Include="Assets\Scripts\DataForm\MapDataForm.cs" />
     <Compile Include="Assets\Scripts\Utils\OutlineController.cs" />
     <Compile Include="Assets\Scripts\DataForm\MonsterDataForm.cs" />

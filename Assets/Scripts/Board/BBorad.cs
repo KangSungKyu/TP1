@@ -434,6 +434,7 @@ public class BBoard : MonoBehaviour
                     tilePoolRef.Release(img);
                 }
             }
+
             pooledTiles.Clear();
             tilePoolRef = null;
         }

@@ -13,6 +13,8 @@ public class MainScene : MonoBehaviour
     private TextMeshProUGUI stageUI = null;
     [SerializeField]
     private AssetReference selectStageScene = null;
+    [SerializeField]
+    private BattleStage battleStage = null;
 
     private UserData userData = null;
     private StageClearData stageClearData = null;
@@ -58,9 +60,9 @@ public class MainScene : MonoBehaviour
                 Debug.Log("Factory.InitAsync completed successfully");
         }, TaskScheduler.FromCurrentSynchronizationContext());
 
-        BattleManager.Instance.OnStageClear(OnStageClear);
-        BattleManager.Instance.OnStageDefeat(OnStageDefeat);
-        BattleManager.Instance.InitStage(userData, sd);
+        battleStage.OnStageClear(OnStageClear);
+        battleStage.OnStageDefeat(OnStageDefeat);
+        battleStage.InitStage(userData, sd);
 
         fadeUI.DOFade(0.0f, 1.0f).Play();
     }
@@ -72,7 +74,7 @@ public class MainScene : MonoBehaviour
         //anim defeat ui
         //branch stage select ui and title scene by player selection
 
-        BattleManager.Instance.ReleaseStage();
+        battleStage.ReleaseStage();
 
         Debug.Log($"stage defeat");
 
@@ -92,7 +94,7 @@ public class MainScene : MonoBehaviour
         //input map change (battle -> ui)
         //goto stage select ui(or scene)
 
-        BattleManager.Instance.ReleaseStage();
+        battleStage.ReleaseStage();
 
         Debug.Log($"stage clear");
 
