@@ -269,7 +269,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5363748626658439665}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc3f48a02713b264291acd0af42cedb1, type: 3}
+  m_Script: {fileID: 11500000, guid: bb0512a61dc29054c9787dfda19b08f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageUI
   StageIdx: 0

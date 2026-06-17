@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63be36732237b094facf162f61f1d9db, type: 3}
+  m_Script: {fileID: 11500000, guid: b155cd5ce87cbf440ad270e9725257c7, type: 3}
   m_Name: UnitData
   m_EditorClassIdentifier: Assembly-CSharp::UnitDataForm
   UnitData:
@@ -21,8 +21,8 @@ MonoBehaviour:
     Atk: 1
     Def: 1
     Dodge: 500
-    Spd: 10
-    PortraitSpr: {fileID: 936928218, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}
+    Spd: 20
+    PortraitSpr: {fileID: -595002158, guid: 255de20460d89874a9b4a7ae8d34e64e, type: 3}
   - Idx: 2
     NameIdx: 2
     AnimGroupIdx: 2
@@ -31,8 +31,8 @@ MonoBehaviour:
     Atk: 1
     Def: 0
     Dodge: 0
-    Spd: 5
-    PortraitSpr: {fileID: 564238223, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}
+    Spd: 10
+    PortraitSpr: {fileID: -1369696745, guid: 255de20460d89874a9b4a7ae8d34e64e, type: 3}
   - Idx: 3
     NameIdx: 3
     AnimGroupIdx: 3
@@ -41,5 +41,5 @@ MonoBehaviour:
     Atk: 2
     Def: 0
     Dodge: 0
-    Spd: 7
-    PortraitSpr: {fileID: -1012555918, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}
+    Spd: 15
+    PortraitSpr: {fileID: -1403314912, guid: 255de20460d89874a9b4a7ae8d34e64e, type: 3}

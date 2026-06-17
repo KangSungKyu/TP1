@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UniRx;
-using Unity.AppUI.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static Commons;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 //atb-based
 //유저는 행동 가능 상태일때 퍼즐을 푸는 유예시간이 주어짐

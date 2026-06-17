@@ -246,7 +246,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 109619213}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0728913e997e0174d9ebd839d8dd3047, type: 3}
+  m_Script: {fileID: 11500000, guid: 014393d8079e72d4ba88a9f0ed2ce9fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Factory
   gobjContainer: {fileID: 454515577}
@@ -590,7 +590,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 517265385}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b9fbc5207ecc64f4389e3185c3eceed9, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d8eb15c930246149a8bc833b026345e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
   uiPoolTempContainer: {fileID: 1629743}
@@ -1231,7 +1231,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
@@ -1324,7 +1324,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3849018c50ae76e42a75da2349c7de90, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 58828bb8037003646bb61521ad47f289, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1493,13 +1493,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1928954684}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02f7f837ee6df6d4d98f759e98f7f959, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b13bbeb1d0354749950b0fdc9298ab0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainScene
   fadeUI: {fileID: 1911069895}
   stageUI: {fileID: 1596006880}
   selectStageScene:
-    m_AssetGUID: 2daf9b854f093794893ce8f3a4794a66
+    m_AssetGUID: 53ac51f5309336541bac255fa53c5a9f
     m_SubObjectName: 
     m_SubObjectType: 
     m_SubObjectGUID: 

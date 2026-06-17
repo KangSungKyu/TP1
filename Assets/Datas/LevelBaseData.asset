@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae981c1dc1e7b2a43af94e94d4d61d28, type: 3}
+  m_Script: {fileID: 11500000, guid: d63f696e8e8cb3d40a5c17b8e88b8708, type: 3}
   m_Name: LevelBaseData
   m_EditorClassIdentifier: Assembly-CSharp::LevelBaseDataForm
   LevelBaseData:
@@ -24,7 +24,7 @@ MonoBehaviour:
   - Idx: 2
     Level: 2
     NeedExp: 100
-    MaxHp: 5
+    MaxHp: 10
     Atk: 0
     Def: 0
     Dodge: 0
@@ -32,7 +32,7 @@ MonoBehaviour:
   - Idx: 3
     Level: 3
     NeedExp: 200
-    MaxHp: 5
+    MaxHp: 0
     Atk: 1
     Def: 0
     Dodge: 0

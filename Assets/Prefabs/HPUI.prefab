@@ -260,7 +260,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7576810997605687553}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91a6926b1e37f9644987b8d3808a995e, type: 3}
+  m_Script: {fileID: 11500000, guid: f94793f8bb3cd934685206b5e3717b0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HpBar
   hpBarImage: {fileID: 208925733924258596}
@@ -330,7 +330,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 17cc583c4011f5d489a3c58538c5938e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a44d6905bf734964db06045b392eeda0, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1

@@ -9,10 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b7310c4c4d133a34b80bd2d9bd9f74c5, type: 3}
+  m_Script: {fileID: 11500000, guid: 4536195041258ff4c89b784c90264376, type: 3}
   m_Name: RewardData
   m_EditorClassIdentifier: Assembly-CSharp::RewardDataForm
-  Idx: 1
   RewardData:
   - Idx: 1
     Exp: 50
