@@ -110,13 +110,6 @@ public class Factory : Singleton<Factory>
 
     public void Release()
     {
-        playerPool?.ReleaseAll();
-        monsterPool?.ReleaseAll();
-        boardPool?.ReleaseAll();
-        tileUIPool?.ReleaseAll();
-        hpBarPool?.ReleaseAll();
-        portraitPool?.ReleaseAll();
-
         playerPool?.Clear();
         monsterPool?.Clear();
         boardPool?.Clear();
@@ -176,34 +169,61 @@ public class Factory : Singleton<Factory>
         return board;
     }
 
-    public void ReleasePortraitUI(Image portraitUI)
-    {
-        portraitUI.transform.SetParent(uiContainer);
-        portraitPool.Release(portraitUI);
-    }
-
     public void ReleasePlayerUnit(PlayerUnit player)
     {
-        player.transform.SetParent(gobjContainer);
+        if (player != null)
+        {
+            player.transform.SetParent(gobjContainer);
+        }
+
         playerPool.Release(player);
     }
 
     public void ReleaseHPUI(HpBar hpUI)
     {
-        hpUI.transform.SetParent(uiContainer);
+        if(hpUI != null)
+        {
+            hpUI.transform.SetParent(uiContainer);
+        }
+        
         hpBarPool.Release(hpUI);
     }
     public void ReleaseBoard(BBoard currentBoard)
     {
-        currentBoard.transform.SetParent(gobjContainer);
+        if(currentBoard != null)
+        {
+            currentBoard.transform.SetParent(gobjContainer);
+        }
+
         boardPool.Release(currentBoard);
     }
 
     public void ReleaseMonsterUnit(MonsterUnit monster)
     {
-        monster.transform.SetParent(gobjContainer);
+        if(monster != null)
+        {
+            monster.transform.SetParent(gobjContainer);
+        }
+
         monsterPool.Release(monster);
     }
+
+    public void ReleasePortraitUI(Image portraitUI)
+    {
+        if(portraitUI != null)
+        {
+            portraitUI.transform.SetParent(uiContainer);
+        }
+
+        portraitPool.Release(portraitUI);
+    }
+
+    protected override void OnSingletonDestroyed()
+    {
+        Release();
+        base.OnSingletonDestroyed();
+    }
+
 
     private void OnGet_Board(BBoard board)
     {
@@ -227,11 +247,5 @@ public class Factory : Singleton<Factory>
     private void OnRelease_Board(BBoard board)
     {
         board.ReleaseBoard();
-    }
-
-    protected override void OnSingletonDestroyed()
-    {
-        base.OnSingletonDestroyed();
-        //Release();
     }
 }

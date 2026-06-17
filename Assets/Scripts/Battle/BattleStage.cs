@@ -18,7 +18,7 @@ using static Commons;
 //유저가 공격하기 위한 고정 생성 (적 1개당 1퍼즐)
 //적이 공격하기 전에 대처할 기회를 주는 퍼즐 1개 (휘발성, 적 공격 패턴 시전마다 추가 갱신)
 //총 퍼즐의 양은 적 * 유저 공격 퍼즐 + a(적의 공격 빈도에 따라 유동적으로, 단 전체적인 atb 길이에 비해 방어 퍼즐의 유예시간은 짧게 유지)
-public class BattleManager : Singleton<BattleManager>
+public class BattleStage : MonoBehaviour
 {
     [SerializeField]
     private RectTransform uiPoolTempContainer = null;
@@ -155,6 +155,7 @@ public class BattleManager : Singleton<BattleManager>
         for(int i = 0; i < playerList.Count; ++i)
         {
             playerList[i]?.Release();
+            Factory.Instance.ReleasePlayerUnit(playerList[i]);
         }
 
         playerList.Clear();
@@ -162,13 +163,34 @@ public class BattleManager : Singleton<BattleManager>
         for(int i = 0; i < monsterList.Count; ++i)
         {
             monsterList[i]?.Release();
+            Factory.Instance.ReleaseMonsterUnit(monsterList[i]);
         }
 
         monsterList.Clear();
 
         for (int i = 0; i < boardList.Length; ++i)
         {
+            for(int j = 0; j < boardList[i].Count; ++j)
+            {
+                boardList[i][j].ReleaseBoard();
+                Factory.Instance.ReleaseBoard(boardList[i][j]);
+            }
+
             boardList[i].Clear();
+        }
+
+        for(int i = 0; i < hpBarContainer.childCount; ++i)
+        {
+            HpBar hpbar = hpBarContainer.GetChild(i)?.GetComponent<HpBar>();
+
+            Factory.Instance.ReleaseHPUI(hpbar);
+        }
+
+        for(int i = 0; i < atbGaugeBG.childCount; ++i)
+        {
+            Image port = atbGaugeBG.GetChild(i)?.GetComponent<Image>();
+
+            Factory.Instance.ReleasePortraitUI(port);
         }
 
         playerInput.Battle.Disable();
@@ -188,10 +210,8 @@ public class BattleManager : Singleton<BattleManager>
         onStageClear += act;
     }
 
-    protected override void OnSingletonAwake()
-    {
-        base.OnSingletonAwake();
-
+    protected void Awake()
+    { 
         if(playerInput == null)
         {
             playerInput = new PlayerInput();
@@ -213,10 +233,8 @@ public class BattleManager : Singleton<BattleManager>
         playerInput.Battle.Enable();
     }
 
-    protected override void OnSingletonDestroyed()
+    protected void OnDestroy()
     {
-        base.OnSingletonDestroyed();
-
         if(playerInput != null)
         {
             playerInput.Battle.Disable();

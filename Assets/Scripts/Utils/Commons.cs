@@ -406,18 +406,18 @@ public static class Commons
                 DontDestroyOnLoad(gameObject);
                 OnSingletonAwake();
             }
-            else
+            else if(Instance != this)
             {
-                Destroy(Instance);
+                Destroy(gameObject);
             }
         }
 
         protected void OnDestroy()
         {
-            OnSingletonDestroyed();
-
             if (Instance == this)
             {
+                OnSingletonDestroyed();
+
                 Instance = null;
             }
         }
@@ -564,13 +564,6 @@ public static class Commons
             pooledInstanceIds.Add(id);
         }
 
-        public void ReleaseAll()
-        {
-            foreach(PooledObject pooled in pool)
-            { 
-                Release(pooled.Instance);
-            }
-        }
 
         public void Clear()
         {
@@ -580,7 +573,6 @@ public static class Commons
 
                 if (isAddressable)
                 {
-                    pooled.Instance.transform.SetParent(null);
                     ResourceManager.Instance.ReleaseInstance(pooled.Instance as GameObject);
                 }
                 else
