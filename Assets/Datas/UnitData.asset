@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63be36732237b094facf162f61f1d9db, type: 3}
+  m_Name: UnitData
+  m_EditorClassIdentifier: Assembly-CSharp::UnitDataForm
+  UnitData:
+  - Idx: 1
+    NameIdx: 1
+    AnimGroupIdx: 1
+    Hp: 10
+    MaxHp: 10
+    Atk: 1
+    Def: 1
+    Dodge: 500
+    Spd: 10
+    PortraitSpr: {fileID: 936928218, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}
+  - Idx: 2
+    NameIdx: 2
+    AnimGroupIdx: 2
+    Hp: 5
+    MaxHp: 5
+    Atk: 1
+    Def: 0
+    Dodge: 0
+    Spd: 5
+    PortraitSpr: {fileID: 564238223, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}
+  - Idx: 3
+    NameIdx: 3
+    AnimGroupIdx: 3
+    Hp: 7
+    MaxHp: 7
+    Atk: 2
+    Def: 0
+    Dodge: 0
+    Spd: 7
+    PortraitSpr: {fileID: -1012555918, guid: d78d0a9486e3e4347b96463bd5a92c7f, type: 3}

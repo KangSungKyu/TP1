@@ -1,0 +1,195 @@
+{
+    "version": 1,
+    "name": "PlayerInput",
+    "maps": [
+        {
+            "name": "Battle",
+            "id": "ea1e08e4-f06a-4b5b-8fba-2cd7f1faf345",
+            "actions": [
+                {
+                    "name": "PuzzleDrawUp",
+                    "type": "Button",
+                    "id": "74bf350c-a8e9-4af0-a088-df902d22ff3e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleDrawDown",
+                    "type": "Button",
+                    "id": "9220e6de-9f88-4ebe-807e-3fc3b206786e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleDrawLeft",
+                    "type": "Button",
+                    "id": "f44d6d36-f2bf-43d2-a284-2735ce56938a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleDrawRight",
+                    "type": "Button",
+                    "id": "1c79727a-407a-43c3-8a3c-db7367fe723b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleSelectL",
+                    "type": "Button",
+                    "id": "ddb92ea4-9b8b-49b7-bbbb-a15c260fb2ce",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleSelectR",
+                    "type": "Button",
+                    "id": "6dc60760-0141-4933-865e-6d9b7671b148",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzlePageL",
+                    "type": "Button",
+                    "id": "99ac964f-753e-41d6-96da-735a8ada9e1a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzlePageR",
+                    "type": "Button",
+                    "id": "58c08138-b83a-49d1-9b25-e53975ac37af",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PuzzleReset",
+                    "type": "Button",
+                    "id": "e702cb36-77bc-4b7a-a4f4-b108c3d66e3d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "99614bca-84cb-46a0-a9c0-583cd3379ccf",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleDrawUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c4fdf58b-8608-4932-8d9f-fa2ad020530d",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleDrawDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d816642d-d400-4d72-b6b7-aa744690df52",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleDrawLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9c710e68-984c-40c0-8cd8-aa3affdbd182",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleDrawRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f60a6aae-c67c-4382-81c2-bf53dfce2e8a",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleSelectL",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "591eef8b-3f60-4355-aa22-3d0a23994f4a",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleSelectR",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "caf38415-c769-400d-b9a7-039218b52fc0",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzlePageL",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "49f2fc93-5cc2-4d91-9747-c3cca3924c36",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzlePageR",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "155b02d2-183f-46d7-9e42-b6e60fc1716b",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PuzzleReset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

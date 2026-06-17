@@ -1,0 +1,33 @@
+name: Unity EditMode Tests
+
+on:
+  push:
+	branches: [ main ]
+  pull_request:
+	branches: [ main ]
+
+jobs:
+  editmode-tests:
+	runs-on: ubuntu-latest
+
+	steps:
+	- uses: actions/checkout@v4
+
+	- name: Cache Unity packages
+	  uses: actions/cache@v4
+	  with:
+		path: |
+		  ~/.local/share/unity3d
+		  ~/.cache/unity
+		key: ${{ runner.os }}-unity-packages-${{ hashFiles('**/Packages/manifest.json') }}
+
+	- name: Setup Unity
+	  uses: game-ci/unity-actions/setup@v2
+	  with:
+		unityVersion: 2021.3.0f1
+
+	- name: Run EditMode Tests
+	  uses: game-ci/unity-test-runner@v2
+	  with:
+		testMode: editmode
+*** End Patch
