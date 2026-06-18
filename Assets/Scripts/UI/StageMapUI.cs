@@ -19,7 +19,7 @@ public class StageMapUI : MonoBehaviour
                 userData.MapIdx = StageMapIdx;
                 userData.StageIdx = (int)stageIdx;
 
-                SaveLoadManager.Instance.SaveUserData();
+                SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
                 sceneChange?.Invoke();
             });
         }

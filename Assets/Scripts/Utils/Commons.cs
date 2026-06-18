@@ -195,8 +195,32 @@ public struct UnitActionData
 }
 
 [System.Serializable]
+public class ClientData
+{
+    public string ClientId = string.Empty;
+
+    public static ClientData CreateClientData()
+    {
+        ClientData data = new ClientData();
+
+        data.ClientId = $"tpc-{System.Guid.NewGuid().ToString()}";
+
+        return data;
+    }
+}
+
+[System.Serializable]
+public class APIResponseData<T>
+{
+    public string status;
+    public T data;
+}
+
+[System.Serializable]
 public class UserData
 {
+    public int UserId;
+    public string ClientId;
     public int Level;
     public int Exp;
     public int MapIdx;
@@ -208,18 +232,23 @@ public class UserData
     {
         return new SavedUserData()
         {
+            UserId = UserId,
+            ClientId = ClientId,
             Level = Level, 
             Exp = Exp, 
             MapIdx = MapIdx, 
             StageIdx = StageIdx, 
             SavedMapIdx = SavedMapIdx,
+            SavedStageIdx = SavedStageIdx
         };
     }
 }
 
 [System.Serializable]
-public class SavedUserData 
+public class SavedUserData
 {
+    public int UserId;
+    public string ClientId;
     public int Level;
     public int Exp;
     public int MapIdx;
@@ -231,6 +260,8 @@ public class SavedUserData
     {
         return new UserData()
         {
+            UserId = UserId,
+            ClientId = ClientId,
             Level = Level, 
             Exp = Exp,
             MapIdx = MapIdx, 
@@ -251,11 +282,12 @@ public class ClearData
 [System.Serializable]
 public class StageClearData
 {
+    public int UserId;
     public Dictionary<int, ClearData> ClearDatas;
 
     public SavedStageClearData Convert()
     {
-        SavedStageClearData sscd = new SavedStageClearData() { ClearDatas = new List<ClearData>() };
+        SavedStageClearData sscd = new SavedStageClearData() { UserId = UserId, ClearDatas = new List<ClearData>() };
 
         sscd.ClearDatas = ClearDatas.Values.ToList();
 
@@ -286,11 +318,12 @@ public class StageClearData
 [System.Serializable]
 public class SavedStageClearData
 {
+    public int UserId;
     public List<ClearData> ClearDatas;
 
     public StageClearData Convert()
     {
-        StageClearData scd = new StageClearData() { ClearDatas = new Dictionary<int, ClearData>() };
+        StageClearData scd = new StageClearData() {UserId = UserId, ClearDatas = new Dictionary<int, ClearData>() };
 
         foreach(var d in ClearDatas)
         {

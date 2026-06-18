@@ -2,72 +2,112 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using Newtonsoft.Json;
 using static Commons;
 
 public class SaveLoadManager : Singleton<SaveLoadManager>
 {
+    public ClientData ClientData { get; private set; } = null;
     public UserData UserData { get; set; } = null;
     public StageClearData StageClearData { get; set; } = null;
 
     private static string GetPath(string fileName) => Path.Combine(Application.persistentDataPath, fileName);
 
+    private ClientData clientData = null;
     private SavedUserData savedUserData = null;
     private SavedStageClearData savedStageClearData = null;
 
-    public void SaveUserData()
+    public void SaveClientData()
     {
-        savedUserData = UserData.Convert();
-
-        Save("userData.json", savedUserData);
+        Save("clientData.json", clientData);
     }
 
-    public void SaveStageClearData()
+    public void LoadClientData()
+    {
+        clientData = Load<ClientData>("clientData.json");
+
+        if(clientData == null)
+        {
+            clientData = ClientData.CreateClientData();
+
+            SaveClientData();
+        }
+    }
+
+    public void SaveUserData(System.Action<string> onComp, System.Action onFail)
+    {
+        savedUserData = UserData.Convert();
+        clientData.ClientId = savedUserData.ClientId;
+
+        //Save("userData.json", savedUserData);
+        GameNetworkManager.Instance.SaveUserData(savedUserData, onComp, onFail);
+    }
+
+    public void LoadUserData(System.Action onComp, System.Action onFail)
+    {
+        GameNetworkManager.Instance.LoadUserData(clientData, (json) =>
+        {
+            //savedUserData = Load<SavedUserData>("userData.json");
+            APIResponseData<SavedUserData> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<SavedUserData>(json);
+
+            if(res.data != null)
+            {
+                savedUserData = res.data;
+                UserData = savedUserData.Convert();
+                clientData.ClientId = UserData.ClientId;
+
+                onComp?.Invoke();
+            }
+        }, onFail);
+    }
+
+    public void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action onFail)
     {
         savedStageClearData = StageClearData.Convert();
 
-        Save("stageClearData.json", savedStageClearData);
+        //Save("stageClearData.json", savedStageClearData);
+        GameNetworkManager.Instance.SaveStageClearData((uint)stageIdx, (uint)clearState, onComp, onFail);
     }
 
-    public void LoadUserData()
+    public void LoadStageClearData(System.Action onComp, System.Action onFail)
     {
-        savedUserData = Load<SavedUserData>("userData.json");
-
-        if(savedUserData == default)
+        GameNetworkManager.Instance.LoadStageClearData((uint)UserData.UserId, (json) =>
         {
-            savedUserData = new SavedUserData()
-            {
-                Level = 1,
-                Exp = 0,
-                MapIdx = 1,
-                StageIdx = 1,
-                SavedMapIdx = 1,
-                SavedStageIdx = 1,
-            };
-        }
+            //savedStageClearData = Load<SavedStageClearData>("stageClearData.json");
+            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-        UserData = savedUserData.Convert();
+            if(res.data != null)
+            {
+                savedStageClearData = new SavedStageClearData() { UserId = UserData.UserId, ClearDatas = res.data };
+                StageClearData = savedStageClearData.Convert();
+
+                onComp?.Invoke();
+            }
+        }, onFail);
     }
 
-    public void LoadStageClearData()
+    public string ToJson<T>(T data) where T : class, new()
     {
-        savedStageClearData = Load<SavedStageClearData>("stageClearData.json");
+        string json = JsonConvert.SerializeObject(data); // true: 가독성 좋게 들여쓰기
 
-        if(savedStageClearData == default)
+        return json;
+    }
+
+    public T FromJson<T>(string json) where T : class, new()
+    {
+        T data = default;
+
+        if (json != string.Empty)
         {
-            savedStageClearData = new SavedStageClearData()
-            {
-                ClearDatas = new List<ClearData>(),
-            };
+            data = JsonConvert.DeserializeObject<T>(json);
         }
 
-        StageClearData = savedStageClearData.Convert();
+        return data;
     }
 
     public void Save<T>(string fileName, T data) where T : class, new()
     {
-        string json = JsonUtility.ToJson(data, true); // true: 가독성 좋게 들여쓰기
-
-        File.WriteAllText(GetPath(fileName), json);
+        File.WriteAllText(GetPath(fileName), ToJson(data));
         Debug.Log("데이터 저장 완료: " + GetPath(fileName));
     }
 
@@ -80,7 +120,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
         string json = File.ReadAllText(path);
 
-        return JsonUtility.FromJson<T>(json);
+        return FromJson<T>(json);
     }
 
     public bool Find(string fileName)

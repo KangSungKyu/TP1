@@ -82,7 +82,7 @@ public class MainScene : MonoBehaviour
         userData.MapIdx = userData.SavedMapIdx;
         userData.StageIdx = userData.SavedStageIdx;
 
-        SaveLoadManager.Instance.SaveUserData();
+        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
 
         GameSceneManager.Instance.LoadScene(selectStageScene);
     }
@@ -125,8 +125,8 @@ public class MainScene : MonoBehaviour
             userData.SavedStageIdx = 1;
         }
 
-        SaveLoadManager.Instance.SaveUserData();
-        SaveLoadManager.Instance.SaveStageClearData();
+        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
+        SaveLoadManager.Instance.SaveStageClearData(userData.StageIdx, 1, (t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
         GameSceneManager.Instance.LoadScene(selectStageScene);
     }
 }
