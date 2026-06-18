@@ -38,11 +38,25 @@ public class InitScene : MonoBehaviour
 
             ResourceManager.Instance.LoadAssetAsync<GameObject>("StageMapUI_1", (o) => Debug.Log($"resource loaded, {o.name}"));
 
-            SaveLoadManager.Instance.LoadUserData();
-            SaveLoadManager.Instance.LoadStageClearData();
+            SaveLoadManager.Instance.LoadClientData();
 
-            GameSceneManager.Instance.LoadScene(selectSceneRef);
+            SaveLoadManager.Instance.LoadUserData(() => { Debug.Log("load"); AfterLoadUserData(); }, () =>
+            {
+                Debug.Log("load fail");
+                //newer user
+
+                AfterLoadUserData();
+            });
+
         }));
+    }
+
+    private void AfterLoadUserData()
+    {
+        SaveLoadManager.Instance.LoadStageClearData(() =>
+        {
+            GameSceneManager.Instance.LoadScene(selectSceneRef);
+        }, null);
     }
 
 }
