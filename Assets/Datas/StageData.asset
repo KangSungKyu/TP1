@@ -14,14 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StageDataForm
   StageData:
   - Idx: 1
+    Type: 0
     Stage: 1
     SubStage: 1
     MonsterIdx: 01000000
     MonsterCount: 02000000
     RewardIdx: 01000000
   - Idx: 2
+    Type: 0
     Stage: 1
     SubStage: 2
     MonsterIdx: 0100000002000000
     MonsterCount: 0100000001000000
     RewardIdx: 0100000002000000
+  - Idx: 3
+    Type: 1
+    Stage: 1
+    SubStage: 3
+    MonsterIdx: 
+    MonsterCount: 
+    RewardIdx: 

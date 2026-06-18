@@ -28,6 +28,7 @@ public class StageDataForm : ScriptableObject, IDataLoad
             StageData newData = new StageData
             {
                 Idx = data.Idx,
+                Type = data.Type,
                 Stage = data.Stage,
                 SubStage = data.SubStage,
                 MonsterIdx = data.MonsterIdx,

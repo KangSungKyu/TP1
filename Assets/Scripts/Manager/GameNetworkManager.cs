@@ -12,21 +12,21 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
 
     public APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
     {
-        var res = JsonConvert.DeserializeObject<APIResponseData<T>>(json);
+        var res = FromJson<APIResponseData<T>>(json);
 
         return res;
     }
 
     public void SaveUserData(SavedUserData savedUserData, System.Action<string> onComplete = null, System.Action onFailed = null)
     {
-        string json = JsonConvert.SerializeObject(savedUserData);
+        string json = ToJson(savedUserData);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
     }
 
     public void LoadUserData(ClientData clientData, System.Action<string> onComplete = null, System.Action onFailed = null)
     {
-        string json = JsonConvert.SerializeObject(clientData);
+        string json = ToJson(clientData);
 
         StartCoroutine(IEPostRequest($"{server_url}/login_user", json, onComplete, onFailed));
     }
@@ -40,7 +40,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             StageIdx = stageIdx,
             ClearState = clearState,
         };
-        string json = JsonConvert.SerializeObject(dto);
+        string json = ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_stagecleardata", json, onComplete, onFailed));
     }
