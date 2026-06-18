@@ -1,9 +1,10 @@
+using JetBrains.Annotations;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 public enum BTileAttribute
 {
@@ -48,6 +49,15 @@ public enum UnitActionType
 
     UnitActionType_End
 }
+
+public enum StageType : int
+{
+    Battle = 0,
+    Rest,
+
+    StageType_End
+}
+
 
 public interface IDataLoad
 {
@@ -148,6 +158,7 @@ public struct MonsterData
 public struct StageData
 {
     public uint Idx;
+    public StageType Type; //0 battle, 1 point
     public uint Stage;
     public uint SubStage;
     public uint[] MonsterIdx;
@@ -424,6 +435,25 @@ public static class Commons
             return localPoint;
         }
 
+    }
+
+    public static string ToJson<T>(T data)
+    {
+        string json = JsonConvert.SerializeObject(data); // true: 가독성 좋게 들여쓰기
+
+        return json;
+    }
+
+    public static T FromJson<T>(string json)
+    {
+        T data = default;
+
+        if (json != string.Empty)
+        {
+            data = JsonConvert.DeserializeObject<T>(json);
+        }
+
+        return data;
     }
 
     public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour

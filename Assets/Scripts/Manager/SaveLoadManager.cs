@@ -86,25 +86,6 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         }, onFail);
     }
 
-    public string ToJson<T>(T data) where T : class, new()
-    {
-        string json = JsonConvert.SerializeObject(data); // true: 가독성 좋게 들여쓰기
-
-        return json;
-    }
-
-    public T FromJson<T>(string json) where T : class, new()
-    {
-        T data = default;
-
-        if (json != string.Empty)
-        {
-            data = JsonConvert.DeserializeObject<T>(json);
-        }
-
-        return data;
-    }
-
     public void Save<T>(string fileName, T data) where T : class, new()
     {
         File.WriteAllText(GetPath(fileName), ToJson(data));
