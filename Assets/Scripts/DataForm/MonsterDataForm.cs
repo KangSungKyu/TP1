@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Commons;
 
-[CreateAssetMenu(fileName = "MonsterDataForm", menuName = "ScriptableObjects/MonsterDataForm", order = 1)]
-public class MonsterDataForm: ScriptableObject, IDataLoad
+public class MonsterDataForm: IDataLoad
 {
     public Dictionary<uint, MonsterData> DB { get; private set; } = null;
 
-    [SerializeField]
-    public MonsterData[] MonsterData = null;
-
-
-    public void LoadData()
+    public void LoadData(string csvText)
     {
         if (DB == null)
         {
@@ -23,25 +18,15 @@ public class MonsterDataForm: ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in MonsterData)
-        {
-            MonsterData newData = new MonsterData
-            {
-                Idx = data.Idx,
-                UnitIdx = data.UnitIdx,
-                PatternIdx = data.PatternIdx,
-                SizeScale = data.SizeScale,
-                BoardDefaultWidth = data.BoardDefaultWidth,
-                BoardDefaultHeight = data.BoardDefaultHeight,
-            };
+        var dataList = Util.ParseFromCSV<MonsterData>(csvText);
 
-            if (DB.ContainsKey(newData.Idx))
+        for (int i = 0; i < dataList.Count; ++i)
+        {
+            var data = dataList[i];
+
+            if (!DB.ContainsKey(data.Idx))
             {
-                Debug.LogError($"Already contained data, monster, idx:{newData.Idx}");
-            }
-            else
-            {
-                DB.Add(newData.Idx, newData);
+                DB.Add(data.Idx, data);
             }
         }
     }

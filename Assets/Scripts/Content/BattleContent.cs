@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -17,14 +19,14 @@ public class BattleContent : GameContent
     private UserData userData = null;
     private StageClearData stageClearData = null;
 
-    public override async void Enter()
+    public override async Task Enter()
     {
-        base.Enter();
+        await base.Enter();
 
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
-        StageData sd = SODataTable.Instance.GetStageData((uint)userData.StageIdx);
+        StageData sd = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
 
         stageUI.SetText($"{sd.Stage} - {sd.SubStage}");
 
@@ -34,7 +36,7 @@ public class BattleContent : GameContent
 
         for (int i = 0; i < sd.MonsterIdx.Length; ++i)
         {
-            MonsterData md = SODataTable.Instance.GetMonsterData(sd.MonsterIdx[i]);
+            MonsterData md = DataTableManager.Instance.GetMonsterData(sd.MonsterIdx[i]);
 
             tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]);
             monsterPoolCount += (int)sd.MonsterCount[i];
@@ -72,13 +74,23 @@ public class BattleContent : GameContent
 
         Debug.Log($"stage defeat");
 
-        userData.Exp = 0;
-        userData.MapIdx = userData.SavedMapIdx;
-        userData.StageIdx = userData.SavedStageIdx;
+        GameNetworkManager.Instance.UpdateDefeatStage((json) =>
+        {
+            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
+            if (res.data != null)
+            {
+                stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
 
-        GameSceneManager.Instance.LoadScene(selectStageScene);
+                userData.Exp = 0;
+                userData.MapIdx = userData.SavedMapIdx;
+                userData.StageIdx = userData.SavedStageIdx;
+
+                SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
+
+                GameSceneManager.Instance.LoadScene(selectStageScene);
+            }
+        });
     }
 
     private void OnStageClear()
@@ -92,15 +104,15 @@ public class BattleContent : GameContent
 
         Debug.Log($"stage clear");
 
-        StageData stageData = SODataTable.Instance.GetStageData((uint)userData.StageIdx);
+        StageData stageData = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
         uint totalExp = 0;
 
         for (int i = 0; i < stageData.MonsterIdx.Length; ++i)
         {
             if (stageData.MonsterIdx[i] > 0)
             {
-                MonsterData monsterData = SODataTable.Instance.GetMonsterData(stageData.MonsterIdx[i]);
-                RewardData rewardData = SODataTable.Instance.GetRewardData(stageData.RewardIdx[i]);
+                MonsterData monsterData = DataTableManager.Instance.GetMonsterData(stageData.MonsterIdx[i]);
+                RewardData rewardData = DataTableManager.Instance.GetRewardData(stageData.RewardIdx[i]);
 
                 totalExp += (rewardData.Exp * stageData.MonsterCount[i]);
             }

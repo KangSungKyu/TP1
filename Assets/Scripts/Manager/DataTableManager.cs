@@ -1,21 +1,39 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using static Commons;
 
-public class SODataTable : Singleton<SODataTable>
+public class DataTableManager : Singleton<DataTableManager>
 {
-    private Dictionary<Type, IDataLoad> dataList = new Dictionary<Type, IDataLoad>();
-
-    public T GetDB<T>() where T : class, IDataLoad
+    private readonly Dictionary<DataTableType, IDataLoad> dataList = new Dictionary<DataTableType, IDataLoad>()
     {
-        if(dataList.ContainsKey(typeof(T)))
+        { DataTableType.TextData, new TextDataForm() },
+        { DataTableType.UnitData, new UnitDataForm() },
+        { DataTableType.LevelBaseData, new LevelBaseDataForm() },
+        { DataTableType.MonsterData, new MonsterDataForm() },
+        { DataTableType.AnimationData, new AnimationDataForm() },
+        { DataTableType.MapData, new MapDataForm() },
+        { DataTableType.StageData, new StageDataForm() },
+        { DataTableType.RewardData, new RewardDataForm() },
+    };
+
+    public T GetDB<T>(uint idx) where T : class, IDataLoad
+    {
+        DataTableType dtt = Util.GetDataTableType(idx);
+
+        return GetDB<T>(dtt);
+    }
+
+    public T GetDB<T>(DataTableType dataTableType) where T : class, IDataLoad
+    {
+        if(dataList.ContainsKey(dataTableType))
         {
-            return dataList[typeof(T)] as T;
+            return dataList[dataTableType] as T;
         }
 
         return null;
@@ -23,7 +41,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public UnitData GetUnitData(uint idx)
     {
-        var db = GetDB<UnitDataForm>()?.DB;
+        var db = GetDB<UnitDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -35,7 +53,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public MonsterData GetMonsterData(uint idx)
     {
-        var db = GetDB<MonsterDataForm>()?.DB;
+        var db = GetDB<MonsterDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -47,7 +65,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public StageData GetStageData(uint idx)
     {
-        var db = GetDB<StageDataForm>()?.DB;
+        var db = GetDB<StageDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -59,7 +77,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public string GetText(uint idx)
     {
-        var db = GetDB<TextDataForm>()?.DB;
+        var db = GetDB<TextDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -71,7 +89,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public AnimationData GetAnimationData(uint idx)
     {
-        var db = GetDB<AnimationDataForm>()?.DB;
+        var db = GetDB<AnimationDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -83,7 +101,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public LevelBaseData GetLevelBaseData(uint level)
     {
-        var db = GetDB<LevelBaseDataForm>()?.DB;
+        var db = GetDB<LevelBaseDataForm>(DataTableType.LevelBaseData)?.DB;
 
         if (db != null)
         {
@@ -95,7 +113,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public RewardData GetRewardData(uint idx)
     {
-        var db = GetDB<RewardDataForm>()?.DB;
+        var db = GetDB<RewardDataForm>(idx)?.DB;
 
         if (db.ContainsKey(idx))
         {
@@ -107,7 +125,7 @@ public class SODataTable : Singleton<SODataTable>
 
     public MapData GetMapData(uint idx)
     {
-        var db = GetDB<MapDataForm>()?.DB;
+        var db = GetDB<MapDataForm>(idx)?.DB;
 
         if(db.ContainsKey(idx))
         {
@@ -139,28 +157,33 @@ public class SODataTable : Singleton<SODataTable>
     private IEnumerator IEPreloadScriptableObjects()
     {
         // 'Data' 라벨을 가진 에셋들만 로드
+        //csv파일이라 수정필요
+        //idx에서 테이블 종류를 구분
         string targetLabel = "Data";
 
-        var locationsHandle = Addressables.LoadResourceLocationsAsync(targetLabel, typeof(ScriptableObject));
+        var locationsHandle = Addressables.LoadResourceLocationsAsync(targetLabel, typeof(TextAsset));
+
         yield return locationsHandle;
 
         if (locationsHandle.Status == AsyncOperationStatus.Succeeded)
         {
-            ResourceManager.Instance.LoadAssetsAsync<ScriptableObject>(locationsHandle.Result, (asset) =>
+            ResourceManager.Instance.LoadAssetsAsync<TextAsset>(locationsHandle.Result, (asset) =>
             {
-                if(asset is IDataLoad)
+                using (var reader = new StringReader(asset.text))
                 {
-                    IDataLoad dl = (asset as IDataLoad);
+                    string firstLine = reader.ReadLine();
+                    string secondLine = reader.ReadLine();
+                    string[] headers = secondLine.Split(',');
 
-                    if (!dataList.ContainsKey(dl.GetType()))
-                    { 
-                        dl.LoadData();
+                    DataTableType dataTableType = Commons.Util.GetDataTableType(uint.Parse(headers[0]));
 
-                        dataList.Add(dl.GetType(), dl);
+                    if(dataList.ContainsKey(dataTableType))
+                    {
+                        dataList[dataTableType].LoadData(asset.text);
+
+                        Debug.Log($"Data Loaded: {asset.name}");
                     }
                 }
-
-                Debug.Log($"Data Loaded: {asset.name}");
             });
         }
 

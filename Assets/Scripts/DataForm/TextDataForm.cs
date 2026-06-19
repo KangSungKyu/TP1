@@ -3,16 +3,11 @@ using System.Collections;
 using static Commons;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "TextDataForm", menuName = "ScriptableObjects/TextDataForm", order = 1)]
-public class TextDataForm : ScriptableObject, IDataLoad
+public class TextDataForm : IDataLoad
 {
     public Dictionary<uint, TextData> DB { get; private set; } = null;
 
-    [SerializeField]
-    public TextData[] TextData = null;
-
-
-    public void LoadData()
+    public void LoadData(string csvText)
     {
         if (DB == null)
         {
@@ -23,21 +18,15 @@ public class TextDataForm : ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in TextData)
-        {
-            TextData newData = new TextData
-            {
-                Idx = data.Idx,
-                Text = data.Text,
-            };
+        var dataList = Util.ParseFromCSV<TextData>(csvText);
 
-            if (DB.ContainsKey(newData.Idx))
+        for (int i = 0; i < dataList.Count; ++i)
+        {
+            var data = dataList[i];
+
+            if (!DB.ContainsKey(data.Idx))
             {
-                Debug.LogError($"Already contained data, text, idx:{newData.Idx}");
-            }
-            else
-            {
-                DB.Add(newData.Idx, newData);
+                DB.Add(data.Idx, data);
             }
         }
     }

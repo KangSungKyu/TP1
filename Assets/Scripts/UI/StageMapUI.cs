@@ -27,7 +27,7 @@ public class StageMapUI : MonoBehaviour
 
     private void Start()
     {
-        data = SODataTable.Instance.GetMapData((uint)StageMapIdx);
+        data = DataTableManager.Instance.GetMapData((uint)StageMapIdx);
 
         if(data.Idx == 0)
         {

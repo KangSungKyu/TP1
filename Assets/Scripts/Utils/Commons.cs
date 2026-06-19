@@ -1,10 +1,29 @@
-using JetBrains.Annotations;
+using CsvHelper;
+using CsvHelper.Configuration;
+using CsvHelper.Configuration.Attributes;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+
+public enum DataTableType : uint //1~999
+{
+    None = 0,
+    TextData,
+    UnitData,
+    LevelBaseData,
+    MonsterData,
+    AnimationData,
+    MapData,
+    StageData,
+    RewardData,
+
+    DataTableType_End
+}
 
 public enum BTileAttribute
 {
@@ -61,37 +80,55 @@ public enum StageType : int
 
 public interface IDataLoad
 {
-    public void LoadData();
+    public void LoadData(string csvText);
     public void Release();
 }
 
 
 [System.Serializable]
-public struct LevelBaseData
+public class LevelBaseData
 {
-    public uint Idx;
-    public uint Level;
-    public uint NeedExp;
-    public float MaxHp;
-    public float Atk;
-    public float Def;
-    public float Dodge;
-    public float Spd;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("level")]
+    public uint Level { get; set; }
+    [Name("needexp")]
+    public uint NeedExp { get; set; }
+    [Name("maxhp")]
+    public float MaxHp { get; set; }
+    [Name("atk")]
+    public float Atk { get; set; }
+    [Name("def")]
+    public float Def { get; set; }
+    [Name("dodge")]
+    public float Dodge { get; set; }
+    [Name("spd")]
+    public float Spd { get; set; }
 }
 
 [System.Serializable]
-public struct UnitData
+public class UnitData
 {
-    public uint Idx;
-    public uint NameIdx;
-    public uint AnimGroupIdx;
-    public float Hp;
-    public float MaxHp;
-    public float Atk;
-    public float Def;
-    public float Dodge; //0~1000
-    public float Spd;
-    public Sprite PortraitSpr;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("nameidx")]
+    public uint NameIdx { get; set; }
+    [Name("animgroupidx")]
+    public uint AnimGroupIdx { get; set; }
+    [Name("hp")]
+    public float Hp { get; set; }
+    [Name("maxhp")]
+    public float MaxHp { get; set; }
+    [Name("atk")]
+    public float Atk { get; set; }
+    [Name("def")]
+    public float Def { get; set; }
+    [Name("dodge")]
+    public float Dodge { get; set; } //0~1000
+    [Name("spd")]
+    public float Spd { get; set; }
+    [Name("portraitidx")]
+    public int PortraitIdx { get; set; }
 }
 
 public struct ApplyStatusData
@@ -137,54 +174,75 @@ public struct UsageUnitData
 }
 
 [System.Serializable]
-public struct TextData
+public class TextData
 {
-    public uint Idx;
-    public string Text;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("text")]
+    public string Text { get; set; }
 }
 
 [System.Serializable]
-public struct MonsterData
+public class MonsterData
 {
-    public uint Idx;
-    public uint UnitIdx;
-    public uint PatternIdx;
-    public float SizeScale;
-    public uint BoardDefaultWidth;
-    public uint BoardDefaultHeight;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("unitidx")]
+    public uint UnitIdx { get; set; }
+    [Name("patternidx")]
+    public uint PatternIdx { get; set; }
+    [Name("sizescale")]
+    public float SizeScale { get; set; }
+    [Name("boarddefaultwidth")]
+    public uint BoardDefaultWidth { get; set; }
+    [Name("boarddefaultheight")]
+    public uint BoardDefaultHeight { get; set; }
 }
 
 [System.Serializable]
-public struct StageData
+public class StageData
 {
-    public uint Idx;
-    public StageType Type; //0 battle, 1 point
-    public uint Stage;
-    public uint SubStage;
-    public uint[] MonsterIdx;
-    public uint[] MonsterCount;
-    public uint[] RewardIdx; //monsteridx.len
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("type")]
+    public StageType Type { get; set; } //0 battle, 1 point
+    [Name("stage")]
+    public uint Stage { get; set; }
+    [Name("substage")]
+    public uint SubStage { get; set; }
+    [Name("monsteridx"), TypeConverter(typeof(UIntArrayConverter))]
+    public uint[] MonsterIdx { get; set; }
+    [Name("monstercount"), TypeConverter(typeof(UIntArrayConverter))]
+    public uint[] MonsterCount { get; set; }
+    [Name("rewardidx"), TypeConverter(typeof(UIntArrayConverter))]
+    public uint[] RewardIdx { get; set; } //monsteridx.len
 }
 
 [System.Serializable]
-public struct AnimationData
+public class AnimationData
 {
-    public uint Idx;
-    public string ControllerKey;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("controllerkey")]
+    public string ControllerKey { get; set; }
 }
 
 [System.Serializable]
-public struct RewardData
+public class RewardData
 {
-    public uint Idx;
-    public uint Exp;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("exp")]
+    public uint Exp { get; set; }
 }
 
 [System.Serializable]
-public struct MapData
+public class MapData
 {
-    public uint Idx;
-    public uint[] StageIdx;
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("stageidx"), TypeConverter(typeof(UIntArrayConverter))]
+    public uint[] StageIdx { get; set; }
 }
 
 public struct UnitActionData
@@ -379,8 +437,41 @@ public static class Commons
     public readonly static int DEFAULT_BOARD_WIDTH = 256;
     public readonly static int DEFAULT_BOARD_HEIGHT = 256;
 
+    public readonly static uint DEFAULT_PLAYER_IDX = 2001;
+
     public class Util
     {
+        public static DataTableType GetDataTableType(uint idx)
+        {
+            return (DataTableType)(idx / 1000);
+        }
+
+        public static uint GetDataInnerId(uint idx)
+        {
+            return idx % 1000;
+        }
+
+        public static uint CreateDataIdx(DataTableType type, uint innerId)
+        {
+            return ((uint)type * 1000) + (innerId);
+        }
+
+        public static List<T> ParseFromCSV<T>(string csvText)
+        {
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ",", // 구분자 설정
+                PrepareHeaderForMatch = args => args.Header,
+            };
+
+            using (var reader = new StringReader(csvText))
+            using (var csv = new CsvReader(reader, config))
+            {
+                // GetRecords는 스트리밍 방식으로 데이터를 읽어 객체 리스트로 반환
+                return csv.GetRecords<T>().ToList();
+            }
+        }
+
         public static int GetRandom(int min, int max, int exclusive = int.MaxValue)
         {
             int r = Random.Range(min, max);
@@ -634,13 +725,16 @@ public static class Commons
             {
                 PooledObject pooled = pool.Dequeue();
 
-                if (isAddressable)
+                if(pooled.Instance is GameObject gobj)
                 {
-                    ResourceManager.Instance.ReleaseInstance(pooled.Instance as GameObject);
-                }
-                else
-                {
-                    GameObject.Destroy(pooled.Instance);
+                    if (isAddressable)
+                    {
+                        ResourceManager.Instance.ReleaseInstance(gobj);
+                    }
+                    else
+                    {
+                        GameObject.Destroy(gobj);
+                    }
                 }
             }
         }

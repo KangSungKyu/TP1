@@ -63,11 +63,11 @@ public class BattleStage : MonoBehaviour
             playerList.Add(Factory.Instance.GetPlayerUnit(transform, PlayerSpawnGO.transform.position) as PlayerUnit);
         }
 
-        LevelBaseData lbd = SODataTable.Instance.GetLevelBaseData((uint)userData.Level);
+        LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
 
         player = playerList[0];
 
-        player.LoadFromSO(1); //test
+        player.LoadFromSO(Commons.DEFAULT_PLAYER_IDX); //test
         player.SetLevelBase(lbd);
         player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
         player.Subscribe_HP(OnPlayerDeath);
@@ -247,7 +247,8 @@ public class BattleStage : MonoBehaviour
         {
             if(monsterList.Count > 0)
             {
-                monsterList[0].ApplyDamage(99999f);
+                boardCursor[0].Value = 0;
+                monsterList.First()?.ApplyDamage(99999f);
             }
         }
         else if(Input.GetKeyDown(KeyCode.P))

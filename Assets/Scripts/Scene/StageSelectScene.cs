@@ -24,7 +24,7 @@ public class StageSelectScene : MonoBehaviour
 
         stageMapIdx = userData.MapIdx;
 
-        MapData mapdata = SODataTable.Instance.GetMapData((uint)stageMapIdx);
+        MapData mapdata = DataTableManager.Instance.GetMapData((uint)stageMapIdx);
 
         if(mapdata.Idx == 0)
         {

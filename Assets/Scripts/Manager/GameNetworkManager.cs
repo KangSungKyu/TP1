@@ -50,6 +50,34 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEGetRequest($"{server_url}/get_stagecleardata/{userId}", onComplete, onFailed));
     }
 
+    public void UpdateUserLevel(System.Action<string> onComplete = null, System.Action onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        int level = SaveLoadManager.Instance.UserData.Level;
+        int exp = SaveLoadManager.Instance.UserData.Exp;
+        var dto = new
+        {
+            UserId = userId,
+            Level = level,
+            Exp = exp,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/update_userlevel", json, onComplete, onFailed));
+    }
+
+    public void UpdateDefeatStage(System.Action<string> onComplete = null, System.Action onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        var dto = new
+        {
+            UserId = userId,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/update_defeatstage", json, onComplete, onFailed));
+    }
+
 
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action onFailed = null)
     {
@@ -99,4 +127,5 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             }
         }
     }
+
 }
