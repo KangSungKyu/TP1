@@ -15,9 +15,9 @@ public class MonsterUnit : UnitBase
     public override void LoadFromSO(uint idx)
     {
         boardList = new List<BBoard>();
-        monsterData = SODataTable.Instance.GetMonsterData(idx);
-        info = SODataTable.Instance.GetUnitData(monsterData.UnitIdx);
-        unitName = SODataTable.Instance.GetText(info.NameIdx);
+        monsterData = DataTableManager.Instance.GetMonsterData(idx);
+        info = DataTableManager.Instance.GetUnitData(monsterData.UnitIdx);
+        unitName = DataTableManager.Instance.GetText(info.NameIdx);
 
         InitUnitData();
         Init();
@@ -76,7 +76,7 @@ public class MonsterUnit : UnitBase
     {
         SetShield(true);
 
-        AnimationData animData = SODataTable.Instance.GetAnimationData(info.AnimGroupIdx);
+        AnimationData animData = DataTableManager.Instance.GetAnimationData(info.AnimGroupIdx);
 
         spriteRenderer.color = Color.white;
 

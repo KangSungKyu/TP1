@@ -56,6 +56,8 @@
     <Compile Include="Assets\Scripts\Content\BattleContent.cs" />
     <Compile Include="Assets\Scripts\Content\RestContent.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
+    <Compile Include="Assets\Scripts\Utils\IntArrayConverter.cs" />
+    <Compile Include="Assets\Scripts\Utils\UIntArrayConverter.cs" />
     <Compile Include="Assets\Scripts\Utils\SpriteRendererFillAmount.cs" />
     <Compile Include="Assets\Scripts\Unit\UnitBase.cs" />
     <Compile Include="Assets\Scripts\UI\HpBar.cs" />
@@ -69,7 +71,7 @@
     <Compile Include="Assets\Scripts\Utils\Factory.cs" />
     <Compile Include="Assets\Scripts\UI\StageUI.cs" />
     <Compile Include="Assets\Scripts\DataForm\TextDataForm.cs" />
-    <Compile Include="Assets\Scripts\Manager\SODataTable.cs" />
+    <Compile Include="Assets\Scripts\Manager\DataTableManager.cs" />
     <Compile Include="Assets\Scripts\DataForm\MapDataForm.cs" />
     <Compile Include="Assets\Scripts\Utils\OutlineController.cs" />
     <Compile Include="Assets\Scripts\DataForm\MonsterDataForm.cs" />
@@ -1549,5 +1551,8 @@
     <ProjectCapability Remove="ReferenceManagerCOM" />
     <ProjectCapability Remove="AssemblyReferences" />
     <ProjectCapability Remove="ReferenceManagerAssemblies" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
   </ItemGroup>
 </Project>

@@ -1,18 +1,19 @@
-﻿using System.Collections;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using static Commons;
+using static UnityEngine.Rendering.STP;
 
-[CreateAssetMenu(fileName = "AnimationData", menuName = "ScriptableObjects/AnimationData", order = 1)]
-public class AnimationDataForm : ScriptableObject, IDataLoad
+public class AnimationDataForm : IDataLoad
 {
     public Dictionary<uint, AnimationData> DB { get; private set; } = null;
 
-    [SerializeField]
-    public AnimationData[] AnimationData;
-
-
-    public void LoadData()
+    public void LoadData(string csvText)
     {
         if (DB == null)
         {
@@ -23,21 +24,15 @@ public class AnimationDataForm : ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in AnimationData)
-        {
-            AnimationData newData = new AnimationData
-            {
-                Idx = data.Idx,
-                ControllerKey = data.ControllerKey,
-            };
+        var dataList = Util.ParseFromCSV<AnimationData>(csvText);
 
-            if (DB.ContainsKey(newData.Idx))
+        for(int i = 0; i < dataList.Count; ++i)
+        {
+            var data = dataList[i];
+
+            if(!DB.ContainsKey(data.Idx))
             {
-                Debug.LogError($"Already contained data, anim, idx:{newData.Idx}");
-            }
-            else
-            {
-                DB.Add(newData.Idx, newData);
+                DB.Add(data.Idx, data);
             }
         }
     }

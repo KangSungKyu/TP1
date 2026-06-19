@@ -1,4 +1,5 @@
 using DG.Tweening;
+using JetBrains.Annotations;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -17,12 +18,17 @@ public class MainScene : MonoBehaviour
     private StageClearData stageClearData = null;
     private GameContent currentGameContent = null;
 
+    private void Awake()
+    {
+        fadeUI.enabled = true;
+    }
+
     private void Start()
     {
         for(int i = 0; i < gameContents.Length; ++i)
         {
             gameContents[i]?.Exit();
-        }
+        }   
 
         Init();
     }
@@ -32,14 +38,20 @@ public class MainScene : MonoBehaviour
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
-        StageData sd = SODataTable.Instance.GetStageData((uint)userData.StageIdx);
+        StageData sd = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
 
-        currentGameContent?.Exit();
+        if(currentGameContent != null)
+        {
+            await currentGameContent.Exit();
+        }
+
         currentGameContent = gameContents[(int)sd.Type];
-        currentGameContent?.Enter();
+        
+        await currentGameContent?.Enter();
 
-        fadeUI.enabled = true;
-        fadeUI.DOFade(0.0f, 1.0f).OnComplete(() => { fadeUI.enabled = false; }).Play();
+        fadeUI.DOFade(0.0f, 1.0f)
+            .OnComplete(() => { fadeUI.enabled = false; })
+            .Play();
     }
 
 }

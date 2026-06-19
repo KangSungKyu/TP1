@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Commons;
 
-[CreateAssetMenu(fileName = "StageDataForm", menuName = "ScriptableObjects/StageDataForm", order = 1)]
-public class StageDataForm : ScriptableObject, IDataLoad
+public class StageDataForm : IDataLoad
 {
     public Dictionary<uint, StageData> DB { get; private set; } = null;
 
-    [SerializeField]
-    public StageData[] StageData = null;
-
-
-    public void LoadData()
+    public void LoadData(string csvText)
     {
         if (DB == null)
         {
@@ -23,26 +18,15 @@ public class StageDataForm : ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in StageData)
-        {
-            StageData newData = new StageData
-            {
-                Idx = data.Idx,
-                Type = data.Type,
-                Stage = data.Stage,
-                SubStage = data.SubStage,
-                MonsterIdx = data.MonsterIdx,
-                MonsterCount = data.MonsterCount,
-                RewardIdx = data.RewardIdx,
-            };
+        var dataList = Util.ParseFromCSV<StageData>(csvText);
 
-            if (DB.ContainsKey(newData.Idx))
+        for (int i = 0; i < dataList.Count; ++i)
+        {
+            var data = dataList[i];
+
+            if (!DB.ContainsKey(data.Idx))
             {
-                Debug.LogError($"Already contained data, stage, idx:{newData.Idx}");
-            }
-            else
-            {
-                DB.Add(newData.Idx, newData);
+                DB.Add(data.Idx, data);
             }
         }
     }

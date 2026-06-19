@@ -25,7 +25,7 @@ public class StageUI : MonoBehaviour
 
     private void Start()
     {
-        data = SODataTable.Instance.GetStageData((uint)StageIdx);
+        data = DataTableManager.Instance.GetStageData((uint)StageIdx);
 
         if(data.Idx == 0)
         {

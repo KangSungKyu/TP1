@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -123,7 +124,7 @@ public abstract class UnitBase : MonoBehaviour
     public void SetPortraitUI(Image port)
     {
         portrait = port;
-        portrait.sprite = info.PortraitSpr;
+        portrait.sprite = ResourceManager.Instance.GetResource<Sprite>($"Portraits[Portraits_{info.PortraitIdx}]");
     }
 
     public void PlayAction(UnitActionData defaultAction, params UnitActionData[] actionDatas)
@@ -200,6 +201,17 @@ public abstract class UnitBase : MonoBehaviour
             usageUnitData.ShieldCrushedTime.Value = shieldCrushTime;
     }
 
+    public virtual void Release()
+    {
+        atbReadySubject?.Dispose();
+        atbReadySubject = null;
+
+        atbTick?.Dispose();
+        atbTick = null;
+
+        StopAction();
+    }
+
     protected abstract void Init();
 
     protected virtual void Awake()
@@ -224,17 +236,6 @@ public abstract class UnitBase : MonoBehaviour
         actionQueue.Clear();
 
         DoAction(new UnitActionData(UnitActionType.Idle));
-    }
-
-    public virtual void Release()
-    {
-        atbReadySubject?.Dispose();
-        atbReadySubject = null;
-
-        atbTick?.Dispose();
-        atbTick = null;
-
-        StopAction();
     }
 
     protected void UpdateHpBarPosition()

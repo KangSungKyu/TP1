@@ -3,16 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static Commons;
 
-[CreateAssetMenu(fileName = "MapData", menuName = "ScriptableObjects/MapData", order = 1)]
-public class MapDataForm : ScriptableObject, IDataLoad
+public class MapDataForm : IDataLoad
 {
     public Dictionary<uint, MapData> DB { get; private set; } = null;
 
-    [SerializeField]
-    public MapData[] MapData;
-
-
-    public void LoadData()
+    public void LoadData(string csvText)
     {
         if (DB == null)
         {
@@ -23,21 +18,15 @@ public class MapDataForm : ScriptableObject, IDataLoad
             DB.Clear();
         }
 
-        foreach (var data in MapData)
-        {
-            MapData newData = new MapData
-            {
-                Idx = data.Idx,
-                StageIdx = data.StageIdx,
-            };
+        var dataList = Util.ParseFromCSV<MapData>(csvText);
 
-            if (DB.ContainsKey(newData.Idx))
+        for (int i = 0; i < dataList.Count; ++i)
+        {
+            var data = dataList[i];
+
+            if (!DB.ContainsKey(data.Idx))
             {
-                Debug.LogError($"Already contained data, anim, idx:{newData.Idx}");
-            }
-            else
-            {
-                DB.Add(newData.Idx, newData);
+                DB.Add(data.Idx, data);
             }
         }
     }

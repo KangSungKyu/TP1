@@ -7,8 +7,8 @@ public class PlayerUnit : UnitBase
 {
     public override void LoadFromSO(uint idx)
     {
-        info = SODataTable.Instance.GetUnitData(idx);
-        unitName = SODataTable.Instance.GetText(info.NameIdx);
+        info = DataTableManager.Instance.GetUnitData(idx);
+        unitName = DataTableManager.Instance.GetText(info.NameIdx);
 
         InitUnitData();
         Init();
@@ -46,7 +46,7 @@ public class PlayerUnit : UnitBase
 
         if (animator != null)
         {
-            animator.runtimeAnimatorController = ResourceManager.Instance.GetResource<RuntimeAnimatorController>(SODataTable.Instance.GetAnimationData(info.AnimGroupIdx).ControllerKey);
+            animator.runtimeAnimatorController = ResourceManager.Instance.GetResource<RuntimeAnimatorController>(DataTableManager.Instance.GetAnimationData(info.AnimGroupIdx).ControllerKey);
         }
 
         Subscribe_HP((hp) =>
