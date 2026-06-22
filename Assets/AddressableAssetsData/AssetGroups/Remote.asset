@@ -69,13 +69,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 368fc073fae1f3342bfef915d1997eee
-    m_Address: mapData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46fedce5fa6d9364596cc56ef5169dbd
     m_Address: BaseTile
     m_ReadOnly: 0
@@ -112,52 +105,10 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7c0924f78164ac3499fdbaa8e4caefbf
-    m_Address: monsterData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7f084c7f941215b439a51b12e776e568
-    m_Address: levelBaseData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 804ff90616b774746b214ea245e58e07
-    m_Address: textData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 84167ac2ad1a4ed41846d01cea9d1411
-    m_Address: rewardData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 87f1f627da474ff48805f2f8dfe619fe
-    m_Address: animationData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89faec5e310b1ad44af27e27b0ada321
     m_Address: MonsterUnit
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 957a5c9128c9ba748b72ca0ee65ac7c6
-    m_Address: unitData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae2d3c5bee912d54a901933afd785e66
@@ -170,13 +121,6 @@ MonoBehaviour:
     m_Address: LoadingScene
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f4ad6d331ffc49643b506d7bd9234ec6
-    m_Address: stageData
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Data
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f71c5c9c67c95c34b8962dffd432753d

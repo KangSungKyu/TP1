@@ -121,18 +121,16 @@ public class BattleContent : GameContent
         userData.Exp += (int)totalExp;
         stageClearData.SetState(userData.StageIdx, 1);
 
-        if (userData.SavedMapIdx <= 0)
+        GameNetworkManager.Instance.UpdateClearStage(userData.StageIdx, (json) =>
         {
-            userData.SavedMapIdx = 1;
-        }
+            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-        if (userData.SavedStageIdx <= 0)
-        {
-            userData.SavedStageIdx = 1;
-        }
+            if (res.data != null)
+            {
+                stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
 
-        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
-        SaveLoadManager.Instance.SaveStageClearData(userData.StageIdx, 1, (t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
-        GameSceneManager.Instance.LoadScene(selectStageScene);
+                GameSceneManager.Instance.LoadScene(selectStageScene);
+            }
+        });
     }
 }

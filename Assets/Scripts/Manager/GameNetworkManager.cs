@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using static Commons;
+using System;
 
 public class GameNetworkManager : Singleton<GameNetworkManager>
 {
@@ -24,11 +25,23 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
     }
 
-    public void LoadUserData(ClientData clientData, System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void LogIn(ClientData clientData, System.Action<string> onComplete = null, System.Action onFailed = null)
     {
         string json = ToJson(clientData);
 
         StartCoroutine(IEPostRequest($"{server_url}/login_user", json, onComplete, onFailed));
+    }
+
+    public void LogOut(System.Action<string> onComplete = null, System.Action onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        var dto = new
+        {
+            UserId = userId,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/logout_user", json, onComplete, onFailed));
     }
 
     public void SaveStageClearData(uint stageIdx, uint clearState, System.Action<string> onComplete = null, System.Action onFailed = null)
@@ -76,6 +89,19 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         string json = ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_defeatstage", json, onComplete, onFailed));
+    }
+
+    public void UpdateClearStage(int stageIdx, Action<string> onComplete = null, System.Action onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        var dto = new
+        {
+            UserId = userId,
+            StageIdx = stageIdx,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/update_clearstage", json, onComplete, onFailed));
     }
 
 
@@ -128,4 +154,8 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        LogOut();
+    }
 }

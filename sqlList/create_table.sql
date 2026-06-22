@@ -8,7 +8,7 @@ Exp int default 0,
 MapIdx int default 6001,
 StageIdx int default 7001,
 SavedMapIdx int default 6001,
-SavedStageIdx int default 7001
+SavedStageIdx int default 0
 );
 //*/
 

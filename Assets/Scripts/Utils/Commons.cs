@@ -281,7 +281,9 @@ public class ClientData
 [System.Serializable]
 public class APIResponseData<T>
 {
+    [JsonProperty("status")]
     public string status;
+    [JsonProperty("data")]
     public T data;
 }
 
@@ -404,6 +406,13 @@ public class SavedStageClearData
 
         return scd;
     }
+}
+
+[System.Serializable]
+public class LoginData
+{
+    public SavedUserData userData;
+    public List<ClearData> stageClearData;
 }
 
 

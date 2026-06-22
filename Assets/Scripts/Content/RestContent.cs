@@ -19,6 +19,8 @@ public class RestContent : GameContent
     [SerializeField]
     private Button lvupBtn = null;
     [SerializeField]
+    private Button stageBtn = null;
+    [SerializeField]
     private AssetReference selectStageScene = null;
 
     private UserData userData = null;
@@ -48,6 +50,8 @@ public class RestContent : GameContent
         
         lvupBtn.onClick.RemoveAllListeners();
         lvupBtn.onClick.AddListener(OnUserLevelUp);
+        stageBtn.onClick.RemoveAllListeners();
+        stageBtn.onClick.AddListener(OnGoStage);
 
         userData.SavedMapIdx = userData.MapIdx;
         userData.SavedStageIdx = userData.StageIdx;
@@ -91,7 +95,7 @@ public class RestContent : GameContent
             LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
             int nextExp = 0;
 
-            if (lbd.Idx > 0)
+            if (lbd != null)
             {
                 nextExp = (int)lbd.NeedExp;
             }
@@ -99,5 +103,10 @@ public class RestContent : GameContent
             levelText.SetText($"Lv:{userData.Level}");
             expText.SetText($"Exp : {userData.Exp} / {nextExp}");
         });
+    }
+
+    private void OnGoStage()
+    {
+        GameSceneManager.Instance.LoadScene(selectStageScene);
     }
 }
