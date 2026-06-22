@@ -42,23 +42,23 @@ public class InitScene : MonoBehaviour
 
             SaveLoadManager.Instance.LoadClientData();
 
-            SaveLoadManager.Instance.LoadUserData(() => { Debug.Log("load"); AfterLoadUserData(); }, () =>
-            {
-                Debug.Log("load fail");
-                //newer user
-
-                AfterLoadUserData();
-            });
+            SaveLoadManager.Instance.LoadUserData(
+                () => 
+                {
+                    Debug.Log("load");
+                    AfterLoadUserData(); 
+                }, 
+                () =>
+                {
+                    Debug.Log("load fail");
+                    AfterLoadUserData();
+                });
 
         }));
     }
 
     private void AfterLoadUserData()
     {
-        SaveLoadManager.Instance.LoadStageClearData(() =>
-        {
-            GameSceneManager.Instance.LoadScene(selectSceneRef);
-        }, null);
+        GameSceneManager.Instance.LoadScene(selectSceneRef);
     }
-
 }

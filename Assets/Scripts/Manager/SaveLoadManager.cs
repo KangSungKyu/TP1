@@ -45,19 +45,26 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
     public void LoadUserData(System.Action onComp, System.Action onFail)
     {
-        GameNetworkManager.Instance.LoadUserData(clientData, (json) =>
+        GameNetworkManager.Instance.LogIn(clientData, (json) =>
         {
             //savedUserData = Load<SavedUserData>("userData.json");
-            APIResponseData<SavedUserData> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<SavedUserData>(json);
+        
+            APIResponseData<LoginData> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<LoginData>(json);
 
-            if(res.data != null)
+            if(res.data.userData != null)
             {
-                savedUserData = res.data;
+                savedUserData = res.data.userData;
                 UserData = savedUserData.Convert();
                 clientData.ClientId = UserData.ClientId;
-
-                onComp?.Invoke();
             }
+            
+            if(res.data.stageClearData != null)
+            {
+                savedStageClearData = new SavedStageClearData() { UserId = UserData.UserId, ClearDatas = res.data.stageClearData };
+                StageClearData = savedStageClearData.Convert();
+            }
+
+            onComp?.Invoke();
         }, onFail);
     }
 

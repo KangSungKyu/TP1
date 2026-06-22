@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CsvDatas
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: CsvDatas
+  m_GUID: 25048cf8aaadd874d8c52d2a1f835793
+  m_SerializeEntries:
+  - m_GUID: 368fc073fae1f3342bfef915d1997eee
+    m_Address: mapData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c0924f78164ac3499fdbaa8e4caefbf
+    m_Address: monsterData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f084c7f941215b439a51b12e776e568
+    m_Address: levelBaseData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 804ff90616b774746b214ea245e58e07
+    m_Address: textData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 84167ac2ad1a4ed41846d01cea9d1411
+    m_Address: rewardData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87f1f627da474ff48805f2f8dfe619fe
+    m_Address: animationData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 957a5c9128c9ba748b72ca0ee65ac7c6
+    m_Address: unitData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f4ad6d331ffc49643b506d7bd9234ec6
+    m_Address: stageData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 43b4872a2439b9c429e5a71d13e4d270, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 9c5aeb984d9921141a29c412e5e9040e, type: 2}
+    - {fileID: 11400000, guid: 76a50bbba5aa80146bdb6c6afd6efd00, type: 2}

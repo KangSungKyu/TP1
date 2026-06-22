@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 989
   m_ShowMode: 4
-  m_Title: Hierarchy
+  m_Title: Project
   m_RootView: {fileID: 2}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -258,7 +258,7 @@ MonoBehaviour:
   - {fileID: 23}
   - {fileID: 24}
   m_Selected: 0
-  m_LastSelected: 5
+  m_LastSelected: 1
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -4080,43 +4080,7 @@ MonoBehaviour:
       m_LastClickedID:
         m_Data: 0
       m_ExpandedIDs:
-      - m_Data: -22738
-      - m_Data: -22540
-      - m_Data: -22534
-      - m_Data: -20734
-      - m_Data: -20732
-      - m_Data: -19530
-      - m_Data: -18832
-      - m_Data: -18818
-      - m_Data: -18590
-      - m_Data: -18580
-      - m_Data: -18566
-      - m_Data: -18410
-      - m_Data: -18132
-      - m_Data: -16596
-      - m_Data: -13926
-      - m_Data: -13912
-      - m_Data: -13622
-      - m_Data: -13612
-      - m_Data: -13598
-      - m_Data: -12896
-      - m_Data: -8036
-      - m_Data: -7832
-      - m_Data: -7820
-      - m_Data: -7664
-      - m_Data: -5208
-      - m_Data: -4948
-      - m_Data: -4928
-      - m_Data: -4926
-      - m_Data: -4922
-      - m_Data: -4920
       - m_Data: -1418
-      - m_Data: 50928
-      - m_Data: 50960
-      - m_Data: 52466
-      - m_Data: 52946
-      - m_Data: 53058
-      - m_Data: 53090
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -4656,7 +4620,7 @@ MonoBehaviour:
   m_Position:
     m_Target: {x: 540.6968, y: 247.74055, z: 2.0660114}
     speed: 2
-    m_Value: {x: 488, y: 274.5, z: 0}
+    m_Value: {x: 540.6968, y: 247.74055, z: 2.0660114}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -4709,7 +4673,7 @@ MonoBehaviour:
   m_Size:
     m_Target: 353.304
     speed: 2
-    m_Value: 559.9056
+    m_Value: 353.304
   m_Ortho:
     m_Target: 1
     speed: 2
@@ -5003,7 +4967,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 3
     m_Folders:
-    - Assets/Scenes
+    - Assets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -5013,7 +4977,7 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Scenes
+  - Assets
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\PC\Documents\GitHub\TP1
   m_LockTracker:
@@ -5022,9 +4986,9 @@ MonoBehaviour:
   m_FolderTreeState:
     scrollPos: {x: 0, y: 79}
     m_SelectedIDs:
-    - m_Data: 45158
+    - m_Data: 44836
     m_LastClickedID:
-      m_Data: 45158
+      m_Data: 44836
     m_ExpandedIDs:
     - m_Data: 0
     - m_Data: 44836
@@ -5089,10 +5053,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs:
-    - m_Data: 53090
+    m_SelectedInstanceIDs: []
     m_LastClickedEntityId:
-      m_Data: 53090
+      m_Data: 0
     m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs:
     - m_Data: 810
