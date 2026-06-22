@@ -29,6 +29,7 @@ public class PlayerUnit : UnitBase
 
         Debug.Log($"{name} apply status, apply:{applyData}, usage:{usageUnitData}");
     }
+
     public void SetLevelBase(LevelBaseData lbd)
     {
         usageUnitData.MaxHp.Value += lbd.MaxHp;

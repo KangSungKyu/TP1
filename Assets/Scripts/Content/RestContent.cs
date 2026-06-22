@@ -23,6 +23,17 @@ public class RestContent : GameContent
     [SerializeField]
     private AssetReference selectStageScene = null;
 
+    [SerializeField]
+    private TextMeshProUGUI[] hpText = null;
+    [SerializeField]
+    private TextMeshProUGUI[] atkText = null;
+    [SerializeField]
+    private TextMeshProUGUI[] defText = null;
+    [SerializeField]
+    private TextMeshProUGUI[] dodgeText = null;
+    [SerializeField]
+    private TextMeshProUGUI[] spdText = null;
+
     private UserData userData = null;
     private StageClearData stageClearData = null;
 
@@ -34,14 +45,15 @@ public class RestContent : GameContent
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
         StageData sd = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
-        LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
+        LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
+        LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
         int nextExp = 0;
 
         stageUI.SetText($"{sd.Stage} - {sd.SubStage}");
 
-        if(lbd.Idx > 0)
+        if(nextLBD.Idx > 0)
         {
-            nextExp = (int)lbd.NeedExp;
+            nextExp = (int)nextLBD.NeedExp;
         }
 
         //test
@@ -55,6 +67,8 @@ public class RestContent : GameContent
 
         userData.SavedMapIdx = userData.MapIdx;
         userData.SavedStageIdx = userData.StageIdx;
+
+        UpdateStatus(currLBD, nextLBD);
 
         SaveLoadManager.Instance.SaveUserData((json) =>
         {
@@ -92,21 +106,63 @@ public class RestContent : GameContent
 
             }
 
-            LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
+            LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
+            LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
             int nextExp = 0;
 
-            if (lbd != null)
+            if (nextLBD != null)
             {
-                nextExp = (int)lbd.NeedExp;
+                nextExp = (int)nextLBD.NeedExp;
             }
 
             levelText.SetText($"Lv:{userData.Level}");
             expText.SetText($"Exp : {userData.Exp} / {nextExp}");
+
+            UpdateStatus(currLBD, nextLBD);
         });
     }
 
     private void OnGoStage()
     {
         GameSceneManager.Instance.LoadScene(selectStageScene);
+    }
+
+    private void UpdateStatus(LevelBaseData currentLBD, LevelBaseData nextLBD)
+    {
+        UnitData playerData = DataTableManager.Instance.GetUnitData(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1));
+
+        if(currentLBD != null)
+        {
+            hpText[0].SetText($"maxHP : {playerData.MaxHp + currentLBD.MaxHp}");
+            atkText[0].SetText($"atk : {playerData.Atk + currentLBD.Atk}");
+            defText[0].SetText($"def : {playerData.Def + currentLBD.Def}");
+            dodgeText[0].SetText($"dodge : {playerData.Dodge + currentLBD.Dodge}");
+            spdText[0].SetText($"spd : {playerData.Spd + currentLBD.Spd}");
+        }
+        else
+        {
+            hpText[0].SetText($"maxHP : {playerData.MaxHp}");
+            atkText[0].SetText($"atk : {playerData.Atk}");
+            defText[0].SetText($"def : {playerData.Def}");
+            dodgeText[0].SetText($"dodge : {playerData.Dodge}");
+            spdText[0].SetText($"spd : {playerData.Spd}");
+        }
+
+        if(nextLBD != null)
+        {
+            hpText[1].SetText($"maxHP : {playerData.MaxHp + nextLBD.MaxHp}");
+            atkText[1].SetText($"atk : {playerData.Atk + nextLBD.Atk}");
+            defText[1].SetText($"def : {playerData.Def + nextLBD.Def}");
+            dodgeText[1].SetText($"dodge : {playerData.Dodge + nextLBD.Dodge}");
+            spdText[1].SetText($"spd : {playerData.Spd + nextLBD.Spd}");
+        }
+        else
+        {
+            hpText[1].SetText($"maxHP : {playerData.MaxHp}");
+            atkText[1].SetText($"atk : {playerData.Atk}");
+            defText[1].SetText($"def : {playerData.Def}");
+            dodgeText[1].SetText($"dodge : {playerData.Dodge}");
+            spdText[1].SetText($"spd : {playerData.Spd}");
+        }
     }
 }
