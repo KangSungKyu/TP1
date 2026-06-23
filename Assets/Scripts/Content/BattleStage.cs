@@ -71,7 +71,6 @@ public class BattleStage : MonoBehaviour
         player.SetLevelBase(lbd);
         player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
         player.Subscribe_HP(OnPlayerDeath);
-        // subscribe to ATB ready for player
         player.OnATBReady.Subscribe(_ => OnUnitATBReady(player)).AddTo(player);
 
         Image playerPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
@@ -104,7 +103,7 @@ public class BattleStage : MonoBehaviour
                     monsterUnit.Subscribe_HP(OnMonsterDeath);
                     monsterUnit.OnATBReady.Subscribe(_ => OnUnitATBReady(monsterUnit)).AddTo(monsterUnit);
 
-                    BBoard board = Factory.Instance.GetBoard(boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, 7.5f);
+                    BBoard board = Factory.Instance.GetBoard(BBoardType.Offensive, boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, 7.5f);
 
                     board.SetOwner(monsterUnit);
                     monsterUnit.AddBoard(board);
@@ -143,8 +142,8 @@ public class BattleStage : MonoBehaviour
         boardCursor[1].Value = 0;
         boardPageCursor.Value = 0;
 
-        boardCursor[0].Subscribe(OnChangedBoardCursor).AddTo(this);
-        boardCursor[1].Subscribe(OnChangedBoardCursor).AddTo(this);
+        boardCursor[0].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
+        boardCursor[1].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
         boardPageCursor.Subscribe(OnChangedBoardPageCursor).AddTo(this);
     }
 
@@ -222,8 +221,8 @@ public class BattleStage : MonoBehaviour
         playerInput.Battle.PuzzleDrawLeft.performed += ctx => OnPuzzleDrawLeft();
         playerInput.Battle.PuzzleDrawRight.performed += ctx => OnPuzzleDrawRight();
 
-        playerInput.Battle.PuzzleSelectL.performed += ctx => OnPuzzleSelectL();
-        playerInput.Battle.PuzzleSelectR.performed += ctx => OnPuzzleSelectR();
+        playerInput.Battle.PuzzleSelectL.performed += ctx => OnPuzzleSelectL(boardPageCursor.Value);
+        playerInput.Battle.PuzzleSelectR.performed += ctx => OnPuzzleSelectR(boardPageCursor.Value);
 
         playerInput.Battle.PuzzlePageL.performed += ctx => OnPuzzlePageL();
         playerInput.Battle.PuzzlePageR.performed += ctx => OnPuzzlePageR();
@@ -283,26 +282,26 @@ public class BattleStage : MonoBehaviour
         }
     }
 
-    private void OnPuzzleSelectR()
+    private void OnPuzzleSelectR(int pageCursor)
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
+        int currentBoardCursor = boardCursor[pageCursor].Value;
 
-        if (currentBoardCursor < boardList[boardPageCursor.Value].Count)
+        if (currentBoardCursor < boardList[pageCursor].Count)
         {
             currentBoardCursor += 1;
         }
 
-        if (currentBoardCursor >= boardList[boardPageCursor.Value].Count)
+        if (currentBoardCursor >= boardList[pageCursor].Count)
         {
             currentBoardCursor = 0;
         }
 
-        boardCursor[boardPageCursor.Value].Value = currentBoardCursor;
+        boardCursor[pageCursor].Value = currentBoardCursor;
     }
 
-    private void OnPuzzleSelectL()
+    private void OnPuzzleSelectL(int pageCursor)
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
+        int currentBoardCursor = boardCursor[pageCursor].Value;
 
         if (currentBoardCursor > 0)
         {
@@ -311,10 +310,10 @@ public class BattleStage : MonoBehaviour
 
         if (currentBoardCursor < 0)
         {
-            currentBoardCursor = boardList[boardPageCursor.Value].Count - 1;
+            currentBoardCursor = boardList[pageCursor].Count - 1;
         }
 
-        boardCursor[boardPageCursor.Value].Value = currentBoardCursor;
+        boardCursor[pageCursor].Value = currentBoardCursor;
     }
 
     private void OnPuzzleDrawRight()
@@ -359,7 +358,7 @@ public class BattleStage : MonoBehaviour
 
     private void TestPrintPointList()
     {
-        //*
+        /*
         int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
         BBoard selectedBoard = boardList[boardPageCursor.Value][currentBoardCursor];
 
@@ -465,21 +464,43 @@ public class BattleStage : MonoBehaviour
 
                 SortingBoard(0);
 
-                current.StartBoardTimer(() =>
+                System.Action actCurrentClear = () =>
                 {
                     current.ClearBoard();
                     current.ClearDrawLine();
-                    current.FillBoard();
-                });
+                    current.FillBoard(BBoardType.Offensive);
+                };
+
+                actCurrentClear?.Invoke();
+                current.StartBoardTimer(actCurrentClear);
                 current.SubscribeOnPathComplete(() =>
                 {
                     if (defender != null)
                     {
                         TestPrintPointList();
+                        List<BTileType> tileTypeList = current.GetTileTypeListInPath();
+                        List<SkillData> skillList = new List<SkillData>();
+
+                        if(tileTypeList.Contains(BTileType.Attack))
+                        {
+                            SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)unit.Info.AttackIdx);
+
+                            if(sdAtk != null)
+                            {
+                                skillList.Add(sdAtk);
+                            }
+                        }
+                        else if(tileTypeList.Contains(BTileType.Skill))
+                        {
+
+                        }
 
                         //calc damage, def from path, and apply to player and monster (instance status)
                         ApplyStatusData applyAttackerStatus = current.GetApplyStatusFromPath();
                         ApplyStatusData applyDefenderStatus = default;
+
+                        int maxTargetCount = skillList.Where((o) => o.Type == SkillType.Damaged && o.TargetType == SkillTargetType.Multiple).Max((o) => (int)o.TargetCount);
+                        List<MonsterUnit> targetList = monsterList.Where((o) => { return o != defender; }).Take(maxTargetCount).Select((s) => { return s; }).ToList();
 
                         //player attack to target(board's owner, monster)
 
@@ -488,15 +509,19 @@ public class BattleStage : MonoBehaviour
                             //new UnitActionData(UnitActionType.Move),
                             new UnitActionData(UnitActionType.Attack, null, () =>
                             {
-                                UnitCalculator.ApplyDamage(unit, defender, applyAttackerStatus, applyDefenderStatus);
+                                for(int i = 0; i < targetList.Count; ++i)
+                                {
+                                    UnitCalculator.ApplyDamage(unit, targetList[i], applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
+                                    targetList[i].ClearApplyStatus();
+                                }
+
+                                UnitCalculator.ApplyDamage(unit, defender, applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
                                 unit.ClearApplyStatus();
                                 defender.ClearApplyStatus();
                             }));
 
                         current.ForceStopBoardTimer();
-                        current.ClearBoard();
-                        current.ClearDrawLine();
-                        current.FillBoard();
+                        actCurrentClear?.Invoke();
                     }
                 });
             }
@@ -513,7 +538,7 @@ public class BattleStage : MonoBehaviour
 
                 if(mu.BoardCount > 1)
                 {
-                    BBoard prevAttack = mu.GetBoard(1);
+                    BBoard prevAttack = mu.GetDefensiveBoard(0);
 
                     if(prevAttack != null)
                     {
@@ -534,9 +559,8 @@ public class BattleStage : MonoBehaviour
                     }
                 }
 
-
                 // create a new temporary board for this monster's attack
-                BBoard tempBoard = Factory.Instance.GetBoard(boardContainer[1], mu.GetBoardWidth(), mu.GetBoardHeight(), 7.0f);
+                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], mu.GetBoardWidth(), mu.GetBoardHeight(), 7.0f);
 
                 if (tempBoard != null)
                 {
@@ -552,6 +576,15 @@ public class BattleStage : MonoBehaviour
                     // start timer: when time over, execute attack using path-derived status and remove the board
                     tempBoard.StartBoardTimer(() =>
                     {
+                        List<SkillData> skillList = new List<SkillData>();
+
+                        SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)mu.Info.AttackIdx);
+
+                        if (sdAtk != null)
+                        {
+                            skillList.Add(sdAtk);
+                        }
+
                         // gather statuses from path
                         ApplyStatusData applyAttackerStatus = player.ApplyStatusData;
                         ApplyStatusData applyDefenderStatus = default;
@@ -560,7 +593,7 @@ public class BattleStage : MonoBehaviour
                         mu.PlayAction(UnitActionData.DefaultAction_None,
                             new UnitActionData(UnitActionType.Attack, null, () =>
                             {
-                                UnitCalculator.ApplyDamage(mu, player, applyAttackerStatus, applyDefenderStatus);
+                                UnitCalculator.ApplyDamage(mu, player, applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
                                 mu.ClearApplyStatus();
                                 player.ClearApplyStatus();
                             }));
@@ -582,7 +615,11 @@ public class BattleStage : MonoBehaviour
                         if (boardList[1].Count <= 0)
                         {
                             boardPageCursor.Value = 0;
-                            boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
+                        }
+                        else
+                        {
+                            OnPuzzleSelectR(1);
+                            OnChangedBoardCursor(1, boardCursor[1].Value);
                         }
                     });
 
@@ -594,6 +631,16 @@ public class BattleStage : MonoBehaviour
                         tempBoard.ClearBoard();
                         tempBoard.ClearDrawLine();
                         tempBoard.ForceBoardTimeOver();
+
+                        if (boardList[1].Count <= 0)
+                        {
+                            boardPageCursor.Value = 0;
+                        }
+                        else
+                        {
+                            OnPuzzleSelectR(1);
+                            OnChangedBoardCursor(1, boardCursor[1].Value);
+                        }
                     });
                 }
             }
@@ -616,18 +663,18 @@ public class BattleStage : MonoBehaviour
         pageCursorUI.rectTransform.localScale = new Vector3(cursor == 0 ? 1.0f : -1.0f, 1.0f, 1.0f);
     }
 
-    private void OnChangedBoardCursor(int cursor)
+    private void OnChangedBoardCursor(int page, int cursor)
     {
         if (cursor > -1)
         {
-            BBoard selectedBoard = boardList[boardPageCursor.Value][cursor];
+            BBoard selectedBoard = boardList[page][cursor];
 
-            DownToBoard(boardPageCursor.Value);
-            UpToBoard(boardPageCursor.Value, cursor);
-            SortingBoard(boardPageCursor.Value);
+            DownToBoard(page);
+            UpToBoard(page, cursor);
+            SortingBoard(page);
             player.SetTarget(selectedBoard.Owner);
 
-            Debug.Log(selectedBoard.ToString());
+            //Debug.Log(selectedBoard.ToString());
         }
     }
 

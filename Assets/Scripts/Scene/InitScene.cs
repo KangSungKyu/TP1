@@ -25,8 +25,6 @@ public class InitScene : MonoBehaviour
             ResourceManager.Instance.LoadAssetAsync<Sprite>("GuardTile", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<Sprite>("ShieldTile", (o) => Debug.Log($"resource loaded, {o.name}"));
 
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>("Portraits", (o) => Debug.Log($"resource loaded, {o.name}"));
-
             ResourceManager.Instance.LoadAssetAsync<GameObject>("Board", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<GameObject>("HPUI", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<GameObject>("MonsterUnit", (o) => Debug.Log($"resource loaded, {o.name}"));
@@ -34,11 +32,8 @@ public class InitScene : MonoBehaviour
             ResourceManager.Instance.LoadAssetAsync<GameObject>("PortraitUI", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<GameObject>("Tile", (o) => Debug.Log($"resource loaded, {o.name}"));
 
+            ResourceManager.Instance.LoadAssetAsync<Sprite>("Portraits[Portraits_1]", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<RuntimeAnimatorController>("player_anim", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<RuntimeAnimatorController>("monster1_anim", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<RuntimeAnimatorController>("monster2_anim", (o) => Debug.Log($"resource loaded, {o.name}"));
-
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("StageMapUI_6001", (o) => Debug.Log($"resource loaded, {o.name}"));
 
             SaveLoadManager.Instance.LoadClientData();
 

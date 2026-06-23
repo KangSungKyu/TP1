@@ -103,7 +103,11 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
 
         StartCoroutine(IEPostRequest($"{server_url}/update_clearstage", json, onComplete, onFailed));
     }
-
+    
+    public void LoadUserSkillData(uint userId, Action<string> onComplete = null, Action onFailed = null)
+    {
+        StartCoroutine(IEGetRequest($"{server_url}/get_userskilldata/{userId}", onComplete, onFailed));
+    }
 
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action onFailed = null)
     {

@@ -273,9 +273,6 @@ public abstract class UnitBase : MonoBehaviour
             case UnitActionType.Dodge:
                 Dodged(actionData);
                 break;
-            case UnitActionType.KnockBack:
-                KnockBack(actionData);
-                break;
             case UnitActionType.Death:
                 Death(actionData);
                 break;
@@ -316,10 +313,6 @@ public abstract class UnitBase : MonoBehaviour
 
     }
 
-    protected virtual void KnockBack(UnitActionData actionData)
-    {
-        actionQueue.Enqueue(IEKnockBack());
-    }
 
     protected virtual void Death(UnitActionData actionData)
     {
@@ -410,26 +403,6 @@ public abstract class UnitBase : MonoBehaviour
         yield return new WaitForSeconds(calcDuration);
 
         animator.SetBool("Attack", false);
-    }
-
-    private IEnumerator IEKnockBack()
-    {
-        if (TargetUnit == null)
-            yield break;
-
-        float time = 0.0f;
-        float duration = 0.5f;
-        Vector3 dir = (transform.position - TargetUnit.transform.position).normalized;
-
-        while(time < duration)
-        {
-            time += Time.deltaTime;
-            yield return null;
-
-            transform.position += dir * 5.0f * Time.deltaTime;
-
-            UpdateHpBarPosition();
-        }
     }
 
     private IEnumerator IEDeath()
