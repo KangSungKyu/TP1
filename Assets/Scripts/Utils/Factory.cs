@@ -162,9 +162,9 @@ public class Factory : Singleton<Factory>
         return portrait;
     }
 
-    public BBoard GetBoard(Transform container, int boardWidth, int boardHeight, float maxTimer)
+    public BBoard GetBoard(BBoardType type, Transform container, int boardWidth, int boardHeight, float maxTimer)
     {
-        BBoard board = BBoard.CreateEmptyBoard(boardPool, tileUIPool, container, boardWidth, boardHeight, maxTimer);
+        BBoard board = BBoard.CreateEmptyBoard(type, boardPool, tileUIPool, container, boardWidth, boardHeight, maxTimer);
 
         return board;
     }

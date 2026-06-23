@@ -7,14 +7,16 @@ using static Commons;
 public class MonsterUnit : UnitBase
 {
     public MonsterData MonsterData => monsterData;
-    public int BoardCount => boardList.Count;
+    public int BoardCount => (ofsBoard != null ? 1 : 0) + dfsBoardList.Count;
 
-    private List<BBoard> boardList = null;
+    private BBoard ofsBoard = null;
+    private List<BBoard> dfsBoardList = null;
     private MonsterData monsterData = default(MonsterData);
 
     public override void LoadFromSO(uint idx)
     {
-        boardList = new List<BBoard>();
+        ofsBoard = null;
+        dfsBoardList = new List<BBoard>();
         monsterData = DataTableManager.Instance.GetMonsterData(idx);
         info = DataTableManager.Instance.GetUnitData(monsterData.UnitIdx);
         unitName = DataTableManager.Instance.GetText(info.NameIdx);
@@ -41,21 +43,47 @@ public class MonsterUnit : UnitBase
 
     public void AddBoard(BBoard board)
     {
-        this.boardList.Add(board);
+        if(board != null)
+        {
+            if(board.Type == BBoardType.Offensive)
+            {
+                ofsBoard = board;
+            }
+            else if(board.Type == BBoardType.Defensive)
+            {
+                this.dfsBoardList.Add(board);
+            }
+        }
     }
 
     public void DelBoard(BBoard board)
     {
-        board.ReleaseBoard();
-        Factory.Instance.ReleaseBoard(board);
-        this.boardList.Remove(board);
+        if (board != null)
+        {
+            board.ReleaseBoard();
+            Factory.Instance.ReleaseBoard(board);
+
+            if(board.Type == BBoardType.Offensive)
+            {
+                ofsBoard = null;
+            }
+            else if(board.Type == BBoardType.Defensive)
+            {
+                this.dfsBoardList.Remove(board);
+            }
+        }
     }
 
-    public BBoard GetBoard(int i)
+    public BBoard GetOffensiveBoard()
     {
-        if(boardList.Count > 0)
+        return ofsBoard;
+    }
+
+    public BBoard GetDefensiveBoard(int i)
+    {
+        if(dfsBoardList.Count > 0)
         {
-            return this.boardList[i];
+            return this.dfsBoardList[i];
         }
 
         return null;
@@ -63,12 +91,9 @@ public class MonsterUnit : UnitBase
 
     public void DelAttackBoardList()
     {
-        if(boardList.Count > 1)
+        for (int i = 1; i < this.dfsBoardList.Count; i++)
         {
-            for (int i = 1; i < this.boardList.Count; i++)
-            {
-                DelBoard(boardList[i]);
-            }
+            DelBoard(dfsBoardList[i]);
         }
     }
 
@@ -117,9 +142,13 @@ public class MonsterUnit : UnitBase
 
     public int GetBoardWidth()
     {
-        if(boardList.Count > 0)
+        if(ofsBoard != null)
         {
-            return boardList[0].Width;
+            return ofsBoard.Width;
+        }
+        else if(dfsBoardList.Count > 0)
+        {
+            return dfsBoardList[0].Width;
         }
 
         return (int)monsterData.BoardDefaultWidth;
@@ -127,9 +156,13 @@ public class MonsterUnit : UnitBase
 
     public int GetBoardHeight()
     {
-        if (boardList.Count > 0)
+        if (ofsBoard != null)
         {
-            return boardList[0].Height;
+            return ofsBoard.Height;
+        }
+        else if (dfsBoardList.Count > 0)
+        {
+            return dfsBoardList[0].Height;
         }
 
         return (int)monsterData.BoardDefaultHeight;

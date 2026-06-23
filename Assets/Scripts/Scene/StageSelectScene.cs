@@ -34,6 +34,8 @@ public class StageSelectScene : MonoBehaviour
 
         string resName = $"StageMapUI_{stageMapIdx}";
 
+        await ResourceManager.Instance.LoadAssetAsyncTask<GameObject>(resName);
+
         stageMapUI = (await ResourceManager.Instance.InstantiateAsyncTask(resName, canvasRT)).GetComponent<StageMapUI>();
 
         if (stageMapUI != null)

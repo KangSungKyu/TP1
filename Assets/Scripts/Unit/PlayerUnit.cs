@@ -32,13 +32,21 @@ public class PlayerUnit : UnitBase
 
     public void SetLevelBase(LevelBaseData lbd)
     {
-        usageUnitData.MaxHp.Value += lbd.MaxHp;
-        usageUnitData.Atk += lbd.Atk;
-        usageUnitData.Def += lbd.Def;
-        usageUnitData.Dodge += lbd.Dodge;
-        usageUnitData.Spd += lbd.Spd;
+        info.MaxHp += lbd.MaxHp;
+        info.Atk += lbd.Atk;
+        info.Def += lbd.Def;
+        info.Dodge += lbd.Dodge;
+        info.Spd += lbd.Spd;
 
-        usageUnitData.Hp.Value = usageUnitData.MaxHp.Value;
+        info.Hp = info.MaxHp;
+
+        usageUnitData.Hp.Value = info.Hp;
+        usageUnitData.MaxHp.Value = info.MaxHp;
+        usageUnitData.Atk = info.Atk;
+        usageUnitData.Def = info.Def;
+        usageUnitData.Dodge = info.Dodge;
+        usageUnitData.Spd = info.Spd;
+        usageUnitData.ShieldCrushTime = 0.0f;
     }
 
     protected override void Init()

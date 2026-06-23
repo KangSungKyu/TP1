@@ -34,16 +34,38 @@ public class BattleContent : GameContent
         int tilePoolCount = 0;
         int boardPoolCount = 0;
 
+        HashSet<string> needAnim = new HashSet<string>();
+        HashSet<string> needPort = new HashSet<string>();
+
         for (int i = 0; i < sd.MonsterIdx.Length; ++i)
         {
             MonsterData md = DataTableManager.Instance.GetMonsterData(sd.MonsterIdx[i]);
 
-            tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]);
-            monsterPoolCount += (int)sd.MonsterCount[i];
+            if(md != null)
+            {
+                UnitData ud = DataTableManager.Instance.GetUnitData(md.UnitIdx);
+                AnimationData ad = DataTableManager.Instance.GetAnimationData(ud.AnimGroupIdx);
+
+                needAnim.Add(ad.ControllerKey);
+                needPort.Add($"Portraits[Portraits_{ud.PortraitIdx}]");
+
+                tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]);
+                monsterPoolCount += (int)sd.MonsterCount[i];
+            }
         }
 
         tilePoolCount = tilePoolCount * 2; //buffer
         boardPoolCount = monsterPoolCount * 2; //buffer
+        
+        for(int i = 0; i < needAnim.Count; ++i)
+        {
+            await ResourceManager.Instance.LoadAssetAsyncTask<RuntimeAnimatorController>(needAnim.ElementAt(i));
+        }
+
+        for(int i = 0; i < needPort.Count; ++i)
+        {
+            await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(needPort.ElementAt(i));
+        }
 
         await Factory.Instance.Init_UnitPoolAsync(monsterPoolCount);
         await Factory.Instance.Init_BoardPoolAsync(boardPoolCount, tilePoolCount);
@@ -61,8 +83,6 @@ public class BattleContent : GameContent
         battleStage.OnStageDefeat(OnStageDefeat);
         battleStage.InitStage(userData, sd);
     }
-
-
 
     private void OnStageDefeat()
     {

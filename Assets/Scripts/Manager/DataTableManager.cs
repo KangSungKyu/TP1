@@ -20,6 +20,7 @@ public class DataTableManager : Singleton<DataTableManager>
         { DataTableType.MapData, new MapDataForm() },
         { DataTableType.StageData, new StageDataForm() },
         { DataTableType.RewardData, new RewardDataForm() },
+        { DataTableType.SkillData, new SkillDataForm() },
     };
 
     public T GetDB<T>(uint idx) where T : class, IDataLoad
@@ -133,6 +134,18 @@ public class DataTableManager : Singleton<DataTableManager>
         }
 
         return default(MapData);
+    }
+
+    public SkillData GetSkillData(uint idx)
+    {
+        var db = GetDB<SkillDataForm>(idx)?.DB;
+
+        if (db.ContainsKey(idx))
+        {
+            return db[idx];
+        }
+
+        return default(SkillData);
     }
 
     protected override void OnSingletonAwake()

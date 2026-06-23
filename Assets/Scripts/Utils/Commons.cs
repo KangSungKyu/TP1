@@ -21,8 +21,18 @@ public enum DataTableType : uint //1~999
     MapData,
     StageData,
     RewardData,
+    SkillData,
 
     DataTableType_End
+}
+
+public enum BBoardType
+{
+    None = 0,
+    Offensive,
+    Defensive,
+
+    BBoardType_End
 }
 
 public enum BTileAttribute
@@ -40,6 +50,7 @@ public enum BTileType : int
     Block,
     Attack,
     Guard,
+    Skill,
     Shield,
 
     BTileType_End
@@ -62,8 +73,6 @@ public enum UnitActionType
     Attack,
     Guard,
     Dodge,
-    KnockBack,
-
     Death,
 
     UnitActionType_End
@@ -77,6 +86,22 @@ public enum StageType : int
     StageType_End
 }
 
+public enum SkillType
+{
+    None = 0,
+    Damaged,
+    Buffed,
+
+    SkillType_End
+}
+
+public enum SkillTargetType
+{
+    Single = 0,
+    Multiple,
+
+    SkillTargetType_End
+}
 
 public interface IDataLoad
 {
@@ -129,6 +154,8 @@ public class UnitData
     public float Spd { get; set; }
     [Name("portraitidx")]
     public int PortraitIdx { get; set; }
+    [Name("attackidx")]
+    public int AttackIdx { get; set; }
 }
 
 public struct ApplyStatusData
@@ -243,6 +270,26 @@ public class MapData
     public uint Idx { get; set; }
     [Name("stageidx"), TypeConverter(typeof(UIntArrayConverter))]
     public uint[] StageIdx { get; set; }
+}
+
+
+[System.Serializable]
+public class SkillData
+{
+    [Name("idx")]
+    public uint Idx { get;set; }
+
+    [Name("type")]
+    public SkillType Type { get; set; }
+
+    [Name("targettype")]
+    public SkillTargetType TargetType { get; set; }
+
+    [Name("targetcount")]
+    public uint TargetCount { get; set; }
+
+    [Name("pervalue")]
+    public int PerValue { get; set; } //pervalue / 1000.0
 }
 
 public struct UnitActionData
@@ -413,8 +460,14 @@ public class LoginData
 {
     public SavedUserData userData;
     public List<ClearData> stageClearData;
+    public List<int> userSkillData;
 }
 
+[System.Serializable]
+public class UserSkillData
+{
+    public List<int> SkillIdies;
+}
 
 public static class Commons
 {

@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System.Collections.Generic;
 using static Commons;
-
 public class LevelBaseDataForm : IDataLoad
 {
     public Dictionary<uint, LevelBaseData> DB { get; private set; } = null;

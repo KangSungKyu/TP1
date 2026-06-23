@@ -71,6 +71,13 @@ MonoBehaviour:
     - Data
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8d65a9aa35571b44bacfb59e910d123
+    m_Address: skillData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 43b4872a2439b9c429e5a71d13e4d270, type: 2}
   m_SchemaSet:

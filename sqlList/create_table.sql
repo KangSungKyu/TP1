@@ -23,3 +23,14 @@ foreign key(UserId) references UserData(UserId) on delete cascade,
 unique key idx_user_stage (UserId, StageIdx)
 );
 //*/
+
+/*
+create table UserSkillData (
+UserSkillId int primary key auto_increment,
+UserId int not null,
+SkillIdx int,
+
+foreign key(UserId) references UserData(UserId) on delete cascade,
+unique key idx_user_skill (UserId, SkillIdx)
+);
+//*/

@@ -57,6 +57,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 255de20460d89874a9b4a7ae8d34e64e
+    m_Address: Portraits
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2f74c276b8534de4fb9b6097150b6d4f
     m_Address: GuardTile
     m_ReadOnly: 0

@@ -4,11 +4,19 @@ using System.Linq;
 using System.Text;
 using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
 using static Commons;
 
 public class BBoard : MonoBehaviour
 {
+    private struct FillBoardTileConfig
+    {
+        public int BlockCount;
+        public int AttackCount;
+        public int GuardCount;
+        public int SkillCount;
+        public int ShieldCount;
+    }
+
     [SerializeField]
     private Transform tileGrid = null;
     [SerializeField]
@@ -16,6 +24,7 @@ public class BBoard : MonoBehaviour
     [SerializeField]
     private SpriteRendererFillAmount timeGauge = null;
 
+    public BBoardType Type => type;
     public BBoardDrawState DrawState => drawState;
     public int Width => width;
     public int Height => height;
@@ -25,6 +34,7 @@ public class BBoard : MonoBehaviour
 
     private bool isInit = false;
     private bool startTimer = false;
+    private BBoardType type = BBoardType.None;
     private BBoardDrawState drawState = BBoardDrawState.None;
     private Vector2Int startPoint = new Vector2Int(-1, -1);
     private Vector2Int endPoint = new Vector2Int(-1, -1);
@@ -38,6 +48,7 @@ public class BBoard : MonoBehaviour
     private ReactiveProperty<float> currentTimer = new ReactiveProperty<float>(0.0f);
     private ReactiveProperty<float> maxTimer = new ReactiveProperty<float>(0.0f);
     private IDisposable disTimer = null;
+    private IDisposable disCurTimer = null;
     // reference to owner pool for tile images so we can return them on release
     private SimplePool<BTile> tilePoolRef = null;
     // track Image instances acquired from the pool for this board
@@ -94,7 +105,7 @@ public class BBoard : MonoBehaviour
         onPathComplete += callback;
     }
 
-    public static BBoard CreateEmptyBoard(SimplePool<BBoard> pool, SimplePool<BTile> tilePool, Transform attachParent, int width, int height, float maxTimer)
+    public static BBoard CreateEmptyBoard(BBoardType type, SimplePool<BBoard> pool, SimplePool<BTile> tilePool, Transform attachParent, int width, int height, float maxTimer)
     {
         BBoard board = pool.Get();
 
@@ -107,6 +118,7 @@ public class BBoard : MonoBehaviour
 
             board.isInit = false;
             board.startTimer = false;
+            board.type = type;
             board.drawState = BBoardDrawState.None;
             board.startPoint = new Vector2Int(-1, -1);
             board.endPoint = new Vector2Int(-1, -1);
@@ -154,7 +166,9 @@ public class BBoard : MonoBehaviour
                         float ty = boardAnchor.y + y * th;
                         tile.x = x;
                         tile.y = y;
+                        tile.type = BTileType.Empty;
 
+                        tile.SetAttribute(BTileAttribute.None);
                         tile.transform.SetParent(board.tilePivot, false);
 
                         tile.transform.localPosition = new Vector2(tx, ty);
@@ -176,7 +190,7 @@ public class BBoard : MonoBehaviour
                 }
             }
 
-            board.currentTimer.Subscribe((v) => board.timeGauge.SetFillAmount(1.0f - board.TimeRatio));
+            board.disCurTimer = board.currentTimer.Subscribe((v) => board.timeGauge.SetFillAmount(1.0f - board.TimeRatio));
 
             board.maxTimer.Value = maxTimer;
             board.currentTimer.Value = 0.0f;
@@ -195,18 +209,46 @@ public class BBoard : MonoBehaviour
         if (isInit)
             return;
 
-        FillBoard();
+        FillBoard(type);
 
         isInit = true;
     }
 
 
-    public void FillBoard()
+    public void FillBoard(BBoardType boardType)
     {
-        int testBlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f));
-        int testAttackCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f));
-        int testGuardCount = UnityEngine.Random.Range(1, (int)(width * height * 0.15f));
-        int testShieldCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f));
+        //offensive -> block, attack, skill, shield
+        //defensive -> block, guard, skill
+        type = boardType;
+
+        FillBoardTileConfig config = default;
+
+        switch (type)
+        {
+            case BBoardType.Offensive:
+                config = new FillBoardTileConfig()
+                {
+                    BlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f)),
+                    AttackCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
+                    GuardCount = 0,
+                    SkillCount = 0,
+                    ShieldCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
+                };
+                break;
+            case BBoardType.Defensive:
+                config = new FillBoardTileConfig()
+                {
+                    BlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f)),
+                    AttackCount = 0,
+                    GuardCount = UnityEngine.Random.Range(1, (int)(width * height * 0.15f)),
+                    SkillCount = 0,
+                    ShieldCount = 0,
+                };
+                break;
+            default:
+                Debug.LogError($"none board type!");
+                break;
+        }
 
         // Use Perlin noise to create clustered distributions of tile types
         SetStartEndPoint();
@@ -238,43 +280,11 @@ public class BBoard : MonoBehaviour
         int total = cells.Count;
         int idx = 0;
 
-        // clamp counts to available cells
-        testBlockCount = Mathf.Min(testBlockCount, total - idx);
-        for (int i = 0; i < testBlockCount && idx < total; i++, idx++)
-        {
-            var c = cells[idx];
-            Vector2Int cellPos = new Vector2Int(c.x, c.y);
-
-            if (IsAround(startPoint, cellPos) || IsAround(endPoint, cellPos))
-                continue;
-
-            tiles[c.y, c.x].type = BTileType.Block;
-            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BlockTile));
-        }
-
-        testAttackCount = Mathf.Min(testAttackCount, total - idx);
-        for (int i = 0; i < testAttackCount && idx < total; i++, idx++)
-        {
-            var c = cells[idx];
-            tiles[c.y, c.x].type = BTileType.Attack;
-            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_AttackTile));
-        }
-
-        testGuardCount = Mathf.Min(testGuardCount, total - idx);
-        for (int i = 0; i < testGuardCount && idx < total; i++, idx++)
-        {
-            var c = cells[idx];
-            tiles[c.y, c.x].type = BTileType.Guard;
-            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_GuardTile));
-        }
-
-        testShieldCount = Mathf.Min(testShieldCount, total - idx);
-        for (int i = 0; i < testShieldCount && idx < total; i++, idx++)
-        {
-            var c = cells[idx];
-            tiles[c.y, c.x].type = BTileType.Shield;
-            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_ShieldTile));
-        }
+        FillTile(config, cells, ref idx, BTileType.Block, Commons.ResKey_BlockTile);
+        FillTile(config, cells, ref idx, BTileType.Attack, Commons.ResKey_AttackTile);
+        FillTile(config, cells, ref idx, BTileType.Guard, Commons.ResKey_GuardTile);
+        FillTile(config, cells, ref idx, BTileType.Skill, Commons.ResKey_AttackTile); //skill
+        FillTile(config, cells, ref idx, BTileType.Shield, Commons.ResKey_ShieldTile);
 
         // After placement, ensure there is at least one path between start and end.
         // If not, try to repair by removing random block tiles until a path is found.
@@ -414,10 +424,9 @@ public class BBoard : MonoBehaviour
 
     public void ReleaseBoard()
     {
-        Debug.Log($"release board");
-
         isInit = false;
         startTimer = false;
+        type = BBoardType.None;
         drawState = BBoardDrawState.None;
         startPoint = new Vector2Int(-1, -1);
         endPoint = new Vector2Int(-1, -1);
@@ -439,6 +448,8 @@ public class BBoard : MonoBehaviour
             tilePoolRef = null;
         }
 
+        disCurTimer?.Dispose();
+
         ForceStopBoardTimer();
         ClearDrawLine();
         SetOwner(null);
@@ -453,6 +464,7 @@ public class BBoard : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 tiles[y, x].type = BTileType.Empty;
+                tiles[y, x].SetAttribute(BTileAttribute.None);
 
                 SetTile(x, y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile));
                 SetTileColor(x, y, Color.white);
@@ -616,19 +628,19 @@ public class BBoard : MonoBehaviour
     {
         if(drawState == BBoardDrawState.Finished)
         {
-            Debug.Log("DoMove: already finished, cannot move");
+            //Debug.Log("DoMove: already finished, cannot move");
             return;
         }
 
         if(!startTimer)
         {
-            Debug.Log("locked board");
+            //Debug.Log("locked board");
             return;
         }
 
         if(currentTimer.Value >= maxTimer.Value)
         {
-            Debug.Log("DoMove : time over");
+            //Debug.Log("DoMove : time over");
             return;
         }
 
@@ -640,7 +652,7 @@ public class BBoard : MonoBehaviour
 
         if (newX < 0 || newX >= width || newY < 0 || newY >= height)
         {
-            Debug.Log($"DoMove: cannot move out of bounds to ({newX},{newY})");
+            //Debug.Log($"DoMove: cannot move out of bounds to ({newX},{newY})");
             return;
         }
 
@@ -649,13 +661,13 @@ public class BBoard : MonoBehaviour
         // cannot move to block
         if (nextTile.type == BTileType.Block)
         {
-            Debug.Log($"DoMove: cannot move to block tile at ({newX},{newY})");
+            //Debug.Log($"DoMove: cannot move to block tile at ({newX},{newY})");
             return;
         }
 
         if (pointList.Contains(new Vector2Int(newX, newY)))
         {
-            Debug.Log($"DoMove: cannot move to already visited tile at ({newX},{newY})");
+            //Debug.Log($"DoMove: cannot move to already visited tile at ({newX},{newY})");
             return;
         }
 
@@ -666,7 +678,7 @@ public class BBoard : MonoBehaviour
         {
             drawState = BBoardDrawState.Finished;
             onPathComplete?.Invoke();
-            Debug.Log("DoMove: reached the end point!");
+            //Debug.Log("DoMove: reached the end point!");
         }
     }
 
@@ -674,19 +686,19 @@ public class BBoard : MonoBehaviour
     {
         if (drawState == BBoardDrawState.Finished)
         {
-            Debug.Log("DoMove: already finished, cannot move");
+            //Debug.Log("DoMove: already finished, cannot move");
             return;
         }
 
         if (!startTimer)
         {
-            Debug.Log("locked board");
+            //Debug.Log("locked board");
             return;
         }
 
         if (currentTimer.Value >= maxTimer.Value)
         {
-            Debug.Log("DoMove : time over");
+            //Debug.Log("DoMove : time over");
             return;
         }
 
@@ -724,7 +736,7 @@ public class BBoard : MonoBehaviour
         }
 
         //test print
-        ToString();
+        //ToString();
     }
 
     public Vector3Int GetInvertY(int x, int y)
@@ -825,6 +837,12 @@ public class BBoard : MonoBehaviour
         startTimer = false;
         currentTimer.Value = maxTimer.Value;
     }
+    public List<BTileType> GetTileTypeListInPath()
+    {
+        List<BTileType> typeList = pointList.Select((s) => { return tiles[s.y, s.x].type; }).ToList();
+
+        return typeList;
+    }
 
     private void ResizeBoard()
     {
@@ -837,9 +855,9 @@ public class BBoard : MonoBehaviour
     {
         Vector2Int[] arounds = new Vector2Int[]
         {
-                new Vector2Int(-1, 1), new Vector2Int(0, 1), new Vector2Int(1, 1),
-                new Vector2Int(-1, 0),                        new Vector2Int(1, 0),
-                new Vector2Int(-1, -1), new Vector2Int(0, -1), new Vector2Int(1, -1),
+            new Vector2Int(-1, 1), new Vector2Int(0, 1), new Vector2Int(1, 1),
+            new Vector2Int(-1, 0),                        new Vector2Int(1, 0),
+            new Vector2Int(-1, -1), new Vector2Int(0, -1), new Vector2Int(1, -1),
         };
 
         bool res = false;
@@ -857,6 +875,42 @@ public class BBoard : MonoBehaviour
 
         return res;
     }
+
+    private void FillTile(FillBoardTileConfig config, List<(int x, int y, float noise)> cells, ref int idx, BTileType tileType, string resKey_Tile)
+    {
+        int total = cells.Count;
+
+        int tileCount = tileType switch
+        {
+            BTileType.Empty => 0,
+            BTileType.Block => config.BlockCount,
+            BTileType.Attack => config.AttackCount,
+            BTileType.Guard => config.GuardCount,
+            BTileType.Skill => config.SkillCount,
+            BTileType.Shield => config.ShieldCount,
+
+            _ => throw new NotImplementedException()
+        };
+
+        // clamp counts to available cells
+        tileCount = Mathf.Min(tileCount, total - idx);
+
+        for (int i = 0; i < tileCount && idx < total; i++, idx++)
+        {
+            var c = cells[idx];
+            Vector2Int cellPos = new Vector2Int(c.x, c.y);
+
+            if (tileType == BTileType.Block)
+            {
+                if (IsAround(startPoint, cellPos) || IsAround(endPoint, cellPos))
+                    continue;
+            }
+
+            tiles[c.y, c.x].type = tileType;
+            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(resKey_Tile));
+        }
+    }
+
     private void SetStartEndPoint()
     {
         System.Func<bool> actInitStartEnd = () =>
@@ -901,14 +955,14 @@ public class BBoard : MonoBehaviour
 
             if (!found)
             {
-                Debug.Log("InitBoard: failed to find valid Start/End pair");
+                //Debug.Log("InitBoard: failed to find valid Start/End pair");
                 return false;
             }
 
             tiles[sy, sx].attr = BTileAttribute.StartPoint;
             tiles[ey, ex].attr = BTileAttribute.EndPoint;
 
-            Debug.Log($"InitBoard: Start=({sx},{sy}) End=({ex},{ey})");
+            //Debug.Log($"InitBoard: Start=({sx},{sy}) End=({ex},{ey})");
             return true;
         };
 
@@ -941,7 +995,11 @@ public class BBoard : MonoBehaviour
 
         pointList.Add(startPoint);
 
+        tiles[startPoint.y, startPoint.x].SetAttribute(BTileAttribute.StartPoint);
+        tiles[endPoint.y, endPoint.x].SetAttribute(BTileAttribute.EndPoint);
+
         SetTileColor(startPoint.x, startPoint.y, Color.green);
         SetTileColor(endPoint.x, endPoint.y, Color.red);
     }
+
 }
