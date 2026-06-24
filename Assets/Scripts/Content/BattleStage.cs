@@ -481,6 +481,7 @@ public class BattleStage : MonoBehaviour
                         List<BTileType> tileTypeList = current.GetTileTypeListInPath();
                         List<SkillData> skillList = new List<SkillData>();
 
+                        //priority skill > attack
                         if(tileTypeList.Contains(BTileType.Attack))
                         {
                             SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)unit.Info.AttackIdx);

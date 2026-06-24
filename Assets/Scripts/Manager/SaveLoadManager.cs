@@ -11,7 +11,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
     public UserData UserData { get; set; } = null;
     public StageClearData StageClearData { get; set; } = null;
 
-    public UserSkillData UserSkillData { get; set; } = null;
+    public UserSkillData UserSkillData => userSkillData;
 
     private static string GetPath(string fileName) => Path.Combine(Application.persistentDataPath, fileName);
 
@@ -69,7 +69,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
             if(res.data.userSkillData != null)
             {
-                userSkillData = new UserSkillData() { SkillIdies = res.data.userSkillData };
+                userSkillData = new UserSkillData() { SkillSlots = res.data.userSkillData };
             }
 
             onComp?.Invoke();
@@ -105,11 +105,11 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
     {
         GameNetworkManager.Instance.LoadUserSkillData((uint)UserData.UserId, (json) =>
         {
-            APIResponseData<List<int>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<int>>(json);
+            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if(res.data != null)
             {
-                userSkillData = new UserSkillData() { SkillIdies = res.data };
+                userSkillData = new UserSkillData() { SkillSlots = res.data };
 
                 onComp?.Invoke();
             }

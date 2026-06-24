@@ -460,13 +460,25 @@ public class LoginData
 {
     public SavedUserData userData;
     public List<ClearData> stageClearData;
-    public List<int> userSkillData;
+    public List<SkillSlotData> userSkillData;
+}
+
+[System.Serializable]
+public class SkillSlotData
+{
+    public int SkillIdx;
+    public int Slot;
 }
 
 [System.Serializable]
 public class UserSkillData
 {
-    public List<int> SkillIdies;
+    public List<SkillSlotData> SkillSlots;
+
+    public int GetSkillIdx(int slot)
+    {
+        return SkillSlots.Where((o) => o.Slot == slot).Select((s) => s.SkillIdx).FirstOrDefault();
+    }
 }
 
 public static class Commons

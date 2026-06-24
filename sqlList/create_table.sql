@@ -14,23 +14,22 @@ SavedStageIdx int default 0
 
 /*
 create table StageClearData (
-StageClearId int primary key auto_increment,
 UserId int not null,
-StageIdx int,
-ClearState int default 0,
+StageIdx int not null,
+ClearState int default '0',
 
-foreign key(UserId) references UserData(UserId) on delete cascade,
-unique key idx_user_stage (UserId, StageIdx)
+primary key(UserId, StageIdx),
+foreign key(UserId) references UserData(UserId) on delete cascade
 );
 //*/
 
 /*
 create table UserSkillData (
-UserSkillId int primary key auto_increment,
 UserId int not null,
-SkillIdx int,
+SkillIdx int not null,
+Slot int default '0',
 
+primary key(UserId, SkillIdx),
 foreign key(UserId) references UserData(UserId) on delete cascade,
-unique key idx_user_skill (UserId, SkillIdx)
 );
 //*/
