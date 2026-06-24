@@ -58,6 +58,7 @@
     <Compile Include="Assets\Scripts\DataForm\SkillDataForm.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Utils\IntArrayConverter.cs" />
+    <Compile Include="Assets\Scripts\Utils\CollectionExtensions.cs" />
     <Compile Include="Assets\Scripts\Utils\UIntArrayConverter.cs" />
     <Compile Include="Assets\Scripts\Utils\SpriteRendererFillAmount.cs" />
     <Compile Include="Assets\Scripts\Unit\UnitBase.cs" />
