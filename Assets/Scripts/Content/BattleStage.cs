@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using UniRx;
 using UnityEngine;
@@ -55,7 +56,6 @@ public class BattleStage : MonoBehaviour
     private event System.Action onStageDefeat = null;
     private event System.Action onStageClear = null;
     
-
     public void InitStage(UserData userData, StageData stageData)
     {
         if (playerList.Count <= 0)
@@ -67,7 +67,7 @@ public class BattleStage : MonoBehaviour
 
         player = playerList[0];
 
-        player.LoadFromSO(Commons.DEFAULT_PLAYER_IDX); //test
+        player.LoadFromSO(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1)); 
         player.SetLevelBase(lbd);
         player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
         player.Subscribe_HP(OnPlayerDeath);
@@ -135,7 +135,7 @@ public class BattleStage : MonoBehaviour
 
         for (int i = 0; i < boardList[0].Count; i++)
         {
-            boardList[0][i].InitBoard();
+            boardList[0][i].InitBoard(SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
         }
 
         boardCursor[0].Value = 0;
@@ -468,7 +468,7 @@ public class BattleStage : MonoBehaviour
                 {
                     current.ClearBoard();
                     current.ClearDrawLine();
-                    current.FillBoard(BBoardType.Offensive);
+                    current.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
                 };
 
                 actCurrentClear?.Invoke();
@@ -478,11 +478,26 @@ public class BattleStage : MonoBehaviour
                     if (defender != null)
                     {
                         TestPrintPointList();
-                        List<BTileType> tileTypeList = current.GetTileTypeListInPath();
+                        List<(BTileType type, uint idx)> tileTypeList = current.GetTileTypeListInPath();
                         List<SkillData> skillList = new List<SkillData>();
+                        bool findSkillType = tileTypeList.Any((o) => o.type == BTileType.Skill && o.idx != 0);
+                        bool findAttackType = tileTypeList.Any((o) => o.type == BTileType.Attack);
 
                         //priority skill > attack
-                        if(tileTypeList.Contains(BTileType.Attack))
+                        if (findSkillType)
+                        {
+                            List<SkillData> sdList = tileTypeList
+                                .Where((o) => o.type == BTileType.Skill && o.idx != 0)
+                                .Select((s) => DataTableManager.Instance.GetSkillData(s.idx))
+                                .Where((o)=>o != null).ToList();
+
+                            if(sdList != null)
+                            {
+                                skillList.AddRange(sdList);
+                            }
+                        }
+                        
+                        if (!findSkillType && findAttackType)
                         {
                             SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)unit.Info.AttackIdx);
 
@@ -490,17 +505,13 @@ public class BattleStage : MonoBehaviour
                             {
                                 skillList.Add(sdAtk);
                             }
-                        }
-                        else if(tileTypeList.Contains(BTileType.Skill))
-                        {
-
-                        }
+                        } 
 
                         //calc damage, def from path, and apply to player and monster (instance status)
                         ApplyStatusData applyAttackerStatus = current.GetApplyStatusFromPath();
                         ApplyStatusData applyDefenderStatus = default;
 
-                        int maxTargetCount = skillList.Where((o) => o.Type == SkillType.Damaged && o.TargetType == SkillTargetType.Multiple).Max((o) => (int)o.TargetCount);
+                        int maxTargetCount = skillList.Where((o) => o.Type == SkillType.Damaged && o.TargetType == SkillTargetType.Multiple).Select((o) => (int)o.TargetCount).DefaultIfEmpty(0).Max();
                         List<MonsterUnit> targetList = monsterList.Where((o) => { return o != defender; }).Take(maxTargetCount).Select((s) => { return s; }).ToList();
 
                         //player attack to target(board's owner, monster)

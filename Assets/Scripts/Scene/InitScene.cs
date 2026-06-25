@@ -19,11 +19,12 @@ public class InitScene : MonoBehaviour
     {
         StartCoroutine(ResourceManager.Instance.Init(() =>
         {
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("BaseTile", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("BlockTile", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("AttackTile", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("GuardTile", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("ShieldTile", (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_BaseTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_BlockTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_AttackTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_GuardTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_ShieldTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_SkillTile, (o) => Debug.Log($"resource loaded, {o.name}"));
 
             ResourceManager.Instance.LoadAssetAsync<GameObject>("Board", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<GameObject>("HPUI", (o) => Debug.Log($"resource loaded, {o.name}"));

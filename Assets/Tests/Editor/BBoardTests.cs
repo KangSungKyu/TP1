@@ -11,7 +11,7 @@ public class BBoardTests
     {
         var go = new GameObject("tile");
         var tile = go.AddComponent<BTile>();
-        tile.SetAttribute(BTileAttribute.StartPoint);
+        tile.attr = BTileAttribute.StartPoint;
         Assert.AreEqual(BTileAttribute.StartPoint, tile.attr);
         Object.DestroyImmediate(go);
     }

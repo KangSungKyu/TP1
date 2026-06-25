@@ -93,6 +93,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 667615c9aa6f5ce46986e32cf86e73ad
+    m_Address: SkillTile
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 69a3ae6cf4dcf874a93b1401ecbf8989
     m_Address: HPUI
     m_ReadOnly: 0
