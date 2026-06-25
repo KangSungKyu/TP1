@@ -164,11 +164,12 @@ public class BBoard : MonoBehaviour
 
                         float tx = boardAnchor.x + x * tw;
                         float ty = boardAnchor.y + y * th;
+                        
+                        tile.type = BTileType.Empty;
+                        tile.attr = BTileAttribute.None;
                         tile.x = x;
                         tile.y = y;
-                        tile.type = BTileType.Empty;
 
-                        tile.SetAttribute(BTileAttribute.None);
                         tile.transform.SetParent(board.tilePivot, false);
 
                         tile.transform.localPosition = new Vector2(tx, ty);
@@ -204,18 +205,18 @@ public class BBoard : MonoBehaviour
         owner = unit;
     }
 
-    public void InitBoard()
+    public void InitBoard(uint[] skillList = null)
     {
         if (isInit)
             return;
 
-        FillBoard(type);
+        FillBoard(type, skillList);
 
         isInit = true;
     }
 
 
-    public void FillBoard(BBoardType boardType)
+    public void FillBoard(BBoardType boardType, uint[] skillList = null)
     {
         //offensive -> block, attack, skill, shield
         //defensive -> block, guard, skill
@@ -231,7 +232,7 @@ public class BBoard : MonoBehaviour
                     BlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f)),
                     AttackCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                     GuardCount = 0,
-                    SkillCount = 0,
+                    SkillCount = skillList != null ? UnityEngine.Random.Range(1, skillList.Length) : 0,
                     ShieldCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                 };
                 break;
@@ -283,7 +284,7 @@ public class BBoard : MonoBehaviour
         FillTile(config, cells, ref idx, BTileType.Block, Commons.ResKey_BlockTile);
         FillTile(config, cells, ref idx, BTileType.Attack, Commons.ResKey_AttackTile);
         FillTile(config, cells, ref idx, BTileType.Guard, Commons.ResKey_GuardTile);
-        FillTile(config, cells, ref idx, BTileType.Skill, Commons.ResKey_AttackTile); //skill
+        FillTile(config, cells, ref idx, BTileType.Skill, Commons.ResKey_SkillTile, skillList); //skill
         FillTile(config, cells, ref idx, BTileType.Shield, Commons.ResKey_ShieldTile);
 
         // After placement, ensure there is at least one path between start and end.
@@ -464,7 +465,7 @@ public class BBoard : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 tiles[y, x].type = BTileType.Empty;
-                tiles[y, x].SetAttribute(BTileAttribute.None);
+                tiles[y, x].attr = BTileAttribute.None;
 
                 SetTile(x, y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile));
                 SetTileColor(x, y, Color.white);
@@ -837,11 +838,11 @@ public class BBoard : MonoBehaviour
         startTimer = false;
         currentTimer.Value = maxTimer.Value;
     }
-    public List<BTileType> GetTileTypeListInPath()
+    public List<(BTileType type, uint idx)> GetTileTypeListInPath()
     {
-        List<BTileType> typeList = pointList.Select((s) => { return tiles[s.y, s.x].type; }).ToList();
+        List<(BTileType type, uint idx)> result = pointList.Select((s) => { return (tiles[s.y, s.x].type, tiles[s.y,s.x].skillIdx); }).ToList();
 
-        return typeList;
+        return result;
     }
 
     private void ResizeBoard()
@@ -876,7 +877,7 @@ public class BBoard : MonoBehaviour
         return res;
     }
 
-    private void FillTile(FillBoardTileConfig config, List<(int x, int y, float noise)> cells, ref int idx, BTileType tileType, string resKey_Tile)
+    private void FillTile(FillBoardTileConfig config, List<(int x, int y, float noise)> cells, ref int idx, BTileType tileType, string resKey_Tile, uint[] skillList = null)
     {
         int total = cells.Count;
 
@@ -908,6 +909,17 @@ public class BBoard : MonoBehaviour
 
             tiles[c.y, c.x].type = tileType;
             SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(resKey_Tile));
+
+            if (tileType == BTileType.Skill && skillList != null)
+            {
+                uint skillIdx = skillList[UnityEngine.Random.Range(0, skillList.Length)];
+                tiles[c.y, c.x].skillIdx = skillIdx; //009001 
+
+                string ht = $"#ff{0:00}{skillIdx}";
+
+                if (ColorUtility.TryParseHtmlString(ht, out var col))
+                    SetTileColor(c.x, c.y, col);
+            }
         }
     }
 
@@ -995,8 +1007,8 @@ public class BBoard : MonoBehaviour
 
         pointList.Add(startPoint);
 
-        tiles[startPoint.y, startPoint.x].SetAttribute(BTileAttribute.StartPoint);
-        tiles[endPoint.y, endPoint.x].SetAttribute(BTileAttribute.EndPoint);
+        tiles[startPoint.y, startPoint.x].attr = BTileAttribute.StartPoint;
+        tiles[endPoint.y, endPoint.x].attr = BTileAttribute.EndPoint;
 
         SetTileColor(startPoint.x, startPoint.y, Color.green);
         SetTileColor(endPoint.x, endPoint.y, Color.red);

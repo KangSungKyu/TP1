@@ -499,6 +499,11 @@ public class UserSkillData
     {
         return SkillSlots.Where((o) => o.Slot == slot).Select((s) => s.SkillIdx).FirstOrDefault();
     }
+
+    public uint[] GetEquipedSkills()
+    {
+        return SkillSlots.Where((o) => o.Slot > 0).Select((s) => (uint)s.SkillIdx).ToArray();
+    }
 }
 
 public static class Commons
@@ -516,6 +521,7 @@ public static class Commons
     public readonly static string ResKey_AttackTile = "AttackTile"; 
     public readonly static string ResKey_GuardTile = "GuardTile";
     public readonly static string ResKey_ShieldTile = "ShieldTile";
+    public readonly static string ResKey_SkillTile = "SkillTile";
 
     public readonly static string SceneName_Init = "InitScene";
     public readonly static string SceneName_Loading = "LoadingScene";
