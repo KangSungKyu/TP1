@@ -578,12 +578,20 @@ public class BattleStage : MonoBehaviour
                     tempBoard.StartBoardTimer(() =>
                     {
                         List<SkillData> skillList = new List<SkillData>();
+                        uint patternSkillIdx = mu.GetCurrentPattern();
 
-                        SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)mu.Info.AttackIdx);
-
-                        if (sdAtk != null)
+                        if (patternSkillIdx != 0)
                         {
-                            skillList.Add(sdAtk);
+                            skillList.Add(DataTableManager.Instance.GetSkillData(patternSkillIdx));
+                        }
+                        else
+                        {
+                            SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)mu.Info.AttackIdx);
+
+                            if(sdAtk != null)
+                            {
+                                skillList.Add(sdAtk);
+                            }
                         }
 
                         // gather statuses from path

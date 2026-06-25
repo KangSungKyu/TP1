@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using static Commons;
+using System.Linq;
 
 public static class UnitCalculator
 {
-    public static void ApplyDamage(UnitBase attacker, UnitBase defender, ApplyStatusData applyAttackerStatus, ApplyStatusData applyDefenderStatus, SkillData[] skillList = null)
+    public static void ApplyDamage(UnitBase attacker, UnitBase defender, ApplyStatusData applyAttackerStatus, ApplyStatusData applyDefenderStatus, params SkillData[] skillList)
     {
         attacker.ApplyStatus(applyAttackerStatus);
         defender.ApplyStatus(applyDefenderStatus);
@@ -14,7 +15,7 @@ public static class UnitCalculator
         defender.ApplyDamage(damage);
     }
 
-    public static float CalculateDamage(UnitBase attacker, UnitBase defender, SkillData[] skillList = null)
+    public static float CalculateDamage(UnitBase attacker, UnitBase defender, params SkillData[] skillList)
     {
         if (attacker.ShieldCrushTime > 0f)
         {
@@ -32,6 +33,8 @@ public static class UnitCalculator
                 attackerAtk *= perValue;
             }
         }
+
+        Debug.Log($"skill per, {string.Join(", ", skillList.Select((o) => $"({o.Idx}: {o.PerValue})"))}");
 
         float damage = Mathf.Max(0, attackerAtk - defender.Def);
         int rnd = Random.Range(0, 1000);
