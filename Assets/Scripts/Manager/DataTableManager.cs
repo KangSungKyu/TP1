@@ -21,6 +21,7 @@ public class DataTableManager : Singleton<DataTableManager>
         { DataTableType.StageData, new StageDataForm() },
         { DataTableType.RewardData, new RewardDataForm() },
         { DataTableType.SkillData, new SkillDataForm() },
+        { DataTableType.MonsterPatternData, new MonsterPatternDataForm() },
     };
 
     public T GetDB<T>(uint idx) where T : class, IDataLoad
@@ -146,6 +147,18 @@ public class DataTableManager : Singleton<DataTableManager>
         }
 
         return default(SkillData);
+    }
+
+    public MonsterPatternData GetMonsterPatternData(uint idx)
+    {
+        var db = GetDB<MonsterPatternDataForm>(idx)?.DB;
+
+        if(db.ContainsKey(idx))
+        {
+            return db[idx];
+        }
+
+        return default(MonsterPatternData);
     }
 
     protected override void OnSingletonAwake()

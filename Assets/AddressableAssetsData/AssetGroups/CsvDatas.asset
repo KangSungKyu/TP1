@@ -15,6 +15,13 @@ MonoBehaviour:
   m_GroupName: CsvDatas
   m_GUID: 25048cf8aaadd874d8c52d2a1f835793
   m_SerializeEntries:
+  - m_GUID: 2358c4f059b31e242af6e7d1f6b02ffb
+    m_Address: monsterPatternData
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Data
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 368fc073fae1f3342bfef915d1997eee
     m_Address: mapData
     m_ReadOnly: 0

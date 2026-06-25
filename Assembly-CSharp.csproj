@@ -55,6 +55,7 @@
     <Compile Include="Assets\Scripts\Content\GameContent.cs" />
     <Compile Include="Assets\Scripts\Content\BattleContent.cs" />
     <Compile Include="Assets\Scripts\Content\RestContent.cs" />
+    <Compile Include="Assets\Scripts\DataForm\MonsterPatternDataForm.cs" />
     <Compile Include="Assets\Scripts\DataForm\SkillDataForm.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Utils\IntArrayConverter.cs" />

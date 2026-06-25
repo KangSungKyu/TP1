@@ -22,6 +22,7 @@ public enum DataTableType : uint //1~999
     StageData,
     RewardData,
     SkillData,
+    MonsterPatternData,
 
     DataTableType_End
 }
@@ -101,6 +102,14 @@ public enum SkillTargetType
     Multiple,
 
     SkillTargetType_End
+}
+
+public enum MonsterPatternType
+{
+    Cycle = 0,
+    Random,
+
+    MonsterPatternType_End
 }
 
 public interface IDataLoad
@@ -277,7 +286,7 @@ public class MapData
 public class SkillData
 {
     [Name("idx")]
-    public uint Idx { get;set; }
+    public uint Idx { get; set; }
 
     [Name("type")]
     public SkillType Type { get; set; }
@@ -290,6 +299,17 @@ public class SkillData
 
     [Name("pervalue")]
     public int PerValue { get; set; } //pervalue / 1000.0
+}
+
+[System.Serializable]
+public class MonsterPatternData
+{
+    [Name("idx")]
+    public uint Idx { get; set; }
+    [Name("type")]
+    public MonsterPatternType Type { get; set; }
+    [Name("skillidx"), TypeConverter(typeof(UIntArrayConverter))]
+    public uint[] SkillIdx { get; set; }
 }
 
 public struct UnitActionData

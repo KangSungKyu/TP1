@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UniRx;
 using UnityEngine;
 using static Commons;
@@ -9,9 +10,14 @@ public class MonsterUnit : UnitBase
     public MonsterData MonsterData => monsterData;
     public int BoardCount => (ofsBoard != null ? 1 : 0) + dfsBoardList.Count;
 
+    private int patternCursor = 0;
+    private int prevPatternCursor = 0;
     private BBoard ofsBoard = null;
     private List<BBoard> dfsBoardList = null;
     private MonsterData monsterData = default(MonsterData);
+    private MonsterPatternData monsterPatternData = default(MonsterPatternData);
+
+    private List<uint> cachedPatternList = new List<uint>();
 
     public override void LoadFromSO(uint idx)
     {
@@ -20,6 +26,9 @@ public class MonsterUnit : UnitBase
         monsterData = DataTableManager.Instance.GetMonsterData(idx);
         info = DataTableManager.Instance.GetUnitData(monsterData.UnitIdx);
         unitName = DataTableManager.Instance.GetText(info.NameIdx);
+        monsterPatternData = DataTableManager.Instance.GetMonsterPatternData(monsterData.PatternIdx);
+
+        cachedPatternList = monsterPatternData.SkillIdx.ToList();
 
         InitUnitData();
         Init();
@@ -95,6 +104,22 @@ public class MonsterUnit : UnitBase
         {
             DelBoard(dfsBoardList[i]);
         }
+    }
+
+    public uint GetCurrentPattern()
+    {
+        prevPatternCursor = patternCursor;
+
+        if (monsterPatternData.Type == MonsterPatternType.Cycle)
+        {
+            patternCursor = (patternCursor + 1) % cachedPatternList.Count;
+        }
+        else
+        {
+            patternCursor = Mathf.Max(0, Util.GetRandom(0, cachedPatternList.Count, prevPatternCursor));
+        }
+
+        return monsterPatternData.SkillIdx[patternCursor];
     }
 
     protected override void Init()
