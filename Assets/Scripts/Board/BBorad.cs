@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -808,7 +809,6 @@ public class BBoard : MonoBehaviour
         currentTimer.Value = 0.0f;
         onBoardTimeOver = timeOverAct;
 
-        // Dispose previous timer subscription if any to avoid multiple concurrent timers
         disTimer?.Dispose();
         disTimer = Observable.Interval(System.TimeSpan.FromSeconds(0.1))
             .Where(_ => currentTimer.Value < maxTimer.Value)
@@ -818,9 +818,9 @@ public class BBoard : MonoBehaviour
 
                 if (currentTimer.Value >= maxTimer.Value)
                 {
-                    // time over board
                     startTimer = false;
                     onBoardTimeOver?.Invoke();
+                    disTimer?.Dispose();
                 }
             });
     }
@@ -838,6 +838,7 @@ public class BBoard : MonoBehaviour
         startTimer = false;
         currentTimer.Value = maxTimer.Value;
     }
+
     public List<(BTileType type, uint idx)> GetTileTypeListInPath()
     {
         List<(BTileType type, uint idx)> result = pointList.Select((s) => { return (tiles[s.y, s.x].type, tiles[s.y,s.x].skillIdx); }).ToList();
@@ -931,7 +932,11 @@ public class BBoard : MonoBehaviour
             int sx = Util.GetRandom(0, width, null);
             int sy = Util.GetRandom(0, height, null);
 
-            if (tiles[sy, sx].type == BTileType.Block) return false; // 블록이면 실패
+            if (tiles == null || tiles[sy, sx] == null) 
+                return false;
+
+            if (tiles[sy, sx].type == BTileType.Block) 
+                return false; // 블록이면 실패
 
             // 2. 종점 선택 (시작점과 같지 않고, 주변(isAround)도 아닌 곳)
             int ex = -1, ey = -1;

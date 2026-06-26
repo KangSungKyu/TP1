@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using NUnit.Framework.Internal;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Resources;
@@ -9,6 +10,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static Commons;
+using static UnityEngine.UI.CanvasScaler;
 
 //atb-based
 //유저는 행동 가능 상태일때 퍼즐을 푸는 유예시간이 주어짐
@@ -21,6 +23,7 @@ using static Commons;
 //총 퍼즐의 양은 적 * 유저 공격 퍼즐 + a(적의 공격 빈도에 따라 유동적으로, 단 전체적인 atb 길이에 비해 방어 퍼즐의 유예시간은 짧게 유지)
 public class BattleStage : MonoBehaviour
 {
+
     [SerializeField]
     private RectTransform uiPoolTempContainer = null;
     [SerializeField]
@@ -42,36 +45,42 @@ public class BattleStage : MonoBehaviour
     [SerializeField]
     private Image pageCursorUI = null;
 
+    private bool isBattleActive = false;
 
     private ReactiveProperty<int> boardPageCursor = new ReactiveProperty<int>(0); //0 right, 1 left
     private ReactiveProperty<int>[] boardCursor = new ReactiveProperty<int>[] { new ReactiveProperty<int>(-1), new ReactiveProperty<int>(-1) };
     private ReactiveProperty<int> playerCount = new ReactiveProperty<int>(0);
     private ReactiveProperty<int> monsterCount = new ReactiveProperty<int>(0);
-    private PlayerUnit player = null;
-    private List<PlayerUnit> playerList = new List<PlayerUnit>();
-    private List<MonsterUnit> monsterList = new List<MonsterUnit>();
+    private List<UnitBase> unitList = new List<UnitBase>();
     private List<BBoard>[] boardList = new List<BBoard>[] { new List<BBoard>(), new List<BBoard>() };
+    private Queue<UnitBase> readyQueue = new Queue<UnitBase>();
+    private Queue<PuzzleResult> resultQueue = new Queue<PuzzleResult>();
+    private List<Coroutine> resultQueueList = new List<Coroutine>();
 
     private PlayerInput playerInput = null;
+
+    private Coroutine coBattleLoop = null;
     private event System.Action onStageDefeat = null;
     private event System.Action onStageClear = null;
     
     public void InitStage(UserData userData, StageData stageData)
     {
-        if (playerList.Count <= 0)
+        isBattleActive = true;
+
+        if (unitList.Count <= 0)
         {
-            playerList.Add(Factory.Instance.GetPlayerUnit(transform, PlayerSpawnGO.transform.position) as PlayerUnit);
+            unitList.Add(Factory.Instance.GetPlayerUnit(transform, PlayerSpawnGO.transform.position) as PlayerUnit);
         }
 
         LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
 
-        player = playerList[0];
+        PlayerUnit player = unitList[0] as PlayerUnit;
 
         player.LoadFromSO(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1)); 
         player.SetLevelBase(lbd);
         player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
-        player.Subscribe_HP(OnPlayerDeath);
-        player.OnATBReady.Subscribe(_ => OnUnitATBReady(player)).AddTo(player);
+        player.Subscribe_HP((v) => OnPlayerDeath(player, v));
+        player.OnATBReady.Subscribe((o) => readyQueue.Enqueue(o)).AddTo(player);
 
         Image playerPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
 
@@ -93,7 +102,7 @@ public class BattleStage : MonoBehaviour
 
                 if (monsterUnit != null)
                 {
-                    spawnY = (monsterList.Count % spawnRow - (spawnRow / 2)) * 1.0f;
+                    spawnY = ((unitList.Count - 1) % spawnRow - (spawnRow / 2)) * 1.0f;
                     //test
                     monsterUnit.transform.position = new Vector3(monsterStartPos.x + prevX, monsterStartPos.y + spawnY, 0.0f);
 
@@ -101,7 +110,7 @@ public class BattleStage : MonoBehaviour
                     monsterUnit.LoadFromSO(stageData.MonsterIdx[i]);
                     monsterUnit.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
                     monsterUnit.Subscribe_HP(OnMonsterDeath);
-                    monsterUnit.OnATBReady.Subscribe(_ => OnUnitATBReady(monsterUnit)).AddTo(monsterUnit);
+                    monsterUnit.OnATBReady.Subscribe((o) => readyQueue.Enqueue(o)).AddTo(monsterUnit);
 
                     BBoard board = Factory.Instance.GetBoard(BBoardType.Offensive, boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, 7.5f);
 
@@ -109,7 +118,7 @@ public class BattleStage : MonoBehaviour
                     monsterUnit.AddBoard(board);
 
                     boardList[0].Add(board);
-                    monsterList.Add(monsterUnit);
+                    unitList.Add(monsterUnit);
 
                     Image monsterPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
 
@@ -124,8 +133,8 @@ public class BattleStage : MonoBehaviour
             }
         }
 
-        playerCount.Value = playerList.Count;
-        monsterCount.Value = monsterList.Count;
+        playerCount.Value = unitList.Count((o)=>o is PlayerUnit);
+        monsterCount.Value = unitList.Count((o)=>o is MonsterUnit);
 
         playerCount.Subscribe(OnChangedPlayerCount).AddTo(this);
         monsterCount.Subscribe(OnChangedMonsterCount).AddTo(this);
@@ -145,27 +154,53 @@ public class BattleStage : MonoBehaviour
         boardCursor[0].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
         boardCursor[1].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
         boardPageCursor.Subscribe(OnChangedBoardPageCursor).AddTo(this);
+
+        readyQueue.Clear();
+
+        if (coBattleLoop == null)
+        {
+            coBattleLoop = StartCoroutine(IEBattleLoop());
+        }
     }
 
     public void ReleaseStage()
     {
-        player = null;
-
-        for(int i = 0; i < playerList.Count; ++i)
+        if(coBattleLoop != null)
         {
-            playerList[i]?.Release();
-            Factory.Instance.ReleasePlayerUnit(playerList[i]);
+            StopCoroutine(coBattleLoop);
+            coBattleLoop = null;
         }
 
-        playerList.Clear();
+        isBattleActive = false;
 
-        for(int i = 0; i < monsterList.Count; ++i)
+        for(int i = 0; i < unitList.Count; ++i)
         {
-            monsterList[i]?.Release();
-            Factory.Instance.ReleaseMonsterUnit(monsterList[i]);
+            unitList[i]?.Release();
+
+            if (unitList[i] is PlayerUnit)
+            {
+                Factory.Instance.ReleasePlayerUnit(unitList[i] as PlayerUnit);
+            }
+            else
+            {
+                Factory.Instance.ReleaseMonsterUnit(unitList[i] as MonsterUnit);
+            }
         }
 
-        monsterList.Clear();
+        unitList.Clear();
+        readyQueue.Clear();
+
+        for (int i = 0; i < resultQueueList.Count; ++i)
+        {
+            if (resultQueueList[i] != null)
+            {
+                StopCoroutine(resultQueueList[i]);
+            }
+
+            resultQueueList[i] = null;
+        }
+
+        resultQueueList.Clear();
 
         for (int i = 0; i < boardList.Length; ++i)
         {
@@ -209,6 +244,94 @@ public class BattleStage : MonoBehaviour
         onStageClear += act;
     }
 
+    public void OnPuzzleCompleted(PuzzleResult resultData)
+    {
+        resultData.ResultType = PuzzleResultType.Completed;
+
+        if(resultData.Attacker is PlayerUnit playerUnit)
+        {
+            List<(BTileType type, uint idx)> tileTypeList = resultData.CurrentBoard.GetTileTypeListInPath();
+            bool findSkillType = tileTypeList.Any((o) => o.type == BTileType.Skill && o.idx != 0);
+            bool findAttackType = tileTypeList.Any((o) => o.type == BTileType.Attack);
+
+            //priority skill > attack
+            if (findSkillType)
+            {
+                List<SkillData> sdList = tileTypeList
+                    .Where((o) => o.type == BTileType.Skill && o.idx != 0)
+                    .Select((s) => DataTableManager.Instance.GetSkillData(s.idx))
+                    .Where((o) => o != null).ToList();
+
+                if (sdList != null)
+                {
+                    resultData.SkillList.AddRange(sdList);
+                }
+            }
+
+            if (!findSkillType && findAttackType)
+            {
+                SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)playerUnit.Info.AttackIdx);
+
+                if (sdAtk != null)
+                {
+                    resultData.SkillList.Add(sdAtk);
+                }
+            }
+
+            if(resultData.CurrentBoard.Owner != null)
+            {
+                resultData.TargetList = new List<UnitBase>();
+
+                resultData.TargetList.Add(resultData.CurrentBoard.Owner);
+            }
+
+            int maxTargetCount = Mathf.Min(monsterCount.Value, resultData.SkillList.Where((o) => o.Type == SkillType.Damaged && o.TargetType == SkillTargetType.Multiple).Select((o) => (int)o.TargetCount).DefaultIfEmpty(0).Max());
+
+            if(maxTargetCount > 0)
+            {
+                resultData.TargetList.AddRange(unitList.Where((o) => { return o is MonsterUnit && o != playerUnit && o != resultData.CurrentBoard.Owner; }).Take(maxTargetCount).Select((s) => { return s; }).ToList());
+            }
+        }
+        else if(resultData.Attacker is MonsterUnit monsterUnit)
+        {
+
+        }
+
+        resultQueue.Enqueue(resultData);
+    }
+
+    public void OnPuzzleExpired(PuzzleResult resultData)
+    {
+        resultData.ResultType = PuzzleResultType.Expired;
+
+        if(resultData.Attacker is PlayerUnit playerUnit)
+        {
+
+        }
+        else if(resultData.Attacker is MonsterUnit monsterUnit)
+        {
+            uint patternSkillIdx = monsterUnit.GetCurrentPattern();
+
+            if (patternSkillIdx != 0)
+            {
+                resultData.SkillList.Add(DataTableManager.Instance.GetSkillData(patternSkillIdx));
+            }
+            else
+            {
+                SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)monsterUnit.Info.AttackIdx);
+
+                if (sdAtk != null)
+                {
+                    resultData.SkillList.Add(sdAtk);
+                }
+            }
+
+            resultData.TargetList.Add(monsterUnit.TargetUnit);
+        }
+
+        resultQueue.Enqueue(resultData);
+    }
+
     protected void Awake()
     { 
         if(playerInput == null)
@@ -242,18 +365,295 @@ public class BattleStage : MonoBehaviour
 
     private void Update()
     {
+        if(resultQueue.Count > 0)
+        {
+            PuzzleResult result = resultQueue.Dequeue();
+            Coroutine co = StartCoroutine(IEProcPuzzleResult(result));
+
+            resultQueueList.Add(co);
+        }
+
+        //for(int i = 0; i < unitList.Count; ++i)
+        //{
+        //    Bounds bd = unitList[i].GetUnitBounds();
+        //
+        //    Debug.DrawLine(new Vector2(bd.min.x, bd.min.y), new Vector3(bd.max.x, bd.min.y), Color.red);
+        //    Debug.DrawLine(new Vector2(bd.max.x, bd.min.y), new Vector3(bd.max.x, bd.max.y), Color.red);
+        //    Debug.DrawLine(new Vector2(bd.max.x, bd.max.y), new Vector3(bd.min.x, bd.max.y), Color.red);
+        //    Debug.DrawLine(new Vector2(bd.min.x, bd.max.y), new Vector3(bd.min.x, bd.min.y), Color.red);
+        //}
+
+        //test func
         if(Input.GetKeyDown(KeyCode.K))
         {
-            if(monsterList.Count > 0)
+            if(unitList.Count > 1)
             {
                 boardCursor[0].Value = 0;
-                monsterList.First()?.ApplyDamage(99999f);
+                unitList.Skip(1).First()?.ApplyDamage(99999f);
             }
         }
         else if(Input.GetKeyDown(KeyCode.P))
         {
-            player?.ApplyDamage(99999f);
+            if(unitList.Count > 0)
+            {
+                unitList.FirstOrDefault()?.ApplyDamage(99999f);
+            }
         }
+    }
+
+    private IEnumerator IEBattleLoop()
+    {
+        while(isBattleActive)
+        {
+            foreach(var unit in unitList)
+            {
+                if(unit.ATBRatio < 1.0f)
+                {
+                    unit.AddATBTick(Time.deltaTime);
+                }
+            }
+
+            while(readyQueue.Count > 0)
+            {
+                UnitBase readyUnit = readyQueue.Dequeue();
+
+                yield return StartCoroutine(IERunUnitTurn(readyUnit));
+            }
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator IERunUnitTurn(UnitBase unit)
+    {
+        if (unit == null)
+            yield break;
+
+        if (unit is PlayerUnit playerUnit)
+        {
+            int currentBoardCursor = boardCursor[0].Value;
+
+            if (currentBoardCursor >= 0 && currentBoardCursor < boardList[0].Count)
+            {
+                BBoard current = boardList[0][currentBoardCursor];
+                UnitBase defender = current.Owner;
+
+                boardPageCursor.Value = 0;
+                boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
+
+                SortingBoard(0);
+
+                PuzzleResult resultData = new PuzzleResult()
+                {
+                    ResultType = PuzzleResultType.NotYet,
+                    CurrentBoard = current,
+                    Attacker = playerUnit,
+                    TargetList = null,
+                    SkillList = new List<SkillData>(),
+                };
+
+                current.StartBoardTimer(() => OnPuzzleExpired(resultData));
+                current.SubscribeOnPathComplete(() => OnPuzzleCompleted(resultData));
+            }
+        }
+        else if (unit is MonsterUnit monsterUnit)
+        {
+            PlayerUnit player = monsterUnit.TargetUnit as PlayerUnit;
+
+            if (player != null)
+            {
+                int prevListCount = boardList[1].Count;
+
+                if (monsterUnit.BoardCount > 1)
+                {
+                    BBoard prevAttack = monsterUnit.GetDefensiveBoard(0);
+
+                    if (prevAttack != null)
+                    {
+                        ClearBoard(prevAttack);
+                        prevAttack.ReleaseBoard();
+
+                        int idx = boardList[1].IndexOf(prevAttack);
+
+                        if (idx >= 0)
+                        {
+                            boardList[1].RemoveAt(idx);
+                        }
+
+                        monsterUnit.DelBoard(prevAttack);
+                    }
+                }
+
+                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], monsterUnit.GetBoardWidth(), monsterUnit.GetBoardHeight(), 7.0f);
+
+                if (tempBoard != null)
+                {
+                    tempBoard.SetOwner(monsterUnit);
+                    boardList[1].Add(tempBoard);
+                    tempBoard.InitBoard();
+
+                    boardPageCursor.Value = 1;
+                    boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
+
+                    SortingBoard(1);
+
+                    PuzzleResult resultData = new PuzzleResult()
+                    {
+                        ResultType = PuzzleResultType.NotYet,
+                        CurrentBoard = tempBoard,
+                        Attacker = monsterUnit,
+                        TargetList = new List<UnitBase>(),
+                        SkillList = new List<SkillData>(),
+                    };
+
+                    tempBoard.StartBoardTimer(() => OnPuzzleExpired(resultData));
+                    tempBoard.SubscribeOnPathComplete(() => OnPuzzleCompleted(resultData));
+                }
+            }
+        }
+
+        unit.ResetATB();
+    }
+
+    private IEnumerator IEProcPuzzleResult(PuzzleResult result)
+    {
+        if(result.ResultType == PuzzleResultType.Completed)
+        {
+            if(result.Attacker is PlayerUnit playerUnit)
+            {
+                if (playerUnit.TargetUnit != null)
+                {
+                    TestPrintPointList();
+
+                    ApplyStatusData applyAttackerStatus = result.CurrentBoard.GetApplyStatusFromPath();
+
+                    for(int i = 0; i < result.TargetList.Count; ++i)
+                    {
+                        ApplyStatusData applyDefenderStatus = default;
+                        UnitActionData uad = new UnitActionData(UnitActionType.Attack, null, () =>
+                        {
+                            UnitCalculator.DamageResult damageResult = UnitCalculator.ApplyDamage(result.Attacker, result.TargetList[i], applyAttackerStatus, applyDefenderStatus, result.SkillList.ToArray());
+
+                            result.TargetList[i].ClearApplyStatus();
+
+                            DamageFont df = Factory.Instance.GetDamageFont(transform, damageResult.Damage);
+                            float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
+                            df.transform.position = result.TargetList[i].transform.position + new Vector3(0.0f, hheight, 0.0f);
+
+                            if (damageResult.Type == DamageResultType.Damaged)
+                            {
+                                df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
+                            }
+                            else if (damageResult.Type == DamageResultType.Dodge)
+                            {
+                                //dodge action
+                                df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                            }
+                        });
+
+                        yield return StartCoroutine(result.Attacker.IEPlayAction(uad));
+                    }
+
+                    playerUnit.ClearApplyStatus();
+
+                    result.CurrentBoard.ForceStopBoardTimer();
+                    ClearBoard(result.CurrentBoard);
+                    result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                }
+            }
+            else if(result.Attacker is MonsterUnit monsterUnit)
+            {
+                PlayerUnit player = result.Attacker.TargetUnit as PlayerUnit;
+
+                if(player != null)
+                {
+                    ApplyStatusData applyDefenderStatus = result.CurrentBoard.GetApplyStatusFromPath();
+
+                    player.ApplyStatus(applyDefenderStatus);
+                    result.CurrentBoard.ForceBoardTimeOver();
+                    ClearBoard(result.CurrentBoard);
+
+                    if (boardList[1].Count <= 0)
+                    {
+                        boardPageCursor.Value = 0;
+                    }
+                    else
+                    {
+                        OnPuzzleSelectR(1);
+                        OnChangedBoardCursor(1, boardCursor[1].Value);
+                    }
+                }
+            }
+        }
+        else if(result.ResultType == PuzzleResultType.Expired)
+        {
+            if(result.Attacker is PlayerUnit playerUnit)
+            {
+                ClearBoard(result.CurrentBoard);
+                result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+            }
+            else if(result.Attacker is MonsterUnit monsterUnit)
+            {
+                // gather statuses from path
+                ApplyStatusData applyAttackerStatus = default;
+                ApplyStatusData applyDefenderStatus = result.CurrentBoard.GetApplyStatusFromPath();
+
+                for(int i = 0; i < result.TargetList.Count; ++i)
+                {
+                    UnitActionData uad = new UnitActionData(UnitActionType.Attack, null, () =>
+                    {
+                        UnitCalculator.DamageResult damageResult = UnitCalculator.ApplyDamage(result.Attacker, result.TargetList[i], applyAttackerStatus, applyDefenderStatus, result.SkillList.ToArray());
+
+                        result.TargetList[i].ClearApplyStatus();
+
+                        DamageFont df = Factory.Instance.GetDamageFont(transform, damageResult.Damage);
+                        float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
+                        df.transform.position = result.TargetList[i].transform.position + new Vector3(0.0f, hheight, 0.0f);
+
+                        if (damageResult.Type == DamageResultType.Damaged)
+                        {
+                            df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
+                        }
+                        else if (damageResult.Type == DamageResultType.Dodge)
+                        {
+                            //dodge action
+                            df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                        }
+                    });
+
+                    yield return StartCoroutine(result.Attacker.IEPlayAction(uad));
+                }
+
+                monsterUnit.ClearApplyStatus();
+                ClearBoard(result.CurrentBoard);
+                result.CurrentBoard.ReleaseBoard();
+
+                int idx = boardList[1].IndexOf(result.CurrentBoard);
+
+                if (idx >= 0)
+                {
+                    boardList[1].RemoveAt(idx);
+                }
+
+                monsterUnit.DelBoard(result.CurrentBoard);
+
+                if (boardList[1].Count <= 0)
+                {
+                    boardPageCursor.Value = 0;
+                }
+                else
+                {
+                    OnPuzzleSelectR(1);
+                    OnChangedBoardCursor(1, boardCursor[1].Value);
+                }
+            }
+        }
+    }
+
+    private void ClearBoard(BBoard board)
+    {
+        board.ClearBoard();
+        board.ClearDrawLine();
     }
 
     private void OnPuzzleReset()
@@ -384,7 +784,7 @@ public class BattleStage : MonoBehaviour
         //*/
     }
 
-    private void OnPlayerDeath(float hp)
+    private void OnPlayerDeath(PlayerUnit player, float hp)
     {
         if (hp <= 0)
         {
@@ -395,14 +795,12 @@ public class BattleStage : MonoBehaviour
                 Factory.Instance.ReleasePlayerUnit(player);
                 Factory.Instance.ReleaseHPUI(player.HpUI);
 
-                playerList.Remove(player);
+                unitList.Remove(player);
 
-                playerCount.Value = playerList.Count;
+                playerCount.Value = unitList.Count((o) => o is PlayerUnit);
             };
 
-            player.PlayAction(UnitActionData.DefaultAction_None,
-                new UnitActionData(UnitActionType.Death, null, act)
-                );
+            StartCoroutine(player.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
         }
     }
 
@@ -426,243 +824,17 @@ public class BattleStage : MonoBehaviour
                     Factory.Instance.ReleaseBoard(currentBoard);
                     Factory.Instance.ReleaseMonsterUnit(monster);
                     Factory.Instance.ReleaseHPUI(monster.HpUI);
-                    monsterList.Remove(monster);
+                    unitList.Remove(monster);
 
                     boardCursor[boardPageCursor.Value].SetValueAndForceNotify(boardList[boardPageCursor.Value].Count - 1);
 
-                    monsterCount.Value = monsterList.Count;
+                    monsterCount.Value = unitList.Count((o) => o is MonsterUnit);
                 }
             };
 
             if (monster != null)
             {
-                monster.PlayAction(UnitActionData.DefaultAction_None,
-                    new UnitActionData(UnitActionType.Death, null, act)
-                    );
-            }
-        }
-    }
-
-    // Example mediator: called when a unit's ATB is full
-    private void OnUnitATBReady(UnitBase unit)
-    {
-        if (unit == null)
-            return;
-
-        // If player is ready, perform attack against current board owner (if any)
-        if (unit is PlayerUnit)
-        {
-            int currentBoardCursor = boardCursor[0].Value;
-
-            if (currentBoardCursor >= 0 && currentBoardCursor < boardList[0].Count)
-            {
-                BBoard current = boardList[0][currentBoardCursor];
-                UnitBase defender = current.Owner;
-
-                boardPageCursor.Value = 0;
-                boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
-
-                SortingBoard(0);
-
-                System.Action actCurrentClear = () =>
-                {
-                    current.ClearBoard();
-                    current.ClearDrawLine();
-                    current.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
-                };
-
-                actCurrentClear?.Invoke();
-                current.StartBoardTimer(actCurrentClear);
-                current.SubscribeOnPathComplete(() =>
-                {
-                    if (defender != null)
-                    {
-                        TestPrintPointList();
-                        List<(BTileType type, uint idx)> tileTypeList = current.GetTileTypeListInPath();
-                        List<SkillData> skillList = new List<SkillData>();
-                        bool findSkillType = tileTypeList.Any((o) => o.type == BTileType.Skill && o.idx != 0);
-                        bool findAttackType = tileTypeList.Any((o) => o.type == BTileType.Attack);
-
-                        //priority skill > attack
-                        if (findSkillType)
-                        {
-                            List<SkillData> sdList = tileTypeList
-                                .Where((o) => o.type == BTileType.Skill && o.idx != 0)
-                                .Select((s) => DataTableManager.Instance.GetSkillData(s.idx))
-                                .Where((o)=>o != null).ToList();
-
-                            if(sdList != null)
-                            {
-                                skillList.AddRange(sdList);
-                            }
-                        }
-                        
-                        if (!findSkillType && findAttackType)
-                        {
-                            SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)unit.Info.AttackIdx);
-
-                            if(sdAtk != null)
-                            {
-                                skillList.Add(sdAtk);
-                            }
-                        } 
-
-                        //calc damage, def from path, and apply to player and monster (instance status)
-                        ApplyStatusData applyAttackerStatus = current.GetApplyStatusFromPath();
-                        ApplyStatusData applyDefenderStatus = default;
-
-                        int maxTargetCount = skillList.Where((o) => o.Type == SkillType.Damaged && o.TargetType == SkillTargetType.Multiple).Select((o) => (int)o.TargetCount).DefaultIfEmpty(0).Max();
-                        List<MonsterUnit> targetList = monsterList.Where((o) => { return o != defender; }).Take(maxTargetCount).Select((s) => { return s; }).ToList();
-
-                        //player attack to target(board's owner, monster)
-
-                        Debug.Log($"Player ATB ready -> attack {defender.name}");
-                        unit.PlayAction(UnitActionData.DefaultAction_None,
-                            //new UnitActionData(UnitActionType.Move),
-                            new UnitActionData(UnitActionType.Attack, null, () =>
-                            {
-                                for(int i = 0; i < targetList.Count; ++i)
-                                {
-                                    UnitCalculator.ApplyDamage(unit, targetList[i], applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
-                                    targetList[i].ClearApplyStatus();
-                                }
-
-                                UnitCalculator.ApplyDamage(unit, defender, applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
-                                unit.ClearApplyStatus();
-                                defender.ClearApplyStatus();
-                            }));
-
-                        current.ForceStopBoardTimer();
-                        actCurrentClear?.Invoke();
-                    }
-                });
-            }
-        }
-        else if (unit is MonsterUnit)
-        {
-            // Monster attacks the player
-            if (player != null)
-            {
-                MonsterUnit mu = (MonsterUnit)unit;
-                int prevListCount = boardList[1].Count;
-
-                Debug.Log($"Monster ATB ready -> spawn attack board for {mu.name}");
-
-                if(mu.BoardCount > 1)
-                {
-                    BBoard prevAttack = mu.GetDefensiveBoard(0);
-
-                    if(prevAttack != null)
-                    {
-                        // cleanup board
-                        //prevAttack.ForceBoardTimeOver();
-                        prevAttack.ClearBoard();
-                        prevAttack.ClearDrawLine();
-                        prevAttack.ReleaseBoard();
-
-                        int idx = boardList[1].IndexOf(prevAttack);
-
-                        if (idx >= 0)
-                        {
-                            boardList[1].RemoveAt(idx);
-                        }
-
-                        mu.DelBoard(prevAttack);
-                    }
-                }
-
-                // create a new temporary board for this monster's attack
-                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], mu.GetBoardWidth(), mu.GetBoardHeight(), 7.0f);
-
-                if (tempBoard != null)
-                {
-                    tempBoard.SetOwner(mu);
-                    boardList[1].Add(tempBoard);
-                    tempBoard.InitBoard();
-
-                    boardPageCursor.Value = 1;
-                    boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
-
-                    SortingBoard(1);
-
-                    // start timer: when time over, execute attack using path-derived status and remove the board
-                    tempBoard.StartBoardTimer(() =>
-                    {
-                        List<SkillData> skillList = new List<SkillData>();
-                        uint patternSkillIdx = mu.GetCurrentPattern();
-
-                        if (patternSkillIdx != 0)
-                        {
-                            skillList.Add(DataTableManager.Instance.GetSkillData(patternSkillIdx));
-                        }
-                        else
-                        {
-                            SkillData sdAtk = DataTableManager.Instance.GetSkillData((uint)mu.Info.AttackIdx);
-
-                            if(sdAtk != null)
-                            {
-                                skillList.Add(sdAtk);
-                            }
-                        }
-
-                        // gather statuses from path
-                        ApplyStatusData applyAttackerStatus = player.ApplyStatusData;
-                        ApplyStatusData applyDefenderStatus = default;
-
-                        // perform the monster attack action
-                        mu.PlayAction(UnitActionData.DefaultAction_None,
-                            new UnitActionData(UnitActionType.Attack, null, () =>
-                            {
-                                UnitCalculator.ApplyDamage(mu, player, applyAttackerStatus, applyDefenderStatus, skillList.ToArray());
-                                mu.ClearApplyStatus();
-                                player.ClearApplyStatus();
-                            }));
-
-                        // cleanup board
-                        tempBoard.ClearBoard();
-                        tempBoard.ClearDrawLine();
-                        tempBoard.ReleaseBoard();
-
-                        int idx = boardList[1].IndexOf(tempBoard);
-
-                        if (idx >= 0)
-                        {
-                            boardList[1].RemoveAt(idx);
-                        }
-
-                        mu.DelBoard(tempBoard);
-
-                        if (boardList[1].Count <= 0)
-                        {
-                            boardPageCursor.Value = 0;
-                        }
-                        else
-                        {
-                            OnPuzzleSelectR(1);
-                            OnChangedBoardCursor(1, boardCursor[1].Value);
-                        }
-                    });
-
-                    tempBoard.SubscribeOnPathComplete(() =>
-                    {
-                        ApplyStatusData applyDefenderStatus = tempBoard.GetApplyStatusFromPath();
-
-                        player.ApplyStatus(applyDefenderStatus);
-                        tempBoard.ClearBoard();
-                        tempBoard.ClearDrawLine();
-                        tempBoard.ForceBoardTimeOver();
-
-                        if (boardList[1].Count <= 0)
-                        {
-                            boardPageCursor.Value = 0;
-                        }
-                        else
-                        {
-                            OnPuzzleSelectR(1);
-                            OnChangedBoardCursor(1, boardCursor[1].Value);
-                        }
-                    });
-                }
+                StartCoroutine(monster.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
             }
         }
     }
@@ -687,12 +859,13 @@ public class BattleStage : MonoBehaviour
     {
         if (cursor > -1)
         {
+            PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
             BBoard selectedBoard = boardList[page][cursor];
 
             DownToBoard(page);
             UpToBoard(page, cursor);
             SortingBoard(page);
-            player.SetTarget(selectedBoard.Owner);
+            player?.SetTarget(selectedBoard.Owner);
 
             //Debug.Log(selectedBoard.ToString());
         }
