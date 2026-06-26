@@ -56,8 +56,8 @@ public class BattleContent : GameContent
 
         tilePoolCount = tilePoolCount * 2; //buffer
         boardPoolCount = monsterPoolCount * 2; //buffer
-        
-        for(int i = 0; i < needAnim.Count; ++i)
+
+        for (int i = 0; i < needAnim.Count; ++i)
         {
             await ResourceManager.Instance.LoadAssetAsyncTask<RuntimeAnimatorController>(needAnim.ElementAt(i));
         }

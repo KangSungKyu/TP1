@@ -19,6 +19,7 @@ public class Factory : Singleton<Factory>
     private SimplePool<BTile> tileUIPool = null;
     private SimplePool<HpBar> hpBarPool = null;
     private SimplePool<Image> portraitPool = null;
+    private SimplePool<DamageFont> damageFontPool = null;
 
 
     // Public InitAsync wrapper to orchestrate pool initialization. If containers were not provided, create fallbacks but log a warning.
@@ -26,6 +27,7 @@ public class Factory : Singleton<Factory>
     {
         bool c = await Init_UIPoolAsync();
         bool d = await Init_HPUIPoolAsync();
+        bool e = await Init_DamageFontPoolAsync();
 
         return c && d;
     }
@@ -108,6 +110,24 @@ public class Factory : Singleton<Factory>
         return res;
     }
 
+    public async Task<bool> Init_DamageFontPoolAsync()
+    {
+        damageFontPool = new SimplePool<DamageFont>(10, Commons.ResKey_DamageFont, gobjContainer, onGet_DamageFont);
+
+        try
+        {
+            await damageFontPool.PrewarmAsync(10);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Init_UIPoolAsync: PrewarmAsync failed: {ex}");
+        }
+
+        bool res = hpBarPool != null;
+
+        return res;
+    }
+
     public void Release()
     {
         playerPool?.Clear();
@@ -116,6 +136,7 @@ public class Factory : Singleton<Factory>
         tileUIPool?.Clear();
         hpBarPool?.Clear();
         portraitPool?.Clear();
+        damageFontPool?.Clear();
     }
 
     public UnitBase GetPlayerUnit(Transform container, Vector3? position = null, Quaternion? quaternion = null)
@@ -148,7 +169,10 @@ public class Factory : Singleton<Factory>
     {
         HpBar hpBar = hpBarPool.Get();
 
-        hpBar.transform.SetParent(container, false);
+        if(hpBar != null)
+        {
+            hpBar.transform.SetParent(container, false);
+        }
 
         return hpBar;
     }
@@ -157,7 +181,10 @@ public class Factory : Singleton<Factory>
     {
         Image portrait = portraitPool.Get();
 
-        portrait.transform.SetParent(container, false);
+        if(portrait != null)
+        {
+            portrait.transform.SetParent(container, false);
+        }
 
         return portrait;
     }
@@ -167,6 +194,18 @@ public class Factory : Singleton<Factory>
         BBoard board = BBoard.CreateEmptyBoard(type, boardPool, tileUIPool, container, boardWidth, boardHeight, maxTimer);
 
         return board;
+    }
+
+    public DamageFont GetDamageFont(Transform container, float damage)
+    {
+        DamageFont damageFont = damageFontPool.Get();
+
+        if(damageFont != null)
+        {
+            damageFont.transform.SetParent(container, false);
+        }
+
+        return damageFont;
     }
 
     public void ReleasePlayerUnit(PlayerUnit player)
@@ -218,6 +257,17 @@ public class Factory : Singleton<Factory>
         portraitPool.Release(portraitUI);
     }
 
+    public void ReleaseDamageFont(DamageFont damageFont)
+    {
+        if(damageFont != null)
+        {
+            damageFont.transform.SetParent(gobjContainer);
+        }
+
+        damageFontPool.Release(damageFont);
+    }
+
+
     protected override void OnSingletonDestroyed()
     {
         Release();
@@ -248,4 +298,10 @@ public class Factory : Singleton<Factory>
     {
         board.ReleaseBoard();
     }
+
+    private void onGet_DamageFont(DamageFont font)
+    {
+        font.Reset();
+    }
+
 }

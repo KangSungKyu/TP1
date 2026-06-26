@@ -50,6 +50,9 @@ TagManager:
   - name: Effect
     uniqueID: 1911589577
     locked: 0
+  - name: DamageFont
+    uniqueID: 652534413
+    locked: 0
   - name: PuzzleBoard
     uniqueID: 1426738621
     locked: 0
