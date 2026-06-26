@@ -141,6 +141,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9dcd097ca5e4dd41a65bee39f554973
+    m_Address: DamageFont
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 43b4872a2439b9c429e5a71d13e4d270, type: 2}
   m_SchemaSet:

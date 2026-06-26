@@ -5,18 +5,31 @@ using System.Linq;
 
 public static class UnitCalculator
 {
-    public static void ApplyDamage(UnitBase attacker, UnitBase defender, ApplyStatusData applyAttackerStatus, ApplyStatusData applyDefenderStatus, params SkillData[] skillList)
+    public struct DamageResult
+    {
+        public DamageResultType Type;
+        public float Damage;
+    }
+
+    public static DamageResult ApplyDamage(UnitBase attacker, UnitBase defender, ApplyStatusData applyAttackerStatus, ApplyStatusData applyDefenderStatus, params SkillData[] skillList)
     {
         attacker.ApplyStatus(applyAttackerStatus);
         defender.ApplyStatus(applyDefenderStatus);
 
-        float damage = CalculateDamage(attacker, defender, skillList);
+        DamageResult result = CalculateDamage(attacker, defender, skillList);
 
-        defender.ApplyDamage(damage);
+        if(result.Type == DamageResultType.Damaged && result.Damage > 0f)
+        {
+            defender.ApplyDamage(result.Damage);
+        }
+
+        return result;
     }
 
-    public static float CalculateDamage(UnitBase attacker, UnitBase defender, params SkillData[] skillList)
+    public static DamageResult CalculateDamage(UnitBase attacker, UnitBase defender, params SkillData[] skillList)
     {
+        DamageResult result = new DamageResult { Damage = 0f, Type = DamageResultType.Damaged };
+
         if (attacker.ShieldCrushTime > 0f)
         {
             defender.ShieldCrush(attacker.ShieldCrushTime);
@@ -49,12 +62,12 @@ public static class UnitCalculator
         if (defender.Dodge > rnd)
         {
             damage = 0;
-
-            //dodge action
-            //defender.PlayAction(UnitActionData.DefaultAction_None);
+            result.Type = DamageResultType.Dodge;
         }
 
-        return damage;
+        result.Damage = damage;
+
+        return result;
     }
 
 }

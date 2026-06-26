@@ -34,14 +34,17 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
 
     public void LogOut(System.Action<string> onComplete = null, System.Action onFailed = null)
     {
-        int userId = SaveLoadManager.Instance.UserData.UserId;
-        var dto = new
+        if(SaveLoadManager.Instance != null)
         {
-            UserId = userId,
-        };
-        string json = ToJson(dto);
+            int userId = SaveLoadManager.Instance.UserData.UserId;
+            var dto = new
+            {
+                UserId = userId,
+            };
+            string json = ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/logout_user", json, onComplete, onFailed));
+            StartCoroutine(IEPostRequest($"{server_url}/logout_user", json, onComplete, onFailed));
+        }
     }
 
     public void SaveStageClearData(uint stageIdx, uint clearState, System.Action<string> onComplete = null, System.Action onFailed = null)

@@ -24,8 +24,9 @@ public abstract class UnitBase : MonoBehaviour
     public float ShieldCrushTime => usageUnitData.ShieldCrushTime;
     public string UnitName => unitName;
     public HpBar HpUI => hpUI;
-    public Subject<Unit> OnATBReady => atbReadySubject;
+    public Subject<UnitBase> OnATBReady => atbReadySubject;
     public Image PortraitUI => portrait;
+    public UnitBase TargetUnit => targetUnit;
 
     [SerializeField]
     protected SpriteRenderer spriteRenderer = null;
@@ -42,18 +43,13 @@ public abstract class UnitBase : MonoBehaviour
     protected ApplyStatusData applyStatusData = new ApplyStatusData();
     protected UsageUnitData usageUnitData = new UsageUnitData();
     protected string unitName = string.Empty;
-    protected UnitBase TargetUnit = null;
+    protected UnitBase targetUnit = null;
     protected HpBar hpUI = null;
     protected Image portrait = null;
 
-    protected Queue<IEnumerator> actionQueue = new Queue<IEnumerator>();
+    protected Subject<UnitBase> atbReadySubject = new Subject<UnitBase>();
 
-    protected Subject<Unit> atbReadySubject = new Subject<Unit>();
-
-    protected IDisposable atbTick = null;
     protected IDisposable dspShield = null;
-    protected Coroutine procAction = null;
-
 
     public abstract void LoadFromSO(uint idx);
     public abstract void ApplyStatus(ApplyStatusData applyData);
@@ -73,8 +69,6 @@ public abstract class UnitBase : MonoBehaviour
         ClearApplyStatus();
 
         usageUnitData.Hp.Value = usageUnitData.MaxHp.Value;
-        // Start ATB ticking
-        StartATBTick();
     }
 
     public void ClearApplyStatus()
@@ -98,7 +92,7 @@ public abstract class UnitBase : MonoBehaviour
 
     public void SetTarget(UnitBase target)
     {
-        TargetUnit = target;
+        targetUnit = target;
     }
 
     public void SetShield(bool onoff)
@@ -125,49 +119,6 @@ public abstract class UnitBase : MonoBehaviour
     {
         portrait = port;
         portrait.sprite = ResourceManager.Instance.GetResource<Sprite>($"Portraits[Portraits_{info.PortraitIdx}]");
-    }
-
-    public void PlayAction(UnitActionData defaultAction, params UnitActionData[] actionDatas)
-    {
-        foreach (var actionData in actionDatas)
-        {
-            DoAction(actionData);
-        }
-
-        if (defaultAction.Type != UnitActionType.None)
-        {
-            DoAction(defaultAction);
-        }
-
-        if (procAction == null)
-        {
-            procAction = StartCoroutine(IEPlayActionList());
-        }
-    }
-
-    public void StopAction()
-    {
-        if(procAction != null)
-        {
-            while(actionQueue.Count > 0)
-            {
-                if(actionQueue.Peek() != null)
-                {
-                    StopCoroutine(actionQueue.Dequeue());
-                }
-            }
-
-            actionQueue.Clear();
-
-            StopCoroutine(procAction);
-        }
-    }
-
-    public void ForceClearAction()
-    {
-        StopAllCoroutines();
-
-        PlayAction(UnitActionData.DefaultAction_Idle);
     }
 
     public virtual void ApplyDamage(float damage)
@@ -203,13 +154,52 @@ public abstract class UnitBase : MonoBehaviour
 
     public virtual void Release()
     {
+        ClearApplyStatus();
+        ClearApplyStatus_ShieldCrushTime();
+
         atbReadySubject?.Dispose();
         atbReadySubject = null;
+    }
 
-        atbTick?.Dispose();
-        atbTick = null;
+    public IEnumerator IEPlayAction(UnitActionData actionData)
+    {
+        IEnumerator proc = actionData.Type switch 
+        { 
+            UnitActionType.Move => IELerpMove(transform, TargetUnit != null ? TargetUnit.transform : null),
+            _ => null
+        };
 
-        StopAction();
+        return IEPlayAction(actionData, proc);
+    }
+
+    public void AddATBTick(float dt)
+    {
+        if (maxATB == null || maxATB.Value <= 0f)
+            return;
+
+        float spd = Mathf.Max(1.0f, Spd);
+
+        if (spd <= 0f)
+            spd = 1f;
+
+        currentATB.Value += spd * dt;
+
+        while (currentATB.Value >= maxATB.Value)
+        {
+            currentATB.Value -= maxATB.Value;
+
+            atbReadySubject?.OnNext(this);
+        }
+    }
+
+    public void ResetATB()
+    {
+        currentATB.Value = 0.0f;
+    }
+
+    public Bounds GetUnitBounds()
+    {
+        return spriteRenderer.bounds;
     }
 
     protected abstract void Init();
@@ -232,10 +222,6 @@ public abstract class UnitBase : MonoBehaviour
         {
             spriteRenderer.GetComponent<OutlineController>();
         }
-
-        actionQueue.Clear();
-
-        DoAction(new UnitActionData(UnitActionType.Idle));
     }
 
     protected void UpdateHpBarPosition()
@@ -247,124 +233,41 @@ public abstract class UnitBase : MonoBehaviour
         uiRT.anchoredPosition = uiPos;
     }
 
-    protected void DoAction(UnitActionData actionData)
+    private IEnumerator IEPlayAction(UnitActionData actionData, IEnumerator procCustomFunc = null)
     {
-        this.actionType = actionData.Type;
+        actionData.BeforeAction?.Invoke();
 
-        if (actionData.BeforeAction != null)
+        string anim = actionData.Type.ToString(); // Enum 이름을 트리거로 사용
+        bool isLoopAnimType = actionData.Type == UnitActionType.Idle || actionData.Type == UnitActionType.Move;
+
+        if (isLoopAnimType)
         {
-            actionQueue.Enqueue(IESingleRoutine(actionData.BeforeAction));
+            animator.SetBool(anim, true);
+        }
+        else
+        {
+            animator.SetTrigger(anim);
+
+            yield return null;
+
+            var clipList = animator.GetCurrentAnimatorClipInfo(0);
+
+            float duration = clipList != null && clipList.Length > 0 ? clipList[0].clip.length : 0f; 
+
+            yield return new WaitForSeconds(duration);
         }
 
-        switch (actionType)
+        if (procCustomFunc != null)
         {
-            case UnitActionType.Idle:
-                Idle(actionData);
-                break;
-            case UnitActionType.Move:
-                Run(actionData);
-                break;
-            case UnitActionType.Attack:
-                Attack(actionData);
-                break;
-            case UnitActionType.Guard:
-                Guard(actionData);
-                break;
-            case UnitActionType.Dodge:
-                Dodged(actionData);
-                break;
-            case UnitActionType.Death:
-                Death(actionData);
-                break;
+            yield return StartCoroutine(procCustomFunc);
         }
 
-        if (actionData.AfterAction != null)
+        if (procCustomFunc != null && isLoopAnimType)
         {
-            actionQueue.Enqueue(IESingleRoutine(actionData.AfterAction));
-        }
-    }
-
-    protected virtual void Idle(UnitActionData actionData)
-    {
-        animator.SetBool("Standing", true);
-    }
-
-    protected virtual void Run(UnitActionData actionData)
-    {
-        if(TargetUnit == null)
-        {
-            return;
+            animator.SetBool(anim, false);
         }
 
-        actionQueue.Enqueue(IELerpMove(transform, TargetUnit.transform));
-    }
-
-    protected virtual void Attack(UnitActionData actionData)
-    {
-        actionQueue.Enqueue(IEAttack());
-    }
-
-    protected virtual void Guard(UnitActionData actionData)
-    {
-    }
-
-    protected virtual void Dodged(UnitActionData actionData)
-    {
-
-    }
-
-
-    protected virtual void Death(UnitActionData actionData)
-    {
-        actionQueue.Enqueue(IEDeath());
-    }
-
-    private void StartATBTick()
-    {
-        // Subscribe to EveryUpdate to increment ATB based on usageUnitData.Spd
-        atbTick = Observable.EveryUpdate()
-            .Subscribe(_ =>
-            {
-                // If MaxATB is zero or negative, skip
-                if (maxATB == null || maxATB.Value <= 0f)
-                    return;
-
-                float spd = Mathf.Max(1.0f, Spd);
-
-                // ensure some minimal speed
-                if (spd <= 0f)
-                    spd = 1f;
-
-                currentATB.Value += spd * Time.deltaTime;
-
-                if (currentATB.Value >= maxATB.Value)
-                {
-                    // consume full gauge
-                    currentATB.Value -= maxATB.Value;
-
-                    // notify subscribers
-                    atbReadySubject?.OnNext(Unit.Default);
-                }
-            })
-            .AddTo(this);
-    }
-
-    private IEnumerator IEPlayActionList()
-    {
-        while (actionQueue.Count > 0)
-        {
-            Debug.Log($"play action, {name}, {actionQueue.Peek()}");
-            yield return StartCoroutine(actionQueue.Dequeue());
-        }
-
-        procAction = null;
-    }
-
-    private IEnumerator IESingleRoutine(System.Action act)
-    {
-        act?.Invoke();
-
-        yield return null;
+        actionData.AfterAction?.Invoke();
     }
 
     private IEnumerator IELerpMove(Transform unitTransform, Transform targetTransform)
@@ -373,9 +276,6 @@ public abstract class UnitBase : MonoBehaviour
         {
             yield break;
         }
-
-        animator.SetBool("Standing", false);
-        animator.SetFloat("MoveSpeed", Spd);
 
         while (Vector2.Distance((Vector2)unitTransform.position, (Vector2)targetTransform.position) > 1.5f)
         {
@@ -388,29 +288,7 @@ public abstract class UnitBase : MonoBehaviour
             UpdateHpBarPosition();
         }
 
-        animator.SetFloat("MoveSpeed", 0.0f);
-
         yield return null;
     }
 
-    private IEnumerator IEAttack()
-    {
-        animator.SetBool("Attack", true);
-
-        float duration = animator.GetCurrentAnimatorClipInfo(0).Length;
-        float calcDuration = duration * 1.0f;
-
-        yield return new WaitForSeconds(calcDuration);
-
-        animator.SetBool("Attack", false);
-    }
-
-    private IEnumerator IEDeath()
-    {
-        float delay = 0.15f;
-
-        animator.SetBool("Death", true);
-
-        yield return new WaitForSeconds(animator.GetCurrentAnimatorClipInfo(0).Length + delay);
-    }
 }

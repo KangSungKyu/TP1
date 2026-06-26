@@ -66,6 +66,15 @@ public enum BBoardDrawState
     BBoardDrawstate_End
 }
 
+public enum PuzzleResultType
+{
+    NotYet = 0,
+    Completed,
+    Expired,
+
+    PuzzleResultType_End
+}
+
 public enum UnitActionType
 {
     None = -1,
@@ -78,6 +87,15 @@ public enum UnitActionType
 
     UnitActionType_End
 }
+
+public enum DamageResultType
+{
+    Damaged = 0,
+    Dodge,
+
+    DamageResultType_End
+}
+
 
 public enum StageType : int
 {
@@ -190,6 +208,15 @@ public struct ApplyStatusData
         Spd = 0.0f;
         ShieldCrushTime = 0.0f;
     }
+}
+
+public class PuzzleResult
+{
+    public PuzzleResultType ResultType;
+    public BBoard CurrentBoard;
+    public UnitBase Attacker;
+    public List<UnitBase> TargetList;
+    public List<SkillData> SkillList;
 }
 
 public struct UsageUnitData
@@ -322,7 +349,7 @@ public struct UnitActionData
     public System.Action BeforeAction;
     public System.Action AfterAction;
 
-    public UnitActionData(UnitActionType type, System.Action beforeAction = null, System.Action afterAction = null)
+    public UnitActionData(UnitActionType type, System.Action beforeAction = null, System.Action afterAction = null) 
     {
         this.Type = type;
         this.BeforeAction = beforeAction;
@@ -515,6 +542,7 @@ public static class Commons
     public readonly static string ResKey_Board = "Board";
     public readonly static string ResKey_HPUI = "HPUI";
     public readonly static string ResKey_PortraitUI = "PortraitUI";
+    public readonly static string ResKey_DamageFont = "DamageFont";
 
     public readonly static string ResKey_BaseTile = "BaseTile";
     public readonly static string ResKey_BlockTile = "BlockTile";
