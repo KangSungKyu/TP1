@@ -45,12 +45,15 @@ public class BattleContent : GameContent
             {
                 UnitData ud = DataTableManager.Instance.GetUnitData(md.UnitIdx);
                 AnimationData ad = DataTableManager.Instance.GetAnimationData(ud.AnimGroupIdx);
+                MonsterPatternData mpd = DataTableManager.Instance.GetMonsterPatternData(md.PatternIdx);
+
+                int patternLen = mpd.SkillIdx.Count((o) => o > 0);
 
                 needAnim.Add(ad.ControllerKey);
                 needPort.Add($"Portraits[Portraits_{ud.PortraitIdx}]");
 
-                tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]);
-                monsterPoolCount += (int)sd.MonsterCount[i];
+                tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]) * patternLen;
+                monsterPoolCount += (int)sd.MonsterCount[i] * patternLen;
             }
         }
 

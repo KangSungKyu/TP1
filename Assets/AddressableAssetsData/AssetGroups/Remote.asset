@@ -117,8 +117,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 814e4d1405214f3499a41ccb690bb90c
+    m_Address: monster3_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89faec5e310b1ad44af27e27b0ada321
     m_Address: MonsterUnit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a18cb81764771974ca6226518715a48e
+    m_Address: monster4_anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ public class BBoard : MonoBehaviour
     private Transform tilePivot = null;
     [SerializeField]
     private SpriteRendererFillAmount timeGauge = null;
+    [SerializeField]
+    private SpriteRenderer cover = null;
 
     public BBoardType Type => type;
     public BBoardDrawState DrawState => drawState;
@@ -211,11 +214,21 @@ public class BBoard : MonoBehaviour
         if (isInit)
             return;
 
-        FillBoard(type, skillList);
+        //FillBoard(type, skillList);
+        OnOffCover(true);
 
         isInit = true;
     }
 
+    public void OnOffCover(bool onoff)
+    {
+        cover.gameObject.SetActive(onoff);
+    }
+
+    public void PlayFadeCover()
+    {
+        cover.DOFade(0.0f, 1.0f).OnComplete(()=>OnOffCover(false)).Play();
+    }
 
     public void FillBoard(BBoardType boardType, uint[] skillList = null)
     {
@@ -455,6 +468,7 @@ public class BBoard : MonoBehaviour
         ForceStopBoardTimer();
         ClearDrawLine();
         SetOwner(null);
+        OnOffCover(true);
 
         tiles = null;
     }
@@ -850,7 +864,10 @@ public class BBoard : MonoBehaviour
     {
         float wRatio = (float)width / (float)Commons.BOARD_WIDTH_MIN;
         float hRatio = (float)height / (float)Commons.BOARD_HEIGHT_MIN;
-        tileGrid.transform.localScale = new Vector3(wRatio, hRatio, 1f);
+        Vector3 resizeScale = new Vector3(wRatio, hRatio, 1f);
+
+        tileGrid.transform.localScale = resizeScale;
+        cover.transform.localScale = resizeScale;
     }
 
     private bool IsAround(Vector2Int center, Vector2Int pos)

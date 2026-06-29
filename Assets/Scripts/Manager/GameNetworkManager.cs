@@ -139,7 +139,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_equipuserskill", json, onComplete, onFailed));
     }
 
-    internal void UpdateUnEquipUserSkill(int slot, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateUnEquipUserSkill(int slot, Action<string> onComplete = null, System.Action onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -150,6 +150,20 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         string json = ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_unequipuserskill", json, onComplete, onFailed));
+    }
+
+    public void UpdateEnterUserStage(int mapIdx, int stageIdx, Action<string> onComplete = null, System.Action onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        var dto = new
+        {
+            UserId = userId,
+            MapIdx = mapIdx,
+            StageIdx = stageIdx,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/update_enteruserstage", json, onComplete, onFailed));
     }
 
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action onFailed = null)
