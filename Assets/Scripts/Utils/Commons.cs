@@ -533,6 +533,13 @@ public class UserSkillData
     }
 }
 
+[System.Serializable]
+public class EnterUserStageData
+{
+    public int MapIdx;
+    public int StageIdx;
+}
+
 public static class Commons
 {
     // Resource keys (addressables) - centralize keys to avoid magic strings

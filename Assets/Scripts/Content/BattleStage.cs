@@ -112,7 +112,7 @@ public class BattleStage : MonoBehaviour
                     monsterUnit.Subscribe_HP(OnMonsterDeath);
                     monsterUnit.OnATBReady.Subscribe((o) => readyQueue.Enqueue(o)).AddTo(monsterUnit);
 
-                    BBoard board = Factory.Instance.GetBoard(BBoardType.Offensive, boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, 7.5f);
+                    BBoard board = Factory.Instance.GetBoard(BBoardType.Offensive, boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, monsterUnit.Spd);
 
                     board.SetOwner(monsterUnit);
                     monsterUnit.AddBoard(board);
@@ -141,6 +141,8 @@ public class BattleStage : MonoBehaviour
 
         SortingBoard(0);
         DownToBoard(0);
+        RepositionUpperBoardList(0);
+        RepositionDownBoardList(0);
 
         for (int i = 0; i < boardList[0].Count; i++)
         {
@@ -431,30 +433,35 @@ public class BattleStage : MonoBehaviour
 
         if (unit is PlayerUnit playerUnit)
         {
-            int currentBoardCursor = boardCursor[0].Value;
-
-            if (currentBoardCursor >= 0 && currentBoardCursor < boardList[0].Count)
+            for(int i = 0; i < boardList[0].Count; ++i)
             {
-                BBoard current = boardList[0][currentBoardCursor];
-                UnitBase defender = current.Owner;
+                BBoard board = boardList[0][i];
 
-                boardPageCursor.Value = 0;
-                boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
-
-                SortingBoard(0);
-
-                PuzzleResult resultData = new PuzzleResult()
+                if(board != null)
                 {
-                    ResultType = PuzzleResultType.NotYet,
-                    CurrentBoard = current,
-                    Attacker = playerUnit,
-                    TargetList = null,
-                    SkillList = new List<SkillData>(),
-                };
+                    board.ForceStopBoardTimer();
+                    ClearBoard(board);
+                    board.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                    board.PlayFadeCover();
 
-                current.StartBoardTimer(() => OnPuzzleExpired(resultData));
-                current.SubscribeOnPathComplete(() => OnPuzzleCompleted(resultData));
+                    UnitBase defender = board.Owner;
+                    PuzzleResult resultData = new PuzzleResult()
+                    {
+                        ResultType = PuzzleResultType.NotYet,
+                        CurrentBoard = board,
+                        Attacker = playerUnit,
+                        TargetList = null,
+                        SkillList = new List<SkillData>(),
+                    };
+
+                    board.StartBoardTimer(() => OnPuzzleExpired(resultData));
+                    board.SubscribeOnPathComplete(() => OnPuzzleCompleted(resultData));
+                }
             }
+
+            SortingBoard(0);
+            RepositionUpperBoardList(0);
+            RepositionDownBoardList(0);
         }
         else if (unit is MonsterUnit monsterUnit)
         {
@@ -463,39 +470,22 @@ public class BattleStage : MonoBehaviour
             if (player != null)
             {
                 int prevListCount = boardList[1].Count;
-
-                if (monsterUnit.BoardCount > 1)
-                {
-                    BBoard prevAttack = monsterUnit.GetDefensiveBoard(0);
-
-                    if (prevAttack != null)
-                    {
-                        ClearBoard(prevAttack);
-                        prevAttack.ReleaseBoard();
-
-                        int idx = boardList[1].IndexOf(prevAttack);
-
-                        if (idx >= 0)
-                        {
-                            boardList[1].RemoveAt(idx);
-                        }
-
-                        monsterUnit.DelBoard(prevAttack);
-                    }
-                }
-
-                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], monsterUnit.GetBoardWidth(), monsterUnit.GetBoardHeight(), 7.0f);
+                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], monsterUnit.GetBoardWidth(), monsterUnit.GetBoardHeight(), monsterUnit.Spd * 0.85f);
 
                 if (tempBoard != null)
                 {
                     tempBoard.SetOwner(monsterUnit);
                     boardList[1].Add(tempBoard);
                     tempBoard.InitBoard();
+                    tempBoard.PlayFadeCover();
+                    tempBoard.FillBoard(BBoardType.Defensive);
 
                     boardPageCursor.Value = 1;
-                    boardCursor[boardPageCursor.Value].SetValueAndForceNotify(0);
+                    boardCursor[1].SetValueAndForceNotify(boardList[1].Count - 1);
 
                     SortingBoard(1);
+                    RepositionUpperBoardList(1);
+                    RepositionDownBoardList(1);
 
                     PuzzleResult resultData = new PuzzleResult()
                     {
@@ -559,6 +549,7 @@ public class BattleStage : MonoBehaviour
                     result.CurrentBoard.ForceStopBoardTimer();
                     ClearBoard(result.CurrentBoard);
                     result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                    result.CurrentBoard.PlayFadeCover();
                 }
             }
             else if(result.Attacker is MonsterUnit monsterUnit)
@@ -591,6 +582,7 @@ public class BattleStage : MonoBehaviour
             {
                 ClearBoard(result.CurrentBoard);
                 result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                result.CurrentBoard.PlayFadeCover();
             }
             else if(result.Attacker is MonsterUnit monsterUnit)
             {
@@ -865,6 +857,8 @@ public class BattleStage : MonoBehaviour
             DownToBoard(page);
             UpToBoard(page, cursor);
             SortingBoard(page);
+            RepositionUpperBoardList(page);
+            RepositionDownBoardList(page);
             player?.SetTarget(selectedBoard.Owner);
 
             //Debug.Log(selectedBoard.ToString());
@@ -874,27 +868,36 @@ public class BattleStage : MonoBehaviour
     private void UpToBoard(int page, int cursor)
     {
         BBoard selectedBoard = boardList[page][cursor];
-        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_U_RT[page]));
 
         selectedBoard.transform.SetParent(boardContainer_U[page]);
+    }
 
-        for(int i = 0; i < boardContainer_U[page].childCount; ++i)
+    private void RepositionUpperBoardList(int page)
+    {
+        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_U_RT[page]));
+
+        for (int i = 0; i < boardContainer_U[page].childCount; ++i)
         {
             boardContainer_U[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
+        }
+    }
+
+    private void RepositionDownBoardList(int page)
+    {
+        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
+
+        for (int i = 0; i < boardContainer[page].childCount; ++i)
+        {
+            boardContainer[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
         }
     }
 
     private void DownToBoard(int page)
     {
         Transform prev = boardContainer_U[page].childCount > 0 ? boardContainer_U[page].GetChild(0) : null;
-        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
 
         prev?.SetParent(boardContainer[page]);
 
-        for (int i = 0; i < boardContainer[page].childCount; ++i)
-        {
-            boardContainer[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
-        }
     }
 
     private Vector3 OverlayToWorld(RectTransform rectTransform)
