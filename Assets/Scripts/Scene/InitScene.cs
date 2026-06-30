@@ -44,7 +44,7 @@ public class InitScene : MonoBehaviour
                     Debug.Log("load");
                     AfterLoadUserData(); 
                 }, 
-                () =>
+                (json) =>
                 {
                     Debug.Log("load fail");
                     AfterLoadUserData();

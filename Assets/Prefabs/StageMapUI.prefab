@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4592475332515066299}
   - component: {fileID: 476961586153106945}
-  - component: {fileID: 8651290470602926155}
   - component: {fileID: 5187647766682197360}
   - component: {fileID: 3576196141037055947}
   m_Layer: 5
@@ -48,36 +47,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 195001046703372236}
   m_CullTransparentMesh: 1
---- !u!114 &8651290470602926155
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 195001046703372236}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!114 &5187647766682197360
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,10 +225,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7158068997909411490}
     m_Modifications:
-    - target: {fileID: 55662645806918185, guid: 5a32c33df698f014a8b9b895c0dddced, type: 3}
-      propertyPath: StageIdx
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5363748626658439665, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_Name
       value: StageUI
@@ -343,6 +308,10 @@ PrefabInstance:
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: 5a32c33df698f014a8b9b895c0dddced, type: 3}
+      propertyPath: StageIdx
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

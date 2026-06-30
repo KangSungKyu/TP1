@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.UI;
 
 
 public class BattleContent : GameContent
 {
+    [SerializeField]
+    private SpriteRenderer bgSprRenderer = null;
     [SerializeField]
     private TextMeshProUGUI stageUI = null;
     [SerializeField]
@@ -21,12 +24,15 @@ public class BattleContent : GameContent
 
     public override async Task Enter()
     {
-        await base.Enter();
-
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
         StageData sd = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
+        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(sd.BgSprite);
+
+        bgSprRenderer.sprite = bgSpr;
+
+        await base.Enter();
 
         stageUI.SetText($"{sd.Stage} - {sd.SubStage}");
 
@@ -99,7 +105,7 @@ public class BattleContent : GameContent
 
         GameNetworkManager.Instance.UpdateDefeatStage((json) =>
         {
-            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
+            APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
             if (res.data != null)
             {
@@ -109,7 +115,7 @@ public class BattleContent : GameContent
                 userData.MapIdx = userData.SavedMapIdx;
                 userData.StageIdx = userData.SavedStageIdx;
 
-                SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
+                SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
 
                 GameSceneManager.Instance.LoadScene(selectStageScene);
             }
@@ -146,7 +152,7 @@ public class BattleContent : GameContent
 
         GameNetworkManager.Instance.UpdateClearStage(userData.StageIdx, (json) =>
         {
-            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
+            APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
             if (res.data != null)
             {

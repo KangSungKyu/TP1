@@ -18,16 +18,22 @@ public class StageMapUI : MonoBehaviour
             {
                 GameNetworkManager.Instance.UpdateEnterUserStage(StageMapIdx, (int)stageIdx, (json) =>
                 {
-                    APIResponseData<EnterUserStageData> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<EnterUserStageData>(json);
+                    APIResponseData<EnterUserStageData> res = GameNetworkManager.CreateAPIResponseDataFromJson<EnterUserStageData>(json);
 
                     if(res.data != null)
                     {
                         userData.MapIdx = res.data.MapIdx;
                         userData.StageIdx = res.data.StageIdx;
 
-                        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, () => { Debug.Log("save fail"); });
+                        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
                         sceneChange?.Invoke();
                     }
+                },
+                (json) =>
+                {
+                    APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+
+                    AlterMsgSystem.Instance.ShowMsg($"response : {dump.response}");
                 });
             });
         }

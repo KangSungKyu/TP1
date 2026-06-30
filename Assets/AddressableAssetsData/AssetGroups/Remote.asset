@@ -75,6 +75,24 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 436aa7ad07b55d0429462f8d312261f7
+    m_Address: dun_floor_2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4417964d69ef5364d80af744fa7cde30
+    m_Address: AlterMsg
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4510a1ed9bd701248b0d115b009c8294
+    m_Address: map_dungeon_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46fedce5fa6d9364596cc56ef5169dbd
     m_Address: BaseTile
     m_ReadOnly: 0
@@ -117,6 +135,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b84903dea7aba841b2b4f1103313de0
+    m_Address: dun_floor_4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 814e4d1405214f3499a41ccb690bb90c
     m_Address: monster3_anim
     m_ReadOnly: 0
@@ -141,8 +165,26 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0669531709dff944926491ba3dd6a82
+    m_Address: dun_floor_rest
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c42d1a0f2b1d6484f86498b6dcb65420
+    m_Address: dun_floor_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d223375d6d49baa47a851bab2cf6731f
     m_Address: LoadingScene
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dbf7b2dfb0931b245bad145e84f9fee1
+    m_Address: dun_floor_5
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -155,6 +197,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f9dcd097ca5e4dd41a65bee39f554973
     m_Address: DamageFont
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb614f208fe6eb34cba0fe7aad5e41ac
+    m_Address: dun_floor_3
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote

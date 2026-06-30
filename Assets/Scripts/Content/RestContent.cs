@@ -12,6 +12,8 @@ using UnityEngine.UI;
 public class RestContent : GameContent
 {
     [SerializeField]
+    private Image bgImg = null;
+    [SerializeField]
     private TextMeshProUGUI stageUI = null;
     [SerializeField]
     private TextMeshProUGUI levelText = null;
@@ -48,12 +50,16 @@ public class RestContent : GameContent
 
     public override async Task Enter()
     {
-        await base.Enter();
-
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
         StageData sd = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
+        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(sd.BgSprite);
+
+        bgImg.sprite = bgSpr;
+
+        await base.Enter();
+
         LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
         LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
         int nextExp = 0;
@@ -93,7 +99,15 @@ public class RestContent : GameContent
         SaveLoadManager.Instance.SaveUserData((json) =>
         {
             Debug.Log($"save current stage");
-        }, () => { });
+        }, 
+        (json) => 
+        {
+            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+
+            AlterMsgSystem.Instance.ShowMsg($"response : {dump.response}");
+
+            Debug.LogError($"server log, {dump.response}");
+        });
 
         GameNetworkManager.Instance.SaveStageClearData((uint)userData.StageIdx, 2, (json) => { });
 
@@ -119,7 +133,7 @@ public class RestContent : GameContent
 
         GameNetworkManager.Instance.UpdateUserLevel((json) =>
         {
-            APIResponseData<(int Level, int Exp)> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<(int Level, int Exp)>(json);
+            APIResponseData<(int Level, int Exp)> res = GameNetworkManager.CreateAPIResponseDataFromJson<(int Level, int Exp)>(json);
 
             if(res.data != default)
             {
@@ -214,7 +228,7 @@ public class RestContent : GameContent
     {
         GameNetworkManager.Instance.UpdateBuyUserSkill(skillIdx, (json) =>
         {
-            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
+            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if(res.data != null)
             {
@@ -252,7 +266,7 @@ public class RestContent : GameContent
     {
         GameNetworkManager.Instance.UpdateEquipUserSkill(skillIdx, slot, (json) =>
         {
-            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
+            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if (res.data != null)
             {
@@ -267,7 +281,7 @@ public class RestContent : GameContent
     {
         GameNetworkManager.Instance.UpdateUnEquipUserSkill(slot, (json) =>
         {
-            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
+            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if (res.data != null)
             {

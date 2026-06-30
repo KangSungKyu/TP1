@@ -13,6 +13,8 @@ public class Factory : Singleton<Factory>
     [SerializeField]
     private RectTransform uiContainer = null;
 
+    private SimplePool<AlterMsg> alterMsgPool = null;
+
     private SimplePool<UnitBase> playerPool = null;
     private SimplePool<UnitBase> monsterPool = null;
     private SimplePool<BBoard> boardPool = null;
@@ -29,7 +31,28 @@ public class Factory : Singleton<Factory>
         bool d = await Init_HPUIPoolAsync();
         bool e = await Init_DamageFontPoolAsync();
 
-        return c && d;
+        return c && d && e;
+    }
+
+    public async Task<bool> Init_SystemResAsync()
+    {
+        if(alterMsgPool == null)
+        {
+            alterMsgPool = new SimplePool<AlterMsg>(10, Commons.ResKey_AlterMsg, uiContainer, onGet_AlterMsg);
+
+            try
+            {
+                await alterMsgPool.PrewarmAsync(10);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Init_SystemResAsync: prewarmAsync failed: {ex}");
+            }
+        }
+
+        bool res = alterMsgPool != null;
+
+        return res;
     }
 
     public async Task<bool> Init_UnitPoolAsync(int monsterCount)
@@ -208,6 +231,13 @@ public class Factory : Singleton<Factory>
         return damageFont;
     }
 
+    public AlterMsg GetAlterMsg()
+    {
+        AlterMsg alter = alterMsgPool.Get();
+
+        return alter;
+    }
+
     public void ReleasePlayerUnit(PlayerUnit player)
     {
         if (player != null)
@@ -227,6 +257,7 @@ public class Factory : Singleton<Factory>
         
         hpBarPool.Release(hpUI);
     }
+
     public void ReleaseBoard(BBoard currentBoard)
     {
         if(currentBoard != null)
@@ -267,6 +298,16 @@ public class Factory : Singleton<Factory>
         damageFontPool.Release(damageFont);
     }
 
+    public void ReleaseAlterMsg(AlterMsg alterMsg)
+    {
+        if(alterMsg != null)
+        {
+            alterMsg.SetParent(uiContainer);
+        }
+
+        alterMsgPool.Release(alterMsg);
+    }
+
 
     protected override void OnSingletonDestroyed()
     {
@@ -304,4 +345,11 @@ public class Factory : Singleton<Factory>
         font.Reset();
     }
 
+    private void onGet_AlterMsg(AlterMsg msg)
+    {
+        RectTransform rt = (RectTransform)msg.transform;
+
+        rt.localScale = Vector3.one;
+        rt.anchoredPosition3D = new Vector3(0, 0, 0);
+    }
 }

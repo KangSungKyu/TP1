@@ -11,28 +11,28 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
     private string server_url = "http://localhost:5000";
 
 
-    public APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
+    public static APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
     {
         var res = FromJson<APIResponseData<T>>(json);
 
         return res;
     }
 
-    public void SaveUserData(SavedUserData savedUserData, System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void SaveUserData(SavedUserData savedUserData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         string json = ToJson(savedUserData);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
     }
 
-    public void LogIn(ClientData clientData, System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void LogIn(ClientData clientData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         string json = ToJson(clientData);
 
         StartCoroutine(IEPostRequest($"{server_url}/login_user", json, onComplete, onFailed));
     }
 
-    public void LogOut(System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void LogOut(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         if(SaveLoadManager.Instance != null)
         {
@@ -47,7 +47,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         }
     }
 
-    public void SaveStageClearData(uint stageIdx, uint clearState, System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void SaveStageClearData(uint stageIdx, uint clearState, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -61,12 +61,12 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_stagecleardata", json, onComplete, onFailed));
     }
 
-    public void LoadStageClearData(uint userId, System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void LoadStageClearData(uint userId, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         StartCoroutine(IEGetRequest($"{server_url}/get_stagecleardata/{userId}", onComplete, onFailed));
     }
 
-    public void UpdateUserLevel(System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateUserLevel(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         int level = SaveLoadManager.Instance.UserData.Level;
@@ -82,7 +82,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_userlevel", json, onComplete, onFailed));
     }
 
-    public void UpdateDefeatStage(System.Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateDefeatStage(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -94,7 +94,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_defeatstage", json, onComplete, onFailed));
     }
 
-    public void UpdateClearStage(int stageIdx, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateClearStage(int stageIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -107,12 +107,12 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_clearstage", json, onComplete, onFailed));
     }
     
-    public void LoadUserSkillData(uint userId, Action<string> onComplete = null, Action onFailed = null)
+    public void LoadUserSkillData(uint userId, Action<string> onComplete = null, Action<string> onFailed = null)
     {
         StartCoroutine(IEGetRequest($"{server_url}/get_userskilldata/{userId}", onComplete, onFailed));
     }
 
-    public void UpdateBuyUserSkill(int skillIdx, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateBuyUserSkill(int skillIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -125,7 +125,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_buyuserskill", json, onComplete, onFailed));
     }
 
-    public void UpdateEquipUserSkill(int skillIdx, int slot, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateEquipUserSkill(int skillIdx, int slot, Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -139,7 +139,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_equipuserskill", json, onComplete, onFailed));
     }
 
-    public void UpdateUnEquipUserSkill(int slot, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateUnEquipUserSkill(int slot, Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -152,7 +152,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_unequipuserskill", json, onComplete, onFailed));
     }
 
-    public void UpdateEnterUserStage(int mapIdx, int stageIdx, Action<string> onComplete = null, System.Action onFailed = null)
+    public void UpdateEnterUserStage(int mapIdx, int stageIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -166,7 +166,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_enteruserstage", json, onComplete, onFailed));
     }
 
-    private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action onFailed = null)
+    private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
         {
@@ -186,13 +186,15 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             }
             else
             {
-                onFailed?.Invoke();
+                string resultJson = www.downloadHandler.text;
+
+                onFailed?.Invoke(resultJson);
                 Debug.LogError(www.error);
             }
         }
     }
 
-    private IEnumerator IEGetRequest(string url, System.Action<string> onComplete = null, System.Action onFailed = null) 
+    private IEnumerator IEGetRequest(string url, System.Action<string> onComplete = null, System.Action<string> onFailed = null) 
     {
         using (UnityWebRequest www = new UnityWebRequest(url, "GET"))
         {
@@ -209,7 +211,9 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             }
             else
             {
-                onFailed?.Invoke();
+                string resultJson = www.downloadHandler.text;
+
+                onFailed?.Invoke(resultJson);
                 Debug.LogError(www.error);
             }
         }

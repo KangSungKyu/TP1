@@ -1,7 +1,7 @@
-idx,type,stage,substage,monsteridx,monstercount,rewardidx
-7001,0,1,1,4001,2,8001
-7002,0,1,2,4001_4002,1_1,8001_8002
-7003,1,1,3,,,
-7004,0,1,4,4002,3,8002
-7005,0,1,5,4003,3,8003
-7006,0,1,6,4003_4004,2_2,8003_8004
+idx,type,stage,substage,monsteridx,monstercount,rewardidx,bgsprite
+7001,0,1,1,4001,2,8001,dun_floor_1
+7002,0,1,2,4001_4002,1_1,8001_8002,dun_floor_2
+7003,1,1,3,,,,dun_floor_rest
+7004,0,1,4,4002,3,8002,dun_floor_3
+7005,0,1,5,4003,3,8003,dun_floor_4
+7006,0,1,6,4003_4004,2_2,8003_8004,dun_floor_5
