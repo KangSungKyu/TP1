@@ -2,6 +2,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -9,6 +10,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using UniRx;
 using UnityEngine;
+
+
+public enum ResponseType : uint
+{
+    Success = 0,
+
+    Failed_DB_Error = 1,
+
+    Failed_NotFound_Data = 2,
+    Failed_NotFound_Session = 3,
+    Failed_NotFound_DB = 4,
+    
+    ResponseType_End
+}
 
 public enum DataTableType : uint //1~999
 {
@@ -279,6 +294,8 @@ public class StageData
     public uint[] MonsterCount { get; set; }
     [Name("rewardidx"), TypeConverter(typeof(UIntArrayConverter))]
     public uint[] RewardIdx { get; set; } //monsteridx.len
+    [Name("bgsprite")]
+    public string BgSprite { get; set; }
 }
 
 [System.Serializable]
@@ -306,6 +323,8 @@ public class MapData
     public uint Idx { get; set; }
     [Name("stageidx"), TypeConverter(typeof(UIntArrayConverter))]
     public uint[] StageIdx { get; set; }
+    [Name("bgsprite")]
+    public string BgSprite { get; set; }
 }
 
 
@@ -373,10 +392,16 @@ public class ClientData
 }
 
 [System.Serializable]
+public class DumpData
+{
+    //dump
+}
+
+[System.Serializable]
 public class APIResponseData<T>
 {
-    [JsonProperty("status")]
-    public string status;
+    [JsonProperty("response")]
+    public ResponseType response;
     [JsonProperty("data")]
     public T data;
 }
@@ -543,6 +568,9 @@ public class EnterUserStageData
 public static class Commons
 {
     // Resource keys (addressables) - centralize keys to avoid magic strings
+
+    public readonly static string ResKey_AlterMsg = "AlterMsg";
+
     public readonly static string ResKey_PlayerUnit = "PlayerUnit";
     public readonly static string ResKey_MonsterUnit = "MonsterUnit";
     public readonly static string ResKey_Tile = "Tile";
@@ -609,12 +637,12 @@ public static class Commons
 
         public static int GetRandom(int min, int max, int exclusive = int.MaxValue)
         {
-            int r = Random.Range(min, max);
+            int r = UnityEngine.Random.Range(min, max);
             bool isValid = min <= exclusive && exclusive <= max;
 
             while (isValid && r == exclusive)
             {
-                r = Random.Range(min, max);
+                r = UnityEngine.Random.Range(min, max);
             }
 
             return r;
@@ -622,13 +650,13 @@ public static class Commons
 
         public static int GetRandom(int min, int max, int[] exclusives = null)
         {
-            int r = Random.Range(min, max);
+            int r = UnityEngine.Random.Range(min, max);
             bool isValid = exclusives != null && exclusives.Length > 0;
             bool isFull = exclusives != null && max - min <= exclusives.Count(x => min <= x && x <= max);
 
             while (isValid && !isFull && exclusives.Contains(r))
             {
-                r = Random.Range(min, max);
+                r = UnityEngine.Random.Range(min, max);
                 isFull = max - min <= exclusives.Count(x => min <= x && x <= max);
             }
 
@@ -805,7 +833,7 @@ public static class Commons
             {
                 if (!isAddressable && prefab != null)
                 {
-                    T newObj = Object.Instantiate(prefab, parent);
+                    T newObj = UnityEngine.Object.Instantiate(prefab, parent);
                     EntityId nid = newObj.GetEntityId();
                     ownedInstanceIds.Add(nid);
                     totalCount++;
@@ -834,7 +862,7 @@ public static class Commons
             if (!ownedInstanceIds.Contains(id))
             {
                 Debug.LogWarning($"SimplePool.Release: object (id:{id}) was not created by this pool. Destroying it to avoid cross-pool issues.");
-                Object.Destroy(obj.gameObject);
+                UnityEngine.Object.Destroy(obj.gameObject);
                 return;
             }
 
@@ -882,7 +910,7 @@ public static class Commons
 
             for (int i = 0; i < toCreate; i++)
             {
-                T newObj = Object.Instantiate(prefab, parent);
+                T newObj = UnityEngine.Object.Instantiate(prefab, parent);
                 newObj.gameObject.SetActive(false);
                 EntityId nid = newObj.GetEntityId();
                 ownedInstanceIds.Add(nid);

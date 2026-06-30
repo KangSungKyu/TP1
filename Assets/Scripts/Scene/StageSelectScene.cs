@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 public class StageSelectScene : MonoBehaviour
 {
@@ -10,6 +9,8 @@ public class StageSelectScene : MonoBehaviour
     private RectTransform canvasRT = null;
     [SerializeField]
     private AssetReference mainScene = null;
+    [SerializeField]
+    private Image bgImg = null;
 
     private int stageMapIdx = 0;
     private StageMapUI stageMapUI = null;
@@ -19,6 +20,8 @@ public class StageSelectScene : MonoBehaviour
 
     private async void Start()
     {
+        await Factory.Instance.Init_SystemResAsync();
+
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
@@ -31,6 +34,10 @@ public class StageSelectScene : MonoBehaviour
             Debug.LogError($"not found mapData, {stageMapIdx}");
             return;
         }
+
+        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
+
+        bgImg.sprite = bgSpr;
 
         string resName = $"StageMapUI_{stageMapIdx}";
 

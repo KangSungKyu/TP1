@@ -35,6 +35,8 @@ public class MainScene : MonoBehaviour
 
     private async void Init()
     {
+        await Factory.Instance.Init_SystemResAsync();
+
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 

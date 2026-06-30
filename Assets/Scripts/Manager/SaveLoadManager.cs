@@ -37,7 +37,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         }
     }
 
-    public void SaveUserData(System.Action<string> onComp, System.Action onFail)
+    public void SaveUserData(System.Action<string> onComp, System.Action<string> onFail)
     {
         savedUserData = UserData.Convert();
         clientData.ClientId = savedUserData.ClientId;
@@ -46,13 +46,13 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         GameNetworkManager.Instance.SaveUserData(savedUserData, onComp, onFail);
     }
 
-    public void LoadUserData(System.Action onComp, System.Action onFail)
+    public void LoadUserData(System.Action onComp, System.Action<string> onFail)
     {
         GameNetworkManager.Instance.LogIn(clientData, (json) =>
         {
             //savedUserData = Load<SavedUserData>("userData.json");
         
-            APIResponseData<LoginData> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<LoginData>(json);
+            APIResponseData<LoginData> res = GameNetworkManager.CreateAPIResponseDataFromJson<LoginData>(json);
 
             if(res.data.userData != null)
             {
@@ -76,7 +76,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         }, onFail);
     }
 
-    public void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action onFail)
+    public void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action<string> onFail)
     {
         savedStageClearData = StageClearData.Convert();
 
@@ -84,12 +84,12 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         GameNetworkManager.Instance.SaveStageClearData((uint)stageIdx, (uint)clearState, onComp, onFail);
     }
 
-    public void LoadStageClearData(System.Action onComp, System.Action onFail)
+    public void LoadStageClearData(System.Action onComp, System.Action<string> onFail)
     {
         GameNetworkManager.Instance.LoadStageClearData((uint)UserData.UserId, (json) =>
         {
             //savedStageClearData = Load<SavedStageClearData>("stageClearData.json");
-            APIResponseData<List<ClearData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<ClearData>>(json);
+            APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
             if(res.data != null)
             {
@@ -101,11 +101,11 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         }, onFail);
     }
 
-    public void LoadUserSkillData(System.Action onComp, System.Action onFail)
+    public void LoadUserSkillData(System.Action onComp, System.Action<string> onFail)
     {
         GameNetworkManager.Instance.LoadUserSkillData((uint)UserData.UserId, (json) =>
         {
-            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.Instance.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
+            APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if(res.data != null)
             {
