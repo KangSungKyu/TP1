@@ -28,6 +28,11 @@ public class DataTableManager : Singleton<DataTableManager>
     {
         DataTableType dtt = Util.GetDataTableType(idx);
 
+        if(idx <= 0)
+        {
+            dtt = dataList.Where((o)=>o.Value is T).Select((s) => s.Key).FirstOrDefault();
+        }
+
         return GetDB<T>(dtt);
     }
 

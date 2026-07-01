@@ -246,7 +246,7 @@ public class BBoard : MonoBehaviour
                     BlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f)),
                     AttackCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                     GuardCount = 0,
-                    SkillCount = skillList != null ? UnityEngine.Random.Range(1, skillList.Length) : 0,
+                    SkillCount = skillList != null ? UnityEngine.Random.Range(0, skillList.Length + 1) : 0,
                     ShieldCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                 };
                 break;
@@ -930,6 +930,12 @@ public class BBoard : MonoBehaviour
 
             if (tileType == BTileType.Skill && skillList != null)
             {
+                if(skillList.Length <= 0)
+                {
+                    Debug.Log($"skillList : len{skillList.Length}, x:{c.x}, y:{c.y}, owner:{Owner.UnitName}");
+                    continue;
+                }
+
                 uint skillIdx = skillList[UnityEngine.Random.Range(0, skillList.Length)];
                 tiles[c.y, c.x].skillIdx = skillIdx; //009001 
 

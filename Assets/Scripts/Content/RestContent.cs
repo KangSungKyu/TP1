@@ -203,7 +203,10 @@ public class RestContent : GameContent
     private void UpdateSkillPanel()
     {
         List<int> haveList = SaveLoadManager.Instance.UserSkillData.SkillSlots.Select((s) => s.SkillIdx).ToList();
-        List<int> allList = DataTableManager.Instance.GetDB<SkillDataForm>(DataTableType.SkillData).DB.Where((s)=>s.Key != Commons.Util.CreateDataIdx(DataTableType.SkillData, 1)).Select((s) => (int)s.Key).ToList();
+        List<int> allList = DataTableManager.Instance.GetDB<SkillDataForm>(DataTableType.SkillData).DB
+            .Where((s)=>s.Key != Commons.Util.CreateDataIdx(DataTableType.SkillData, 1) && s.Value.RequireLevel <= userData.Level)
+            .Select((s) => (int)s.Key)
+            .ToList();
         List<int> rndList = allList.Except(haveList).Shuffle().ToList();
         
         for(int i = 0; i < skillUI.Length; ++i)
@@ -211,9 +214,12 @@ public class RestContent : GameContent
             if(i < rndList.Count)
             {
                 int skillIdx = rndList[i];
+                SkillData sd = DataTableManager.Instance.GetSkillData((uint)skillIdx);
+                int quota = sd != null ? sd.Quota : 0;
 
                 skillUI[i].gameObject.SetActive(true);
-                skillUI[i].transform.GetComponentInChildren<TextMeshProUGUI>()?.SetText($"skill:{skillIdx}");
+                skillUI[i].transform.Find("NameText").GetComponent<TextMeshProUGUI>()?.SetText($"skill:{skillIdx}");
+                skillUI[i].transform.Find("QuotaText").GetComponent<TextMeshProUGUI>()?.SetText($"qt:{quota}");
                 skillUI[i].transform.GetComponentInChildren<Button>()?.onClick.RemoveAllListeners();
                 skillUI[i].transform.GetComponentInChildren<Button>()?.onClick.AddListener(() => OnBuySkill(skillIdx));
             }
@@ -245,6 +251,7 @@ public class RestContent : GameContent
         for (int i = 0; i < skillSlotUI.Length; ++i)
         {
             TextMeshProUGUI skillText = skillSlotUI[i].transform.Find("EquipedText").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI quotaText = skillSlotUI[i].transform.Find("QuotaText").GetComponent<TextMeshProUGUI>();
             Button equipBtn = skillSlotUI[i].transform.Find("EquipBtn").GetComponent<Button>();
             TMP_Dropdown skillDd = skillSlotUI[i].transform.GetComponentInChildren<TMP_Dropdown>();
 
@@ -255,9 +262,13 @@ public class RestContent : GameContent
             List<string> addDdOd = SaveLoadManager.Instance.UserSkillData.SkillSlots.Where((o) => o.Slot <= 0).Select((s) => $"{s.SkillIdx}").ToList();
             int slot = i + 1;
             int idx = i;
+            int curIdx = SaveLoadManager.Instance.UserSkillData.GetSkillIdx(slot);
+            SkillData sd = DataTableManager.Instance.GetSkillData((uint)curIdx);
+            int quota = sd != null ? sd.Quota : 0;
 
             skillDd.AddOptions(addDdOd);
-            skillText.SetText($"skill : {SaveLoadManager.Instance.UserSkillData.GetSkillIdx(slot)}");
+            skillText.SetText($"skill : {curIdx}");
+            quotaText.SetText($"qt:{quota}");
             equipBtn.onClick.AddListener(() => OnEqiupSkill(ides[selectedSkillDropdown[idx]], slot)); //equip selected dropdown
         }
     }

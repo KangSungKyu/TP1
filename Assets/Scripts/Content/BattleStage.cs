@@ -62,6 +62,8 @@ public class BattleStage : MonoBehaviour
     private Coroutine coBattleLoop = null;
     private event System.Action onStageDefeat = null;
     private event System.Action onStageClear = null;
+
+    private List<Coroutine> coGC = new List<Coroutine>();
     
     public void InitStage(UserData userData, StageData stageData)
     {
@@ -159,6 +161,8 @@ public class BattleStage : MonoBehaviour
 
         readyQueue.Clear();
 
+        ClearCoroutineGC();
+
         if (coBattleLoop == null)
         {
             coBattleLoop = StartCoroutine(IEBattleLoop());
@@ -167,6 +171,8 @@ public class BattleStage : MonoBehaviour
 
     public void ReleaseStage()
     {
+        ClearCoroutineGC();
+
         if(coBattleLoop != null)
         {
             StopCoroutine(coBattleLoop);
@@ -236,6 +242,20 @@ public class BattleStage : MonoBehaviour
         Factory.Instance.Release();
     }
 
+    public void ClearCoroutineGC()
+    {
+        for(int i = 0; i < coGC.Count; ++i)
+        {
+            if(coGC[i] != null)
+            {
+                StopCoroutine(coGC[i]);
+                coGC[i] = null;
+            }
+        }
+
+        coGC.Clear();
+    }
+
     public void OnStageDefeat(System.Action act)
     {
         onStageDefeat += act;
@@ -267,6 +287,27 @@ public class BattleStage : MonoBehaviour
                 if (sdList != null)
                 {
                     resultData.SkillList.AddRange(sdList);
+
+                    UsedUserSkillData[] usedSkillList = sdList.GroupBy((o) => o.Idx).Select((s) => new UsedUserSkillData { SkillIdx = (int)s.Key, Count = s.Count() }).ToArray();
+                    
+                    GameNetworkManager.Instance.UpdateUsedUserSkill(usedSkillList, (json) =>
+                    {
+                        APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
+
+                        if(res.data != null)
+                        {
+                            SaveLoadManager.Instance.UserSkillData.SkillSlots = res.data;
+                        }
+                    },
+                    (json) =>
+                    {
+                        APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+
+                        if(dump.response != ResponseType.Success)
+                        {
+
+                        }
+                    });
                 }
             }
 
@@ -419,7 +460,11 @@ public class BattleStage : MonoBehaviour
             {
                 UnitBase readyUnit = readyQueue.Dequeue();
 
-                yield return StartCoroutine(IERunUnitTurn(readyUnit));
+                Coroutine co = StartCoroutine(IERunUnitTurn(readyUnit));
+
+                coGC.Add(co);
+
+                yield return co;
             }
 
             yield return null;
@@ -541,7 +586,11 @@ public class BattleStage : MonoBehaviour
                             }
                         });
 
-                        yield return StartCoroutine(result.Attacker.IEPlayAction(uad));
+                        Coroutine co = StartCoroutine(result.Attacker.IEPlayAction(uad));
+
+                        coGC.Add(co);
+
+                        yield return co;
                     }
 
                     playerUnit.ClearApplyStatus();
@@ -599,21 +648,30 @@ public class BattleStage : MonoBehaviour
                         result.TargetList[i].ClearApplyStatus();
 
                         DamageFont df = Factory.Instance.GetDamageFont(transform, damageResult.Damage);
-                        float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
-                        df.transform.position = result.TargetList[i].transform.position + new Vector3(0.0f, hheight, 0.0f);
 
-                        if (damageResult.Type == DamageResultType.Damaged)
+                        if(df != null)
                         {
-                            df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
-                        }
-                        else if (damageResult.Type == DamageResultType.Dodge)
-                        {
-                            //dodge action
-                            df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                            float hwidth = result.TargetList[i].GetUnitBounds().size.x * 0.5f;
+                            float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
+                            df.transform.position = result.TargetList[i].transform.position + new Vector3(UnityEngine.Random.Range(-hwidth, hwidth), hheight, 0.0f);
+
+                            if (damageResult.Type == DamageResultType.Damaged)
+                            {
+                                df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
+                            }
+                            else if (damageResult.Type == DamageResultType.Dodge)
+                            {
+                                //dodge action
+                                df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                            }
                         }
                     });
 
-                    yield return StartCoroutine(result.Attacker.IEPlayAction(uad));
+                    Coroutine co = StartCoroutine(result.Attacker.IEPlayAction(uad));
+
+                    coGC.Add(co);
+
+                    yield return co;
                 }
 
                 monsterUnit.ClearApplyStatus();
@@ -792,7 +850,9 @@ public class BattleStage : MonoBehaviour
                 playerCount.Value = unitList.Count((o) => o is PlayerUnit);
             };
 
-            StartCoroutine(player.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
+            Coroutine co = StartCoroutine(player.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
+
+            coGC.Add(co);
         }
     }
 
@@ -826,7 +886,9 @@ public class BattleStage : MonoBehaviour
 
             if (monster != null)
             {
-                StartCoroutine(monster.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
+                Coroutine co = StartCoroutine(monster.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
+
+                coGC.Add(co);
             }
         }
     }
