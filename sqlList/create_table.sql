@@ -28,6 +28,7 @@ create table UserSkillData (
 UserId int not null,
 SkillIdx int not null,
 Slot int default '0',
+Quota int default '0',
 
 primary key(UserId, SkillIdx),
 foreign key(UserId) references UserData(UserId) on delete cascade,

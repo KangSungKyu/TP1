@@ -5,10 +5,12 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using static Commons;
 using System;
+using System.Linq;
 
 public class GameNetworkManager : Singleton<GameNetworkManager>
 {
     private string server_url = "http://localhost:5000";
+    //private string server_url = "http://3.36.71.224:5000";
 
 
     public static APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
@@ -164,6 +166,19 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         string json = ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_enteruserstage", json, onComplete, onFailed));
+    }
+
+    public void UpdateUsedUserSkill(UsedUserSkillData[] usedSkillList, Action<string> onComplete = null, Action<string> onFailed = null)
+    {
+        int userId = SaveLoadManager.Instance.UserData.UserId;
+        var dto = new
+        {
+            UserId = userId,
+            UsedSkillList = usedSkillList,
+        };
+        string json = ToJson(dto);
+
+        StartCoroutine(IEPostRequest($"{server_url}/update_useduserskill", json, onComplete, onFailed));
     }
 
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action<string> onFailed = null)

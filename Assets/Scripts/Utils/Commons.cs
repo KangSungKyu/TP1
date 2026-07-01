@@ -345,6 +345,10 @@ public class SkillData
 
     [Name("pervalue")]
     public int PerValue { get; set; } //pervalue / 1000.0
+    [Name("requirelevel")]
+    public int RequireLevel { get; set; }
+    [Name("quota")]
+    public int Quota { get; set; }
 }
 
 [System.Serializable]
@@ -540,6 +544,7 @@ public class SkillSlotData
 {
     public int SkillIdx;
     public int Slot;
+    public int Quota;
 }
 
 [System.Serializable]
@@ -554,7 +559,7 @@ public class UserSkillData
 
     public uint[] GetEquipedSkills()
     {
-        return SkillSlots.Where((o) => o.Slot > 0).Select((s) => (uint)s.SkillIdx).ToArray();
+        return SkillSlots.Where((o) => o.Slot > 0 && o.Quota > 0).Select((s) => (uint)s.SkillIdx).ToArray();
     }
 }
 
@@ -563,6 +568,13 @@ public class EnterUserStageData
 {
     public int MapIdx;
     public int StageIdx;
+}
+
+[System.Serializable]
+public class UsedUserSkillData
+{
+    public int SkillIdx;
+    public int Count;
 }
 
 public static class Commons
