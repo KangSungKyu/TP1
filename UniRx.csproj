@@ -279,6 +279,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Plugins\UniRx\Scripts\UniRx.asmdef" />
+    <None Include="DOCS\TP1_Game_Analysis_AND_Workflow.md" />
+    <None Include="DOCS\TP1_Python_Server.md" />
+    <None Include="DOCS\TP1_Python_Server_FULL.md" />
+    <None Include="DOCS\TP1_Unity_Client.md" />
+    <None Include="DOCS\TP1_Unity_Client_FULL.md" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

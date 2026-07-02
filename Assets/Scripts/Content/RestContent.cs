@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,7 +110,31 @@ public class RestContent : GameContent
             Debug.LogError($"server log, {dump.response}");
         });
 
-        GameNetworkManager.Instance.SaveStageClearData((uint)userData.StageIdx, 2, (json) => { });
+        GameNetworkManager.Instance.SaveStageClearData((uint)userData.StageIdx, 2, (json) => 
+        {
+            APIResponseData<ClearData> res = GameNetworkManager.CreateAPIResponseDataFromJson<ClearData>(json);
+
+            if(res.data != null)
+            {
+                if(!stageClearData.ClearDatas.ContainsKey(res.data.StageIdx))
+                {
+                    stageClearData.ClearDatas.Add(res.data.StageIdx, res.data);
+                }
+                else
+                {
+                    stageClearData.ClearDatas[res.data.StageIdx] = res.data;
+                }
+            }
+        },
+        (json) =>
+        {
+            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+
+            if(dump != null)
+            {
+                AlterMsgSystem.Instance.ShowMsg($"error : {dump.response}");
+            }
+        });
 
         await Task.CompletedTask;
     }

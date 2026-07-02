@@ -77,6 +77,20 @@ MonoBehaviour:
       - m_Id: 2e598a5f44361a545ae40f6c39301705
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: 896f382a8f3c1fe4b9b29881d200c5aa
+        m_Value: 'http://localhost:8080/[BuildTarget]'
+      - m_Id: a2750b424a2cddf42a5699ff2824e132
+        m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: c5018bb9fea8f394596c872a54f402b4
+        m_Value: 'ServerData/[BuildTarget]'
+      - m_Id: ea4a98535d69e7f4ea2f85bb015930e5
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+    - m_InheritedParent: 
+      m_Id: 28d053f21fd492c4dbac718676f30291
+      m_ProfileName: Dev
+      m_Values:
+      - m_Id: 2e598a5f44361a545ae40f6c39301705
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
+      - m_Id: 896f382a8f3c1fe4b9b29881d200c5aa
         m_Value: 'https://tp1-assets-2026-269816413405-ap-northeast-2-an.s3.ap-northeast-2-an.amazonaws.com/[BuildTarget]'
       - m_Id: a2750b424a2cddf42a5699ff2824e132
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
