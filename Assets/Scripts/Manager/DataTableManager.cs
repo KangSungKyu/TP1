@@ -46,6 +46,18 @@ public class DataTableManager : Singleton<DataTableManager>
         return null;
     }
 
+    public int GetDataCount<T>(DataTableType dataTableType) where T : class, IDataLoad
+    {
+        var db = GetDB<T>(dataTableType);
+
+        if (db != null)
+        {
+            return db.GetDataCount();
+        }
+
+        return 0;
+    }
+
     public UnitData GetUnitData(uint idx)
     {
         var db = GetDB<UnitDataForm>(idx)?.DB;

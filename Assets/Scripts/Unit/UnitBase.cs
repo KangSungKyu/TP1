@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +53,7 @@ public abstract class UnitBase : MonoBehaviour
     protected Subject<UnitBase> atbReadySubject = new Subject<UnitBase>();
 
     protected IDisposable dspShield = null;
+    private TweenerCore<Color, Color, ColorOptions> fadeDo;
 
     public abstract void LoadFromSO(uint idx);
     public abstract void ApplyStatus(ApplyStatusData applyData);
@@ -154,11 +158,34 @@ public abstract class UnitBase : MonoBehaviour
 
     public virtual void Release()
     {
+        fadeDo?.Kill();
+        fadeDo = null;
+
         ClearApplyStatus();
         ClearApplyStatus_ShieldCrushTime();
 
         atbReadySubject?.Dispose();
         atbReadySubject = null;
+    }
+
+    public void FadeOut(float duration)
+    {
+        if(spriteRenderer != null)
+        {
+            fadeDo = spriteRenderer.DOFade(0.0f, duration);
+
+            fadeDo.Play();
+        }
+    }
+
+    public void FadeIn(float duration)
+    {
+        if (spriteRenderer != null)
+        {
+            fadeDo = spriteRenderer.DOFade(1.0f, duration);
+
+            fadeDo.Play();
+        }
     }
 
     public IEnumerator IEPlayAction(UnitActionData actionData)
@@ -222,6 +249,11 @@ public abstract class UnitBase : MonoBehaviour
         {
             spriteRenderer.GetComponent<OutlineController>();
         }
+
+        if(spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
     }
 
     protected void UpdateHpBarPosition()
@@ -252,7 +284,14 @@ public abstract class UnitBase : MonoBehaviour
 
             var clipList = animator.GetCurrentAnimatorClipInfo(0);
 
-            float duration = clipList != null && clipList.Length > 0 ? clipList[0].clip.length : 0f; 
+            float duration = (clipList != null && clipList.Length > 0 ? clipList[0].clip.length : 0f);
+
+            if(actionData.Type == UnitActionType.Death)
+            {
+                duration += 1.0f;
+
+                FadeOut(duration);
+            }
 
             yield return new WaitForSeconds(duration);
         }

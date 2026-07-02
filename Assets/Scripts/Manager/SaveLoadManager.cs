@@ -4,34 +4,29 @@ using System.IO;
 using UnityEngine;
 using Newtonsoft.Json;
 using static Commons;
+using System.Linq;
 
 public class SaveLoadManager : Singleton<SaveLoadManager>
 {
-    public ClientData ClientData { get; private set; } = null;
-    public UserData UserData { get; set; } = null;
-    public StageClearData StageClearData { get; set; } = null;
-
-    public UserSkillData UserSkillData => userSkillData;
+    public ClientData ClientData = null;
+    public UserData UserData = null;
+    public StageClearData StageClearData = null;
+    public UserSkillData UserSkillData = null;
 
     private static string GetPath(string fileName) => Path.Combine(Application.persistentDataPath, fileName);
 
-    private ClientData clientData = null;
-    private SavedUserData savedUserData = null;
-    private SavedStageClearData savedStageClearData = null;
-    private UserSkillData userSkillData = null;
-
     public void SaveClientData()
     {
-        Save("clientData.json", clientData);
+        Save("clientData.json", ClientData);
     }
 
     public void LoadClientData()
     {
-        clientData = Load<ClientData>("clientData.json");
+        ClientData = Load<ClientData>("clientData.json");
 
-        if(clientData == null)
+        if(ClientData == null)
         {
-            clientData = ClientData.CreateClientData();
+            ClientData = ClientData.CreateClientData();
 
             SaveClientData();
         }
@@ -39,37 +34,32 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
     public void SaveUserData(System.Action<string> onComp, System.Action<string> onFail)
     {
-        savedUserData = UserData.Convert();
-        clientData.ClientId = savedUserData.ClientId;
+        ClientData.ClientId = UserData.ClientId;
 
-        //Save("userData.json", savedUserData);
-        GameNetworkManager.Instance.SaveUserData(savedUserData, onComp, onFail);
+        GameNetworkManager.Instance.SaveUserData(UserData, onComp, onFail);
     }
 
     public void LoadUserData(System.Action onComp, System.Action<string> onFail)
     {
-        GameNetworkManager.Instance.LogIn(clientData, (json) =>
+        GameNetworkManager.Instance.LogIn(ClientData, (json) =>
         {
-            //savedUserData = Load<SavedUserData>("userData.json");
-        
             APIResponseData<LoginData> res = GameNetworkManager.CreateAPIResponseDataFromJson<LoginData>(json);
 
             if(res.data.userData != null)
             {
-                savedUserData = res.data.userData;
-                UserData = savedUserData.Convert();
-                clientData.ClientId = UserData.ClientId;
+                UserData = res.data.userData;
+                ClientData.ClientId = UserData.ClientId;
             }
             
             if(res.data.stageClearData != null)
             {
-                savedStageClearData = new SavedStageClearData() { UserId = UserData.UserId, ClearDatas = res.data.stageClearData };
-                StageClearData = savedStageClearData.Convert();
+                StageClearData.UserId = UserData.UserId;
+                StageClearData.ClearDatas = res.data.stageClearData.ToDictionary((o) => o.StageIdx);
             }
 
             if(res.data.userSkillData != null)
             {
-                userSkillData = new UserSkillData() { SkillSlots = res.data.userSkillData };
+                UserSkillData = new UserSkillData() { SkillSlots = res.data.userSkillData };
             }
 
             onComp?.Invoke();
@@ -78,9 +68,6 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
     public void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action<string> onFail)
     {
-        savedStageClearData = StageClearData.Convert();
-
-        //Save("stageClearData.json", savedStageClearData);
         GameNetworkManager.Instance.SaveStageClearData((uint)stageIdx, (uint)clearState, onComp, onFail);
     }
 
@@ -93,8 +80,8 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
             if(res.data != null)
             {
-                savedStageClearData = new SavedStageClearData() { UserId = UserData.UserId, ClearDatas = res.data };
-                StageClearData = savedStageClearData.Convert();
+                StageClearData.UserId = UserData.UserId;
+                StageClearData.ClearDatas = res.data.ToDictionary((o) => o.StageIdx);
 
                 onComp?.Invoke();
             }
@@ -109,7 +96,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
             if(res.data != null)
             {
-                userSkillData = new UserSkillData() { SkillSlots = res.data };
+                UserSkillData.SkillSlots = res.data;
 
                 onComp?.Invoke();
             }
@@ -137,5 +124,13 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
     public bool Find(string fileName)
     {
         return File.Exists(GetPath(fileName));
+    }
+
+    protected override void OnSingletonAwake()
+    {
+        ClientData = null;
+        UserData = new UserData();
+        StageClearData = new StageClearData();
+        UserSkillData = new UserSkillData();
     }
 }

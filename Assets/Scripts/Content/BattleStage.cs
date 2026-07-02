@@ -850,9 +850,12 @@ public class BattleStage : MonoBehaviour
                 playerCount.Value = unitList.Count((o) => o is PlayerUnit);
             };
 
-            Coroutine co = StartCoroutine(player.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
+            if(player != null)
+            {
+                Coroutine co = StartCoroutine(player.IEPlayAction(new UnitActionData(UnitActionType.Death, null, act)));
 
-            coGC.Add(co);
+                coGC.Add(co);
+            }
         }
     }
 

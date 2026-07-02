@@ -5,6 +5,11 @@ public class SkillDataForm : IDataLoad
 {
     public Dictionary<uint, SkillData> DB { get; private set; } = null;
 
+    public int GetDataCount()
+    {
+        return DB != null ? DB.Count : 0;
+    }
+
     public void LoadData(string csvText)
     {
         if (DB == null)

@@ -1,16 +1,26 @@
-﻿using System.Collections;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using Newtonsoft.Json;
 using static Commons;
-using System;
-using System.Linq;
 
 public class GameNetworkManager : Singleton<GameNetworkManager>
 {
-    private string server_url = "http://localhost:5000";
-    //private string server_url = "http://3.36.71.224:5000";
+    [SerializeField]
+    private bool isDebugMode = true;
+    [SerializeField]
+    private Canvas progressCanvas = null;
+
+    private static string[] server_list =
+    {
+        "http://localhost:5000",
+        "http://3.36.71.224:5000",
+    };
+
+    private string server_url = string.Empty;
 
 
     public static APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
@@ -20,9 +30,9 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         return res;
     }
 
-    public void SaveUserData(SavedUserData savedUserData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public void SaveUserData(UserData userData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
-        string json = ToJson(savedUserData);
+        string json = ToJson(userData);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
     }
@@ -181,6 +191,11 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         StartCoroutine(IEPostRequest($"{server_url}/update_useduserskill", json, onComplete, onFailed));
     }
 
+    private void OnOffProgressUI(bool onoff)
+    {
+        progressCanvas.enabled = onoff;
+    }
+
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
         using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
@@ -191,9 +206,13 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
 
+            OnOffProgressUI(true);
+
             yield return www.SendWebRequest();
 
-            if(www.result == UnityWebRequest.Result.Success)
+            OnOffProgressUI(false);
+
+            if (www.result == UnityWebRequest.Result.Success)
             {
                 string resultJson = www.downloadHandler.text;
 
@@ -216,9 +235,13 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             www.downloadHandler = new DownloadHandlerBuffer();
             www.SetRequestHeader("Content-Type", "application/json");
 
+            OnOffProgressUI(true);
+
             yield return www.SendWebRequest();
 
-            if(www.result == UnityWebRequest.Result.Success)
+            OnOffProgressUI(false);
+
+            if (www.result == UnityWebRequest.Result.Success)
             {
                 string resultJson = www.downloadHandler.text;
 
@@ -232,6 +255,15 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
                 Debug.LogError(www.error);
             }
         }
+    }
+
+    protected override void OnSingletonAwake()
+    {
+        base.OnSingletonAwake();
+
+        server_url = isDebugMode ? server_list[0] : server_list[1];
+
+        OnOffProgressUI(false);
     }
 
     private void OnApplicationQuit()

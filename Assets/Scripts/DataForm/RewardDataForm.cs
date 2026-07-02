@@ -5,6 +5,11 @@ public class RewardDataForm : IDataLoad
 {
     public Dictionary<uint, RewardData> DB { get; private set; } = null;
 
+    public int GetDataCount()
+    {
+        return DB != null ? DB.Count : 0;
+    }
+
     public void LoadData(string csvText)
     {
         if (DB == null)

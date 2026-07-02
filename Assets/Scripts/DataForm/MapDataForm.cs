@@ -5,6 +5,11 @@ public class MapDataForm : IDataLoad
 {
     public Dictionary<uint, MapData> DB { get; private set; } = null;
 
+    public int GetDataCount()
+    {
+        return DB != null ? DB.Count : 0;
+    }
+
     public void LoadData(string csvText)
     {
         if (DB == null)

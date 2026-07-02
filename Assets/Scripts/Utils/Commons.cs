@@ -147,6 +147,7 @@ public enum MonsterPatternType
 
 public interface IDataLoad
 {
+    public int GetDataCount();
     public void LoadData(string csvText);
     public void Release();
 }
@@ -422,48 +423,6 @@ public class UserData
     public int SavedMapIdx;
     public int SavedStageIdx; //가장 마지막으로 저장된 위치
 
-    public SavedUserData Convert()
-    {
-        return new SavedUserData()
-        {
-            UserId = UserId,
-            ClientId = ClientId,
-            Level = Level, 
-            Exp = Exp, 
-            MapIdx = MapIdx, 
-            StageIdx = StageIdx, 
-            SavedMapIdx = SavedMapIdx,
-            SavedStageIdx = SavedStageIdx
-        };
-    }
-}
-
-[System.Serializable]
-public class SavedUserData
-{
-    public int UserId;
-    public string ClientId;
-    public int Level;
-    public int Exp;
-    public int MapIdx;
-    public int StageIdx; //현재 진행
-    public int SavedMapIdx;
-    public int SavedStageIdx; //가장 마지막으로 저장된 위치
-
-    public UserData Convert()
-    {
-        return new UserData()
-        {
-            UserId = UserId,
-            ClientId = ClientId,
-            Level = Level, 
-            Exp = Exp,
-            MapIdx = MapIdx, 
-            StageIdx = StageIdx, 
-            SavedMapIdx= SavedMapIdx,
-            SavedStageIdx = SavedStageIdx,
-        };
-    }
 }
 
 [System.Serializable]
@@ -478,15 +437,6 @@ public class StageClearData
 {
     public int UserId;
     public Dictionary<int, ClearData> ClearDatas;
-
-    public SavedStageClearData Convert()
-    {
-        SavedStageClearData sscd = new SavedStageClearData() { UserId = UserId, ClearDatas = new List<ClearData>() };
-
-        sscd.ClearDatas = ClearDatas.Values.ToList();
-
-        return sscd;
-    }
 
     public void SetState(int stageIdx, int state)
     {
@@ -510,31 +460,9 @@ public class StageClearData
 }
 
 [System.Serializable]
-public class SavedStageClearData
-{
-    public int UserId;
-    public List<ClearData> ClearDatas;
-
-    public StageClearData Convert()
-    {
-        StageClearData scd = new StageClearData() {UserId = UserId, ClearDatas = new Dictionary<int, ClearData>() };
-
-        foreach(var d in ClearDatas)
-        {
-            if(!scd.ClearDatas.ContainsKey(d.StageIdx))
-            {
-                scd.ClearDatas.Add(d.StageIdx, d);
-            }
-        }
-
-        return scd;
-    }
-}
-
-[System.Serializable]
 public class LoginData
 {
-    public SavedUserData userData;
+    public UserData userData;
     public List<ClearData> stageClearData;
     public List<SkillSlotData> userSkillData;
 }

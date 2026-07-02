@@ -1,8 +1,11 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
+//todo
+//mapui도 풀링 (mapdata만큼)
 public class StageSelectScene : MonoBehaviour
 {
     [SerializeField]
@@ -11,9 +14,13 @@ public class StageSelectScene : MonoBehaviour
     private AssetReference mainScene = null;
     [SerializeField]
     private Image bgImg = null;
+    [SerializeField]
+    private Button prevBtn = null;
+    [SerializeField]
+    private Button nextBtn = null;
 
     private int stageMapIdx = 0;
-    private StageMapUI stageMapUI = null;
+    private List<StageMapUI> stageMapUIList = new List<StageMapUI>();
 
     private UserData userData = null;
     private StageClearData stageClearData = null;
@@ -25,30 +32,58 @@ public class StageSelectScene : MonoBehaviour
         userData = SaveLoadManager.Instance.UserData;
         stageClearData = SaveLoadManager.Instance.StageClearData;
 
-        stageMapIdx = userData.MapIdx;
+        int mapCount = DataTableManager.Instance.GetDataCount<MapDataForm>(DataTableType.MapData);
 
-        MapData mapdata = DataTableManager.Instance.GetMapData((uint)stageMapIdx);
-
-        if(mapdata.Idx == 0)
+        for(int i = 0; i < mapCount; ++i)
         {
-            Debug.LogError($"not found mapData, {stageMapIdx}");
-            return;
+            uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(i + 1));
+            MapData mapdata = DataTableManager.Instance.GetMapData(idx);
+
+            if (mapdata.Idx == 0)
+            {
+                Debug.LogError($"not found mapData, {idx}");
+                return;
+            }
+
+            Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
+
+            //test
+            if(i == 0)
+            {
+                bgImg.sprite = bgSpr;
+            }
+
+            string resName = $"StageMapUI_{mapdata.Idx}";
+
+            await ResourceManager.Instance.LoadAssetAsyncTask<GameObject>(resName);
+
+            StageMapUI stageMapUI = (await ResourceManager.Instance.InstantiateAsyncTask(resName, canvasRT)).GetComponent<StageMapUI>();
+
+            if (stageMapUI != null)
+            {
+                stageMapUI.SetEnterStageEvent(userData, LoadMainScene);
+            }
+
+            stageMapUI.gameObject.SetActive(false);
+            stageMapUIList.Add(stageMapUI);
         }
 
-        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
+        prevBtn.transform.SetAsLastSibling();
+        nextBtn.transform.SetAsLastSibling();
 
-        bgImg.sprite = bgSpr;
-
-        string resName = $"StageMapUI_{stageMapIdx}";
-
-        await ResourceManager.Instance.LoadAssetAsyncTask<GameObject>(resName);
-
-        stageMapUI = (await ResourceManager.Instance.InstantiateAsyncTask(resName, canvasRT)).GetComponent<StageMapUI>();
-
-        if (stageMapUI != null)
+        prevBtn.onClick.AddListener(() =>
         {
-            stageMapUI.SetEnterStageEvent(userData, LoadMainScene);
-        }
+            int idx = Mathf.Max(0, stageMapIdx - 1);
+            LoadMap(idx);
+        });
+
+        nextBtn.onClick.AddListener(() =>
+        {
+            int idx = Mathf.Min(stageMapUIList.Count - 1, stageMapIdx + 1);
+            LoadMap(idx);
+        });
+
+        LoadMap((int)Commons.Util.GetDataInnerId((uint)userData.MapIdx) - 1);
     }
 
     private void LoadMainScene()
@@ -56,4 +91,12 @@ public class StageSelectScene : MonoBehaviour
         GameSceneManager.Instance.LoadScene(mainScene);
     }
 
+    private void LoadMap(int mapIdx)
+    {
+        int prevIdx = stageMapIdx;
+        stageMapIdx = mapIdx;
+
+        stageMapUIList[prevIdx].gameObject.SetActive(false);
+        stageMapUIList[stageMapIdx].gameObject.SetActive(true);
+    }
 }

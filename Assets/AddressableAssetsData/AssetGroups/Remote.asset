@@ -45,6 +45,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 16e8abf0afc269d4fa1c3d25fbef934f
+    m_Address: monster5_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 197e2bdfc8fec104b9c2b15ce12e5337
     m_Address: monster2_anim
     m_ReadOnly: 0
@@ -53,6 +59,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1a86ac1cf98778f418b1b8dd3261c02e
     m_Address: PlayerUnit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2259e3bff607fe34fae2e474c3ad5ed7
+    m_Address: StageMapUI_6002
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -71,6 +83,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3326240be52180144ba0b5d4bd3f1731
     m_Address: player_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40923b53dedb72346a0fec03f693bb50
+    m_Address: monster8_anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -147,6 +165,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 81e1c51949f69084292a3d4140e65db6
+    m_Address: monster6_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89faec5e310b1ad44af27e27b0ada321
     m_Address: MonsterUnit
     m_ReadOnly: 0
@@ -155,6 +179,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a18cb81764771974ca6226518715a48e
     m_Address: monster4_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a21b8c8be05e73a41a02707833f87ec5
+    m_Address: monster9_anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -185,6 +215,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dbf7b2dfb0931b245bad145e84f9fee1
     m_Address: dun_floor_5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ee9ce4728f46d5a43bb805ae6cb3c5b7
+    m_Address: monster7_anim
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
