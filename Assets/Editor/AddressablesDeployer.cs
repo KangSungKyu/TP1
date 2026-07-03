@@ -14,7 +14,7 @@ public class AddressablesDeployer
         AddressableAssetSettings.BuildPlayerContent();
 
         // 2. 경로 설정
-        string sourcePath = "ServerData"; // 유니티 프로젝트 루트
+        string sourcePath = @"ServerData\Local"; // 유니티 프로젝트 루트
         string serverPath = @"C:\Users\PC\LocalServerTest\ServerData"; // 로컬 서버 루트 경로
 
         // 3. 파일 동기화
