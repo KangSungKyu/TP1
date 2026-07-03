@@ -97,20 +97,23 @@ public class StageSelectScene : MonoBehaviour
         int prevIdx = stageMapIdx;
         stageMapIdx = mapIdx;
 
-        stageMapUIList[prevIdx].gameObject.SetActive(false);
-        stageMapUIList[stageMapIdx].gameObject.SetActive(true);
-
-        uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(stageMapIdx + 1));
-        MapData mapdata = DataTableManager.Instance.GetMapData(idx);
-
-        if (mapdata.Idx == 0)
+        if(stageMapUIList != null && stageMapUIList.Count > stageMapIdx)
         {
-            Debug.LogError($"not found mapData, {idx}");
-            return;
+            stageMapUIList[prevIdx].gameObject.SetActive(false);
+            stageMapUIList[stageMapIdx].gameObject.SetActive(true);
+
+            uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(stageMapIdx + 1));
+            MapData mapdata = DataTableManager.Instance.GetMapData(idx);
+
+            if (mapdata.Idx == 0)
+            {
+                Debug.LogError($"not found mapData, {idx}");
+                return;
+            }
+
+            Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
+
+            bgImg.sprite = bgSpr;
         }
-
-        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
-
-        bgImg.sprite = bgSpr;
     }
 }

@@ -1,0 +1,24 @@
+@startuml
+title 시퀀스: 플레이어 퍼즐 만료(시간초과) -> 적 패턴 실행
+
+participant Player as "Player(Input/UI)"
+participant PuzzleSystem as "PuzzleSystem"
+participant BattleStage as "BattleStage"
+participant MonsterAI as "MonsterAI"
+participant ResultQueue as "ResultQueue"
+
+Player -> PuzzleSystem: 퍼즐 생성/제공
+activate PuzzleSystem
+note right: 플레이어가 시간내 해결 실패
+PuzzleSystem -> BattleStage: OnPuzzleExpired(resultData)
+deactivate PuzzleSystem
+
+activate BattleStage
+BattleStage -> MonsterAI: Determine monster pattern (owner)
+MonsterAI --> BattleStage: patternSkillIdx
+BattleStage -> ResultQueue: Enqueue(resultData with monster pattern)
+deactivate BattleStage
+
+note over ResultQueue: 이후 ResultQueue가 스킬/공격을 처리
+
+@enduml

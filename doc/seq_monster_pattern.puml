@@ -1,0 +1,22 @@
+@startuml
+title 시퀀스: 몬스터 패턴 준비/발동 흐름
+
+participant MonsterUnit as "MonsterUnit"
+participant MonsterAI as "MonsterAI/Pattern"
+participant BattleStage as "BattleStage"
+participant ResultQueue as "ResultQueue"
+
+MonsterUnit -> MonsterAI: SelectPattern()
+activate MonsterAI
+MonsterAI --> MonsterUnit: pattern selected (skillIdx, timing)
+deactivate MonsterAI
+
+note right: 패턴 타이밍까지 대기(유예)
+MonsterUnit -> BattleStage: NotifyPatternReady(patternSkillIdx)
+activate BattleStage
+BattleStage -> ResultQueue: Enqueue(patternResult)
+deactivate BattleStage
+
+note over ResultQueue: 패턴에 따른 스킬/공격은 result 처리 파이프라인으로 이동
+
+@enduml
