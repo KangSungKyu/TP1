@@ -355,6 +355,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b7833573da726f4abd290ca06ef3f5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameNetworkManager
+  isDebugMode: 0
   progressCanvas: {fileID: 626263242}
 --- !u!224 &626263241
 RectTransform:

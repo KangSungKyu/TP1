@@ -18,6 +18,8 @@ public class StageSelectScene : MonoBehaviour
     private Button prevBtn = null;
     [SerializeField]
     private Button nextBtn = null;
+    [SerializeField]
+    private Button exitBtn = null;
 
     private int stageMapIdx = 0;
     private List<StageMapUI> stageMapUIList = new List<StageMapUI>();
@@ -45,14 +47,6 @@ public class StageSelectScene : MonoBehaviour
                 return;
             }
 
-            Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
-
-            //test
-            if(i == 0)
-            {
-                bgImg.sprite = bgSpr;
-            }
-
             string resName = $"StageMapUI_{mapdata.Idx}";
 
             await ResourceManager.Instance.LoadAssetAsyncTask<GameObject>(resName);
@@ -70,6 +64,7 @@ public class StageSelectScene : MonoBehaviour
 
         prevBtn.transform.SetAsLastSibling();
         nextBtn.transform.SetAsLastSibling();
+        exitBtn.transform.SetAsLastSibling();
 
         prevBtn.onClick.AddListener(() =>
         {
@@ -83,6 +78,12 @@ public class StageSelectScene : MonoBehaviour
             LoadMap(idx);
         });
 
+        exitBtn.onClick.AddListener(() =>
+        {
+            //okcancel msgbox
+            Application.Quit();
+        });
+
         LoadMap((int)Commons.Util.GetDataInnerId((uint)userData.MapIdx) - 1);
     }
 
@@ -91,12 +92,25 @@ public class StageSelectScene : MonoBehaviour
         GameSceneManager.Instance.LoadScene(mainScene);
     }
 
-    private void LoadMap(int mapIdx)
+    private async void LoadMap(int mapIdx)
     {
         int prevIdx = stageMapIdx;
         stageMapIdx = mapIdx;
 
         stageMapUIList[prevIdx].gameObject.SetActive(false);
         stageMapUIList[stageMapIdx].gameObject.SetActive(true);
+
+        uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(stageMapIdx + 1));
+        MapData mapdata = DataTableManager.Instance.GetMapData(idx);
+
+        if (mapdata.Idx == 0)
+        {
+            Debug.LogError($"not found mapData, {idx}");
+            return;
+        }
+
+        Sprite bgSpr = await ResourceManager.Instance.LoadAssetAsyncTask<Sprite>(mapdata.BgSprite);
+
+        bgImg.sprite = bgSpr;
     }
 }
