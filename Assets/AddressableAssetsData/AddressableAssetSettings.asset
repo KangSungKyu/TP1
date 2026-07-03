@@ -91,7 +91,7 @@ MonoBehaviour:
       - m_Id: 2e598a5f44361a545ae40f6c39301705
         m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
       - m_Id: 896f382a8f3c1fe4b9b29881d200c5aa
-        m_Value: 'https://tp1-assets-2026-269816413405-ap-northeast-2-an.s3.ap-northeast-2-an.amazonaws.com/ServerData/[BuildTarget]'
+        m_Value: 'https://tp1-assets-2026-269816413405-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com/ServerData/[BuildTarget]'
       - m_Id: a2750b424a2cddf42a5699ff2824e132
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
       - m_Id: c5018bb9fea8f394596c872a54f402b4
@@ -132,4 +132,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 16f56841a60f3a64fa0aeb57db58e995, type: 2}
   - {fileID: 11400000, guid: 4c4cedc05ff502340afac43fcf3c761b, type: 2}
   - {fileID: 11400000, guid: d1440b611b0a94549a69d70ee367c03a, type: 2}
-  m_ActiveProfileId: 28d053f21fd492c4dbac718676f30291
+  m_ActiveProfileId: 184164a2d444fbf4089a5d28c9bf34d6

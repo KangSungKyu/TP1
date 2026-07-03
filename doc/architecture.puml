@@ -1,0 +1,93 @@
+@startuml
+' 프로젝트 주요 클래스 다이어그램
+class StageSelectScene {
+  - int stageMapIdx
+  - List<StageMapUI> stageMapUIList
+  + Start()
+  + LoadMap(int)
+}
+class ResourceManager {
+  - Dictionary<string, AsyncOperationHandle> loadHandles
+  - List<AsyncOperationHandle> instantiateHandles
+  + IEnumerator Init(Action onComplete = null)
+  + Task<T> LoadAssetAsyncTask<T>(string key)
+  + Task<GameObject> InstantiateAsyncTask(string key, Transform parent = null, Vector3? position = null, Quaternion? rotation = null)
+  + void Release(string key)
+  + void ReleaseInstance(GameObject go)
+  + void ReleaseAll()
+}
+class DataTableManager {
+  - Dictionary<DataTableType, IDataLoad> dataList
+  + T GetDB<T>(uint idx)
+  + int GetDataCount<T>(DataTableType dataTableType)
+  + MapData GetMapData(uint idx)
+}
+class SaveLoadManager {
+  + ClientData ClientData
+  + UserData UserData
+  + StageClearData StageClearData
+  + void SaveClientData()
+  + void LoadClientData()
+  + void SaveUserData(Action<string> onComp, Action<string> onFail)
+  + void LoadUserData(Action onComp, Action<string> onFail)
+}
+
+StageSelectScene --> ResourceManager : Load/Instantiate
+StageSelectScene --> DataTableManager : GetMapData
+StageSelectScene --> SaveLoadManager : UserData
+StageSelectScene --> GameSceneManager : LoadScene
+ResourceManager --> Addressables
+DataTableManager --> MapDataForm
+SaveLoadManager ..> GameNetworkManager
+
+'"전투 도메인 추가"
+class UnitBase {
+  + UnitData Info
+  + void InitUnitData()
+  + void ApplyDamage(float)
+  + void AddATBTick(float)
+  + void Release()
+}
+
+class PlayerUnit
+class MonsterUnit
+class UnitCalculator {
+  + static int CalculateDamage(UnitBase attacker, UnitBase defender)
+}
+
+class BTile {
+  + BTileType type
+  + int x
+  + int y
+}
+
+class BBoard {
+  - BTile[,] tiles
+  - UnitBase Owner
+  + static BBoard CreateEmptyBoard(...)
+  + void InitBoard(uint[] skillList = null)
+  + void SetOwner(UnitBase)
+}
+
+class BattleStage {
+  - List<UnitBase> unitList
+  - List<BBoard>[] boardList
+  + void InitStage(UserData, StageData)
+  + void ReleaseStage()
+  + void OnPuzzleCompleted(PuzzleResult)
+}
+
+class BattleContent
+
+UnitBase <|-- PlayerUnit
+UnitBase <|-- MonsterUnit
+BBoard --> BTile : contains
+BBoard --> UnitBase : Owner
+BattleStage --> BBoard : manages
+BattleStage --> UnitBase : contains
+BattleStage --> Factory : allocates
+BattleContent --> BattleStage : uses
+Factory --> BBoard
+Factory --> UnitBase
+
+@enduml

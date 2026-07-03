@@ -17,7 +17,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
     private static string[] server_list =
     {
         "http://localhost:5000",
-        "http://3.36.71.224:5000",
+        "http://3.34.190.7:5000",
     };
 
     private string server_url = string.Empty;

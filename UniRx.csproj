@@ -284,6 +284,15 @@
     <None Include="DOCS\TP1_Python_Server_FULL.md" />
     <None Include="DOCS\TP1_Unity_Client.md" />
     <None Include="DOCS\TP1_Unity_Client_FULL.md" />
+    <None Include="doc\ARCHITECTURE.md" />
+    <None Include="doc\architecture.puml" />
+    <None Include="doc\flowchart_battle_loop.puml" />
+    <None Include="doc\MANAGERS.md" />
+    <None Include="doc\seq_monster_pattern.puml" />
+    <None Include="doc\seq_puzzle_completed.puml" />
+    <None Include="doc\seq_puzzle_expired.puml" />
+    <None Include="doc\seq_skill_apply.puml" />
+    <None Include="doc\seq_turn_flow.puml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

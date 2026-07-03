@@ -1,0 +1,33 @@
+@startuml
+title 시퀀스: 플레이어 퍼즐 완료 -> 결과 생성 -> 스킬/공격 실행
+
+participant Player as "Player(Input/UI)"
+participant PuzzleSystem as "PuzzleSystem"
+participant BattleStage as "BattleStage"
+participant ResultQueue as "ResultQueue"
+participant SkillResolver as "SkillResolver"
+participant TargetUnit as "TargetUnit(s)"
+
+Player -> PuzzleSystem: 퍼즐 풀이 시작
+activate PuzzleSystem
+PuzzleSystem -> Player: 퍼즐 시간/인터랙션 제공
+note right: 플레이어가 퍼즐을 완성
+Player -> PuzzleSystem: 퍼즐 완료(패스)
+PuzzleSystem -> BattleStage: OnPuzzleCompleted(resultData)
+deactivate PuzzleSystem
+
+activate BattleStage
+BattleStage -> ResultQueue: Enqueue(resultData)
+deactivate BattleStage
+
+ResultQueue -> SkillResolver: Dequeue & Resolve(skillList, targets)
+activate SkillResolver
+SkillResolver -> TargetUnit: ApplySkill/ApplyDamage
+TargetUnit --> SkillResolver: 상태 변경/피격 결과
+deactivate SkillResolver
+
+ResultQueue -> BattleStage: Notify 처리 완료
+
+note over TargetUnit: 사망이면 Death 처리(FadeOut, Release, Factory 반환)
+
+@enduml
