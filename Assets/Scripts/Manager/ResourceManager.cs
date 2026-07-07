@@ -9,6 +9,7 @@ using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.U2D;
 
 // Resource manager using Commons.Singleton<T>
 public class ResourceManager : Commons.Singleton<ResourceManager>
@@ -106,7 +107,11 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
                 {
                     if (op.Status == AsyncOperationStatus.Succeeded)
                     {
-                        loadHandles.Add(key, handle);
+                        if(!loadHandles.ContainsKey(key))
+                        {
+                            loadHandles.Add(key, handle);
+                        }
+
                         onLoaded?.Invoke(op.Result);
                     }
                     else
@@ -297,10 +302,14 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
     {
         base.OnSingletonAwake();
         Debug.Log("ResourceMgr initialized");
+
+        SpriteAtlasManager.atlasRequested += OnAtlasRequested;
     }
 
     protected override void OnSingletonDestroyed()
     {
+        SpriteAtlasManager.atlasRequested -= OnAtlasRequested;
+
         base.OnSingletonDestroyed();
         //ReleaseAll();
     }
@@ -312,5 +321,14 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
         yield return loadHandle;
 
         Addressables.Release(loadHandle);
+    }
+
+    private void OnAtlasRequested(string tag, Action<SpriteAtlas> onComplete)
+    {
+        string addrKey = tag;
+
+        Debug.Log($"atlas requested: addrKey: {addrKey}");
+
+        LoadAssetAsync(addrKey, onComplete);
     }
 }

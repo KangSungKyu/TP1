@@ -56,6 +56,9 @@ TagManager:
   - name: PuzzleBoard
     uniqueID: 1426738621
     locked: 0
+  - name: WorldUI
+    uniqueID: 248831649
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1

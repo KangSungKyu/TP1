@@ -10,7 +10,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static Commons;
-using static UnityEngine.UI.CanvasScaler;
 
 //atb-based
 //유저는 행동 가능 상태일때 퍼즐을 푸는 유예시간이 주어짐
@@ -135,8 +134,8 @@ public class BattleStage : MonoBehaviour
             }
         }
 
-        playerCount.Value = unitList.Count((o)=>o is PlayerUnit);
-        monsterCount.Value = unitList.Count((o)=>o is MonsterUnit);
+        playerCount.Value = unitList.Count((o) => o is PlayerUnit);
+        monsterCount.Value = unitList.Count((o) => o is MonsterUnit);
 
         playerCount.Subscribe(OnChangedPlayerCount).AddTo(this);
         monsterCount.Subscribe(OnChangedMonsterCount).AddTo(this);
@@ -427,21 +426,21 @@ public class BattleStage : MonoBehaviour
         //}
 
         //test func
-        if(Input.GetKeyDown(KeyCode.K))
-        {
-            if(unitList.Count > 1)
-            {
-                boardCursor[0].Value = 0;
-                unitList.Skip(1).First()?.ApplyDamage(99999f);
-            }
-        }
-        else if(Input.GetKeyDown(KeyCode.P))
-        {
-            if(unitList.Count > 0)
-            {
-                unitList.FirstOrDefault()?.ApplyDamage(99999f);
-            }
-        }
+        //if(Input.GetKeyDown(KeyCode.K))
+        //{
+        //    if(unitList.Count > 1)
+        //    {
+        //        boardCursor[0].Value = 0;
+        //        unitList.Skip(1).First()?.ApplyDamage(99999f);
+        //    }
+        //}
+        //else if(Input.GetKeyDown(KeyCode.P))
+        //{
+        //    if(unitList.Count > 0)
+        //    {
+        //        unitList.FirstOrDefault()?.ApplyDamage(99999f);
+        //    }
+        //}
     }
 
     private IEnumerator IEBattleLoop()
@@ -524,6 +523,7 @@ public class BattleStage : MonoBehaviour
                     tempBoard.InitBoard();
                     tempBoard.PlayFadeCover();
                     tempBoard.FillBoard(BBoardType.Defensive);
+                    monsterUnit.AddBoard(tempBoard);
 
                     boardPageCursor.Value = 1;
                     boardCursor[1].SetValueAndForceNotify(boardList[1].Count - 1);
@@ -573,16 +573,28 @@ public class BattleStage : MonoBehaviour
 
                             DamageFont df = Factory.Instance.GetDamageFont(transform, damageResult.Damage);
                             float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
-                            df.transform.position = result.TargetList[i].transform.position + new Vector3(0.0f, hheight, 0.0f);
+                            Vector3 tarPos = result.TargetList[i].transform.position;
 
-                            if (damageResult.Type == DamageResultType.Damaged)
+                            if(df != null)
                             {
-                                df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
+                                df.transform.position = tarPos + new Vector3(0.0f, hheight, 0.0f);
+
+                                if (damageResult.Type == DamageResultType.Damaged)
+                                {
+                                    df.SetText($"{damageResult.Damage:0}", () => Factory.Instance.ReleaseDamageFont(df));
+                                }
+                                else if (damageResult.Type == DamageResultType.Dodge)
+                                {
+                                    //dodge action
+                                    df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                                }
                             }
-                            else if (damageResult.Type == DamageResultType.Dodge)
+
+                            HitEffect hitEffect = Factory.Instance.GetHitEffect(transform);
+
+                            if(hitEffect != null)
                             {
-                                //dodge action
-                                df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
+                                hitEffect.PlayEffect(tarPos, () => Factory.Instance.ReleaseHitEffect(hitEffect));
                             }
                         });
 
@@ -648,12 +660,13 @@ public class BattleStage : MonoBehaviour
                         result.TargetList[i].ClearApplyStatus();
 
                         DamageFont df = Factory.Instance.GetDamageFont(transform, damageResult.Damage);
+                        Vector3 tarPos = result.TargetList[i].transform.position;
 
-                        if(df != null)
+                        if (df != null)
                         {
                             float hwidth = result.TargetList[i].GetUnitBounds().size.x * 0.5f;
                             float hheight = result.TargetList[i].GetUnitBounds().size.y * 0.5f;
-                            df.transform.position = result.TargetList[i].transform.position + new Vector3(UnityEngine.Random.Range(-hwidth, hwidth), hheight, 0.0f);
+                            df.transform.position = tarPos + new Vector3(UnityEngine.Random.Range(-hwidth, hwidth), hheight, 0.0f);
 
                             if (damageResult.Type == DamageResultType.Damaged)
                             {
@@ -664,6 +677,13 @@ public class BattleStage : MonoBehaviour
                                 //dodge action
                                 df.SetText($"Dodge!", () => Factory.Instance.ReleaseDamageFont(df));
                             }
+                        }
+
+                        HitEffect hitEffect = Factory.Instance.GetHitEffect(transform);
+
+                        if (hitEffect != null)
+                        {
+                            hitEffect.PlayEffect(tarPos, () => Factory.Instance.ReleaseHitEffect(hitEffect));
                         }
                     });
 
@@ -686,6 +706,7 @@ public class BattleStage : MonoBehaviour
                 }
 
                 monsterUnit.DelBoard(result.CurrentBoard);
+                monsterUnit.DelLastTargetLine();
 
                 if (boardList[1].Count <= 0)
                 {
@@ -925,6 +946,7 @@ public class BattleStage : MonoBehaviour
             RepositionUpperBoardList(page);
             RepositionDownBoardList(page);
             player?.SetTarget(selectedBoard.Owner);
+            player?.DrawTargetLine();
 
             //Debug.Log(selectedBoard.ToString());
         }

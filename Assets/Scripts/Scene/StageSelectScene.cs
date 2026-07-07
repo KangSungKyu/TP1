@@ -20,6 +20,8 @@ public class StageSelectScene : MonoBehaviour
     private Button nextBtn = null;
     [SerializeField]
     private Button exitBtn = null;
+    [SerializeField]
+    private Button tutoBtn = null;
 
     private int stageMapIdx = 0;
     private List<StageMapUI> stageMapUIList = new List<StageMapUI>();
@@ -62,9 +64,10 @@ public class StageSelectScene : MonoBehaviour
             stageMapUIList.Add(stageMapUI);
         }
 
-        prevBtn.transform.SetAsLastSibling();
-        nextBtn.transform.SetAsLastSibling();
-        exitBtn.transform.SetAsLastSibling();
+        //prevBtn.transform.SetAsLastSibling();
+        //nextBtn.transform.SetAsLastSibling();
+        //exitBtn.transform.SetAsLastSibling();
+        //tutoBtn.transform.SetAsLastSibling();
 
         prevBtn.onClick.AddListener(() =>
         {
@@ -82,6 +85,14 @@ public class StageSelectScene : MonoBehaviour
         {
             //okcancel msgbox
             Application.Quit();
+        });
+
+        tutoBtn.onClick.AddListener(() =>
+        {
+            string text = string.Empty;
+            text = DataTableManager.Instance.GetText(1011);
+
+            PanelManager.GetPanel<SimpleTextPanel>("TutorialPanel")?.Show(text);
         });
 
         LoadMap((int)Commons.Util.GetDataInnerId((uint)userData.MapIdx) - 1);

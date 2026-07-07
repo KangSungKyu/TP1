@@ -105,7 +105,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
     public void Save<T>(string fileName, T data) where T : class, new()
     {
-        File.WriteAllText(GetPath(fileName), ToJson(data));
+        File.WriteAllText(GetPath(fileName), Util.ToJson(data));
         Debug.Log("데이터 저장 완료: " + GetPath(fileName));
     }
 
@@ -118,7 +118,7 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
 
         string json = File.ReadAllText(path);
 
-        return FromJson<T>(json);
+        return Util.FromJson<T>(json);
     }
 
     public bool Find(string fileName)
