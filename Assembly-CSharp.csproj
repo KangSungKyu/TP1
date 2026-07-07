@@ -57,12 +57,17 @@
     <Compile Include="Assets\Scripts\Content\RestContent.cs" />
     <Compile Include="Assets\Scripts\DataForm\MonsterPatternDataForm.cs" />
     <Compile Include="Assets\Scripts\DataForm\SkillDataForm.cs" />
+    <Compile Include="Assets\Scripts\Effect\HitEffect.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Manager\AlterMsgSystem.cs" />
     <Compile Include="Assets\Scripts\UI\AlterMsg.cs" />
+    <Compile Include="Assets\Scripts\UI\Panel\PanelBase.cs" />
+    <Compile Include="Assets\Scripts\UI\Panel\PanelManager.cs" />
+    <Compile Include="Assets\Scripts\UI\Panel\SimpleTextPanel.cs" />
     <Compile Include="Assets\Scripts\Utils\IntArrayConverter.cs" />
     <Compile Include="Assets\Scripts\Utils\CollectionExtensions.cs" />
     <Compile Include="Assets\Scripts\Utils\DamageFont.cs" />
+    <Compile Include="Assets\Scripts\Utils\QuadraticBezierRenderer.cs" />
     <Compile Include="Assets\Scripts\Utils\UIntArrayConverter.cs" />
     <Compile Include="Assets\Scripts\Utils\SpriteRendererFillAmount.cs" />
     <Compile Include="Assets\Scripts\Unit\UnitBase.cs" />

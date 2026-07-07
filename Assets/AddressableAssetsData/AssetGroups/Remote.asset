@@ -15,6 +15,13 @@ MonoBehaviour:
   m_GroupName: Remote
   m_GUID: 84eace213a7457e4a8b25414b3a64b4c
   m_SerializeEntries:
+  - m_GUID: 0277db5b4af7b094e98733a4e54f7553
+    m_Address: AT_Unit2004
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0405963510c9e534780aaaf0e2b75f67
     m_Address: Tile
     m_ReadOnly: 0
@@ -25,6 +32,13 @@ MonoBehaviour:
     m_Address: InitScene
     m_ReadOnly: 0
     m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0999259a785796b498ecfcfc9372549d
+    m_Address: AT_Unit2002
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1179236c113c8cd469f9034784d2306a
@@ -87,6 +101,13 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 397bf723bd4b48249a7346bd7aee9ba4
+    m_Address: AT_Unit2007
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 40923b53dedb72346a0fec03f693bb50
     m_Address: monster8_anim
     m_ReadOnly: 0
@@ -109,6 +130,13 @@ MonoBehaviour:
     m_Address: map_dungeon_1
     m_ReadOnly: 0
     m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46e903323663d97428c9818996d705a9
+    m_Address: AT_Unit2005
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46fedce5fa6d9364596cc56ef5169dbd
@@ -143,6 +171,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 776d58de5fda2fc4995d8a626a41c442
     m_Address: Board
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a9980c3ddae9c142bddae1c89eb1f6d
+    m_Address: ToTargetLine
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -189,6 +223,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a596d815d1364dc44806b157e404f11d
+    m_Address: AT_Unit2010
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a70bc1829fdcaf54582ff1142005a8e2
+    m_Address: AT_Unit2001
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae2d3c5bee912d54a901933afd785e66
     m_Address: StageMapUI_6001
     m_ReadOnly: 0
@@ -197,6 +245,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b0669531709dff944926491ba3dd6a82
     m_Address: dun_floor_rest
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b19a287376d46834f8bb0b9835ad716a
+    m_Address: HitEffect
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -213,10 +267,38 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2e8fc6e9f31dc347914396fc44b0eab
+    m_Address: AT_Unit2006
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dbf7b2dfb0931b245bad145e84f9fee1
     m_Address: dun_floor_5
     m_ReadOnly: 0
     m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: deab1e50705098d4e8a0850b8175adca
+    m_Address: AT_Unit2009
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4622c0222f16a64782401cd413bf6fc
+    m_Address: AT_Unit2008
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb2842b49c5306640a9c72cadd55c128
+    m_Address: AT_Unit2003
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Atlas
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ee9ce4728f46d5a43bb805ae6cb3c5b7

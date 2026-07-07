@@ -1,9 +1,13 @@
 ﻿
 using System.Collections;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
+using UnityEngine.U2D;
+using static UnityEngine.Analytics.IAnalytic;
 
 public class InitScene : MonoBehaviour
 {
@@ -57,4 +61,5 @@ public class InitScene : MonoBehaviour
     {
         GameSceneManager.Instance.LoadScene(selectSceneRef);
     }
+
 }

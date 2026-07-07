@@ -49,10 +49,10 @@ public abstract class UnitBase : MonoBehaviour
     protected UnitBase targetUnit = null;
     protected HpBar hpUI = null;
     protected Image portrait = null;
-
     protected Subject<UnitBase> atbReadySubject = new Subject<UnitBase>();
-
     protected IDisposable dspShield = null;
+    protected List<QuadraticBezierRenderer> targetLineList = new List<QuadraticBezierRenderer>();
+
     private TweenerCore<Color, Color, ColorOptions> fadeDo;
 
     public abstract void LoadFromSO(uint idx);
@@ -158,6 +158,13 @@ public abstract class UnitBase : MonoBehaviour
 
     public virtual void Release()
     {
+        for(int i = 0; i < targetLineList.Count; ++i)
+        {
+            Factory.Instance.ReleaseTargetLine(targetLineList[i]);
+        }
+
+        targetLineList.Clear();
+
         fadeDo?.Kill();
         fadeDo = null;
 
@@ -229,6 +236,23 @@ public abstract class UnitBase : MonoBehaviour
         return spriteRenderer.bounds;
     }
 
+    //todo : 최대한 근사값을 찾아야함
+    public Vector3 GetUnitHeadPosition()
+    {
+        float size = transform.localScale.magnitude;
+        Vector3 pos = transform.position + Vector3.up * size;
+
+        return pos;
+    }
+
+    public void DelLastTargetLine()
+    {
+        //todo : 이왕이면 생성될때와 지워질때 짝 맞추기
+        Factory.Instance.ReleaseTargetLine(targetLineList.Last());
+    }
+
+    public abstract void DrawTargetLine();
+
     protected abstract void Init();
 
     protected virtual void Awake()
@@ -258,7 +282,7 @@ public abstract class UnitBase : MonoBehaviour
 
     protected void UpdateHpBarPosition()
     {
-        Vector3 worldPos = transform.position + new Vector3(0, 2.0f, 0.0f);
+        Vector3 worldPos = GetUnitHeadPosition();
         Vector2 uiPos = Util.WorldToCanvasPosition(hpUI.transform.parent.GetComponent<Canvas>(), Camera.main, worldPos);
         RectTransform uiRT = (RectTransform)hpUI.transform;
 

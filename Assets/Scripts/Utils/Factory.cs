@@ -22,6 +22,8 @@ public class Factory : Singleton<Factory>
     private SimplePool<HpBar> hpBarPool = null;
     private SimplePool<Image> portraitPool = null;
     private SimplePool<DamageFont> damageFontPool = null;
+    private SimplePool<HitEffect> hitEffectPool = null;
+    private SimplePool<QuadraticBezierRenderer> targetLinePool = null;
 
 
     // Public InitAsync wrapper to orchestrate pool initialization. If containers were not provided, create fallbacks but log a warning.
@@ -73,6 +75,42 @@ public class Factory : Singleton<Factory>
         }
 
         bool res = playerPool != null && monsterPool != null;
+
+        return res;
+    }
+
+    public async Task<bool> Init_HitEffectPoolAsync(int hitEffectCount)
+    {
+        hitEffectPool = new SimplePool<HitEffect>(hitEffectCount, Commons.ResKey_HitEffect, gobjContainer, onGet_HitEffect);
+
+        try
+        {
+            await hitEffectPool.PrewarmAsync(hitEffectCount);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Init_HitEffectPoolAsync: PrewarmAsync failed: {ex}");
+        }
+
+        bool res = hitEffectPool != null;
+        
+        return res;
+    }
+
+    public async Task<bool> Init_TargetLinePoolAsync(int count)
+    {
+        targetLinePool = new SimplePool<QuadraticBezierRenderer>(count, Commons.ResKey_TargetLine, gobjContainer, onGet_TargetLine);
+
+        try
+        {
+            await targetLinePool.PrewarmAsync(count);
+        }
+        catch(System.Exception ex)
+        {
+            Debug.LogError($"Init_TargetLinePoolAsync: PrewarmAsync failed: {ex}");
+        }
+
+        bool res = targetLinePool != null;
 
         return res;
     }
@@ -231,11 +269,36 @@ public class Factory : Singleton<Factory>
         return damageFont;
     }
 
+    public HitEffect GetHitEffect(Transform container)
+    {
+        HitEffect hitEffect = hitEffectPool.Get();
+
+        if (hitEffect != null)
+        {
+            hitEffect.transform.SetParent(container, false);
+        }
+        
+        return hitEffect;
+    }
+
     public AlterMsg GetAlterMsg()
     {
         AlterMsg alter = alterMsgPool.Get();
 
         return alter;
+    }
+
+    public QuadraticBezierRenderer GetTargetLine(Transform container, Color color)
+    {
+        QuadraticBezierRenderer targetLine = targetLinePool.Get();
+
+        if(targetLine != null)
+        {
+            targetLine.transform.SetParent(container);
+            targetLine.SetColor(color);
+        }
+
+        return targetLine;
     }
 
     public void ReleasePlayerUnit(PlayerUnit player)
@@ -308,6 +371,25 @@ public class Factory : Singleton<Factory>
         alterMsgPool.Release(alterMsg);
     }
 
+    public void ReleaseHitEffect(HitEffect hitEffect)
+    {
+        if (hitEffect != null)
+        {
+            hitEffect.transform.SetParent(gobjContainer);
+        }
+
+        hitEffectPool.Release(hitEffect);
+    }
+
+    public void ReleaseTargetLine(QuadraticBezierRenderer targetLine)
+    {
+        if(targetLine != null)
+        {
+            targetLine.transform.SetParent(gobjContainer);
+        }
+
+        targetLinePool.Release(targetLine);
+    }
 
     protected override void OnSingletonDestroyed()
     {
@@ -352,4 +434,16 @@ public class Factory : Singleton<Factory>
         rt.localScale = Vector3.one;
         rt.anchoredPosition3D = new Vector3(0, 0, 0);
     }
+
+    private void onGet_HitEffect(HitEffect effect)
+    {
+        effect.transform.localScale = Vector3.one * 1.0f;
+    }
+
+    private void onGet_TargetLine(QuadraticBezierRenderer targetLine)
+    {
+        targetLine.transform.position = Vector3.zero;
+        targetLine.transform.localScale = Vector3.one;
+    }
+
 }

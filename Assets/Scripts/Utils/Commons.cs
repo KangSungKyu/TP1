@@ -518,6 +518,8 @@ public static class Commons
     public readonly static string ResKey_HPUI = "HPUI";
     public readonly static string ResKey_PortraitUI = "PortraitUI";
     public readonly static string ResKey_DamageFont = "DamageFont";
+    public readonly static string ResKey_HitEffect = "HitEffect";
+    public readonly static string ResKey_TargetLine = "ToTargetLine";
 
     public readonly static string ResKey_BaseTile = "BaseTile";
     public readonly static string ResKey_BlockTile = "BlockTile";
@@ -629,25 +631,38 @@ public static class Commons
             return localPoint;
         }
 
-    }
-
-    public static string ToJson<T>(T data)
-    {
-        string json = JsonConvert.SerializeObject(data); // true: 가독성 좋게 들여쓰기
-
-        return json;
-    }
-
-    public static T FromJson<T>(string json)
-    {
-        T data = default;
-
-        if (json != string.Empty)
+        public static Vector3 CalcBezierPoint_Quadratic(float t, Vector3 p0, Vector3 p1, Vector3 p2)
         {
-            data = JsonConvert.DeserializeObject<T>(json);
+            float u = 1 - t;
+            float tt = t * t;
+            float uu = u * u;
+
+            Vector3 point = uu * p0;
+
+            point += 2 * u * t * p1;
+            point += tt * p2;
+
+            return point;
         }
 
-        return data;
+        public static string ToJson<T>(T data)
+        {
+            string json = JsonConvert.SerializeObject(data); // true: 가독성 좋게 들여쓰기
+
+            return json;
+        }
+
+        public static T FromJson<T>(string json)
+        {
+            T data = default;
+
+            if (json != string.Empty)
+            {
+                data = JsonConvert.DeserializeObject<T>(json);
+            }
+
+            return data;
+        }
     }
 
     public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour

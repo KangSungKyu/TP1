@@ -1,4 +1,4 @@
-idx,type,targettype,targetcount,pervalue,requirelevel,quota
+﻿idx,type,targettype,targetcount,pervalue,requirelevel,quota
 9001,1,0,1,1000,1,-1
 9002,1,1,3,500,2,4
 9003,1,0,1,1250,3,3

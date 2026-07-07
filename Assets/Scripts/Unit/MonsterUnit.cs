@@ -61,6 +61,8 @@ public class MonsterUnit : UnitBase
             else if(board.Type == BBoardType.Defensive)
             {
                 this.dfsBoardList.Add(board);
+
+                DrawTargetLine();
             }
         }
     }
@@ -69,17 +71,17 @@ public class MonsterUnit : UnitBase
     {
         if (board != null)
         {
-            board.ReleaseBoard();
-            Factory.Instance.ReleaseBoard(board);
-
-            if(board.Type == BBoardType.Offensive)
+            if (board.Type == BBoardType.Offensive)
             {
                 ofsBoard = null;
             }
-            else if(board.Type == BBoardType.Defensive)
+            else if (board.Type == BBoardType.Defensive)
             {
                 this.dfsBoardList.Remove(board);
             }
+
+            board.ReleaseBoard();
+            Factory.Instance.ReleaseBoard(board);
         }
     }
 
@@ -120,6 +122,50 @@ public class MonsterUnit : UnitBase
         }
 
         return monsterPatternData.SkillIdx[patternCursor];
+    }
+    public int GetBoardWidth()
+    {
+        if (ofsBoard != null)
+        {
+            return ofsBoard.Width;
+        }
+        else if (dfsBoardList.Count > 0)
+        {
+            return dfsBoardList[0].Width;
+        }
+
+        return (int)monsterData.BoardDefaultWidth;
+    }
+
+    public int GetBoardHeight()
+    {
+        if (ofsBoard != null)
+        {
+            return ofsBoard.Height;
+        }
+        else if (dfsBoardList.Count > 0)
+        {
+            return dfsBoardList[0].Height;
+        }
+
+        return (int)monsterData.BoardDefaultHeight;
+    }
+
+    public override void DrawTargetLine()
+    {
+        QuadraticBezierRenderer toTarget = Factory.Instance.GetTargetLine(transform.parent, Color.red);
+
+        if (toTarget != null)
+        {
+            Vector3 pA = GetUnitHeadPosition();
+            Vector3 ctrlP = pA + Quaternion.Euler(0.0f, 0.0f, 90 + Random.Range(45, 90)) * Vector3.right * UnityEngine.Random.Range(1.55f, 1.85f);
+            Vector3 pB = targetUnit.GetUnitHeadPosition();
+
+            toTarget.SetBezierPoints(pA, ctrlP, pB);
+            toTarget.Render();
+
+            targetLineList.Add(toTarget);
+        }
     }
 
     protected override void Init()
@@ -163,33 +209,5 @@ public class MonsterUnit : UnitBase
                     usageUnitData.ShieldCrushedTime.Value = 0f;
             })
             .AddTo(this);
-    }
-
-    public int GetBoardWidth()
-    {
-        if(ofsBoard != null)
-        {
-            return ofsBoard.Width;
-        }
-        else if(dfsBoardList.Count > 0)
-        {
-            return dfsBoardList[0].Width;
-        }
-
-        return (int)monsterData.BoardDefaultWidth;
-    }
-
-    public int GetBoardHeight()
-    {
-        if (ofsBoard != null)
-        {
-            return ofsBoard.Height;
-        }
-        else if (dfsBoardList.Count > 0)
-        {
-            return dfsBoardList[0].Height;
-        }
-
-        return (int)monsterData.BoardDefaultHeight;
     }
 }

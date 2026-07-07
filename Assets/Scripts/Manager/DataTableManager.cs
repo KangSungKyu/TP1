@@ -182,7 +182,7 @@ public class DataTableManager : Singleton<DataTableManager>
     {
         base.OnSingletonAwake();
 
-        StartCoroutine(IEPreloadScriptableObjects());
+        StartCoroutine(IEPreloadDataTables());
     }
 
     protected override void OnSingletonDestroyed()
@@ -197,7 +197,7 @@ public class DataTableManager : Singleton<DataTableManager>
         base.OnSingletonDestroyed();
     }
 
-    private IEnumerator IEPreloadScriptableObjects()
+    private IEnumerator IEPreloadDataTables()
     {
         // 'Data' 라벨을 가진 에셋들만 로드
         //csv파일이라 수정필요

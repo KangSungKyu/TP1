@@ -1,4 +1,4 @@
-idx,level,needexp,maxhp,atk,def,dodge,spd
+﻿idx,level,needexp,maxhp,atk,def,dodge,spd
 3001,1,0,0,0,0,0,0
 3002,2,100,10,0,0,0,0
 3003,3,200,10,1,0,0,0

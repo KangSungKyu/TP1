@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 
 
@@ -78,6 +80,8 @@ public class BattleContent : GameContent
 
         await Factory.Instance.Init_UnitPoolAsync(monsterPoolCount);
         await Factory.Instance.Init_BoardPoolAsync(boardPoolCount, tilePoolCount);
+        await Factory.Instance.Init_HitEffectPoolAsync(monsterPoolCount);
+        await Factory.Instance.Init_TargetLinePoolAsync(1 + boardPoolCount);
 
         await Factory.Instance.InitAsync().ContinueWith(t => {
             if (t.IsFaulted)

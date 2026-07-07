@@ -25,21 +25,21 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
 
     public static APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
     {
-        var res = FromJson<APIResponseData<T>>(json);
+        var res = Util.FromJson<APIResponseData<T>>(json);
 
         return res;
     }
 
     public void SaveUserData(UserData userData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
-        string json = ToJson(userData);
+        string json = Util.ToJson(userData);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
     }
 
     public void LogIn(ClientData clientData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
     {
-        string json = ToJson(clientData);
+        string json = Util.ToJson(clientData);
 
         StartCoroutine(IEPostRequest($"{server_url}/login_user", json, onComplete, onFailed));
     }
@@ -53,7 +53,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             {
                 UserId = userId,
             };
-            string json = ToJson(dto);
+            string json = Util.ToJson(dto);
 
             StartCoroutine(IEPostRequest($"{server_url}/logout_user", json, onComplete, onFailed));
         }
@@ -68,7 +68,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             StageIdx = stageIdx,
             ClearState = clearState,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_stagecleardata", json, onComplete, onFailed));
     }
@@ -89,7 +89,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             Level = level,
             Exp = exp,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_userlevel", json, onComplete, onFailed));
     }
@@ -101,7 +101,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         {
             UserId = userId,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_defeatstage", json, onComplete, onFailed));
     }
@@ -114,7 +114,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             UserId = userId,
             StageIdx = stageIdx,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_clearstage", json, onComplete, onFailed));
     }
@@ -132,7 +132,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             UserId = userId,
             SkillIdx = skillIdx,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_buyuserskill", json, onComplete, onFailed));
     }
@@ -146,7 +146,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             SkillIdx = skillIdx,
             Slot = slot,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_equipuserskill", json, onComplete, onFailed));
     }
@@ -159,7 +159,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             UserId = userId,
             Slot = slot,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_unequipuserskill", json, onComplete, onFailed));
     }
@@ -173,7 +173,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             MapIdx = mapIdx,
             StageIdx = stageIdx,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_enteruserstage", json, onComplete, onFailed));
     }
@@ -186,7 +186,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             UserId = userId,
             UsedSkillList = usedSkillList,
         };
-        string json = ToJson(dto);
+        string json = Util.ToJson(dto);
 
         StartCoroutine(IEPostRequest($"{server_url}/update_useduserskill", json, onComplete, onFailed));
     }
