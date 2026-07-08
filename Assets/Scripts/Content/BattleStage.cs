@@ -415,6 +415,7 @@ public class BattleStage : MonoBehaviour
             resultQueueList.Add(co);
         }
 
+
         //for(int i = 0; i < unitList.Count; ++i)
         //{
         //    Bounds bd = unitList[i].GetUnitBounds();
