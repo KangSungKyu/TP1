@@ -67,8 +67,10 @@ public class PlayerUnit : UnitBase
         if (toTarget != null)
         {
             Vector3 pA = GetUnitHeadPosition();
-            Vector3 ctrlP = pA + Quaternion.Euler(0.0f, 0.0f, Random.Range(45, 90)) * Vector3.right * UnityEngine.Random.Range(1.55f, 1.85f);
             Vector3 pB = targetUnit.GetUnitHeadPosition();
+            Vector3 up = Vector2.Perpendicular((pB - pA).normalized);
+            float dist = Vector2.Distance(pA, pB);
+            Vector3 ctrlP = Vector3.Lerp(pA, pB, 0.35f) + up * dist * Random.Range(0.3f, 0.5f);
 
             toTarget.SetBezierPoints(pA, ctrlP, pB);
             toTarget.Render();

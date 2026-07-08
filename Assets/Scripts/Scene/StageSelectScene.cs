@@ -9,6 +9,8 @@ using UnityEngine.UI;
 public class StageSelectScene : MonoBehaviour
 {
     [SerializeField]
+    private SceneFadeUI fadeUI = null;
+    [SerializeField]
     private RectTransform canvasRT = null;
     [SerializeField]
     private AssetReference mainScene = null;
@@ -31,6 +33,8 @@ public class StageSelectScene : MonoBehaviour
 
     private async void Start()
     {
+        fadeUI.Init();
+
         await Factory.Instance.Init_SystemResAsync();
 
         userData = SaveLoadManager.Instance.UserData;
@@ -96,6 +100,7 @@ public class StageSelectScene : MonoBehaviour
         });
 
         LoadMap((int)Commons.Util.GetDataInnerId((uint)userData.MapIdx) - 1);
+        fadeUI.Play();
     }
 
     private void LoadMainScene()

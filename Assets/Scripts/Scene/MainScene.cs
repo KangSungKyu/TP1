@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class MainScene : MonoBehaviour
 {
     [SerializeField]
-    private Image fadeUI = null;
+    private SceneFadeUI fadeUI = null;
 
     [SerializeField]
     private GameContent[] gameContents = null;
@@ -20,7 +20,7 @@ public class MainScene : MonoBehaviour
 
     private void Awake()
     {
-        fadeUI.enabled = true;
+        fadeUI.Init();
     }
 
     private void Start()
@@ -51,9 +51,7 @@ public class MainScene : MonoBehaviour
         
         await currentGameContent?.Enter();
 
-        fadeUI.DOFade(0.0f, 1.0f)
-            .OnComplete(() => { fadeUI.enabled = false; })
-            .Play();
+        fadeUI.Play();
     }
 
 }
