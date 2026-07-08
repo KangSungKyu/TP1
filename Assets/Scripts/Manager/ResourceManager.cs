@@ -141,6 +141,20 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
         return resource;
     }
 
+    public Sprite GetSpriteFromAtlas(string atlasKey, string key)
+    {
+        Sprite resource = null;
+
+        if(loadHandles.ContainsKey(atlasKey))
+        {
+            SpriteAtlas atlas = loadHandles[atlasKey].Result as SpriteAtlas;
+
+            resource = atlas.GetSprite(key);
+        }
+
+        return resource;
+    }
+
     public Task<T> LoadAssetAsyncTask<T>(string key) where T : class
     {
         if(loadHandles.ContainsKey(key))

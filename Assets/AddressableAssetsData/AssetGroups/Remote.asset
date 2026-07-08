@@ -47,16 +47,11 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 14bb5a9a46aae90429a2fabcc2e23e76
-    m_Address: BlockTile
+  - m_GUID: 145bc70cb8162ad4e8639cf187202cb5
+    m_Address: AT_Tile
     m_ReadOnly: 0
     m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 162a3b92616b93849bedc66ff6752443
-    m_Address: AttackTile
-    m_ReadOnly: 0
-    m_SerializedLabels:
+    - Atlas
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 16e8abf0afc269d4fa1c3d25fbef934f
@@ -85,12 +80,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 255de20460d89874a9b4a7ae8d34e64e
     m_Address: Portraits
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2f74c276b8534de4fb9b6097150b6d4f
-    m_Address: GuardTile
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -139,26 +128,8 @@ MonoBehaviour:
     - Atlas
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 46fedce5fa6d9364596cc56ef5169dbd
-    m_Address: BaseTile
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 53ac51f5309336541bac255fa53c5a9f
     m_Address: StageSelectScene
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 58572e3bc2902d046be7732350bdbf16
-    m_Address: ShieldTile
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - Remote
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 667615c9aa6f5ce46986e32cf86e73ad
-    m_Address: SkillTile
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
