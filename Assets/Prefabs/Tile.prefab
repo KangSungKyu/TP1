@@ -45,10 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9fe004cf59902d479487126c707c1f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BTile
+  type: 0
   attr: 0
   x: 0
   y: 0
-  type: 0
+  skillIdx: 0
 --- !u!212 &7243430173504133436
 SpriteRenderer:
   serializedVersion: 2
@@ -95,7 +96,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1426738621
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 46fedce5fa6d9364596cc56ef5169dbd, type: 3}

@@ -64,7 +64,7 @@ public class PlayerUnit : UnitBase
             targetLineList.Add(toTarget);
         }
 
-        if (toTarget != null)
+        if (toTarget != null && targetUnit != null)
         {
             Vector3 pA = GetUnitHeadPosition();
             Vector3 pB = targetUnit.GetUnitHeadPosition();

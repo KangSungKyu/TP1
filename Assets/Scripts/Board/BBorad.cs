@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using UniRx;
 using UnityEngine;
@@ -27,6 +28,8 @@ public class BBoard : MonoBehaviour
     private SpriteRendererFillAmount timeGauge = null;
     [SerializeField]
     private SpriteRenderer cover = null;
+    [SerializeField]
+    private GameObject selected = null;
 
     public BBoardType Type => type;
     public BBoardDrawState DrawState => drawState;
@@ -178,7 +181,7 @@ public class BBoard : MonoBehaviour
 
                         tile.transform.localPosition = new Vector2(tx, ty);
 
-                        board.SetTile(x, y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile));
+                        board.SetTile(x, y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
                         // track pooled tile so we can release it later
                         board.pooledTiles.Add(tile);
 
@@ -189,7 +192,7 @@ public class BBoard : MonoBehaviour
                         Debug.LogError("CreateEmptyBoard: failed to get tile from pool - creating fallback Image");
                         GameObject go = new GameObject($"Tile_{x}_{y}", typeof(Transform), typeof(BTile));
                         SpriteRenderer spr = go.GetComponent<SpriteRenderer>();
-                        spr.sprite = ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile);
+                        spr.sprite = ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile);
                         go.transform.SetParent(board.tilePivot.transform, false);
                     }
                 }
@@ -199,6 +202,8 @@ public class BBoard : MonoBehaviour
 
             board.maxTimer.Value = maxTimer;
             board.currentTimer.Value = 0.0f;
+
+            board.HideselectedUI();
         }
         
         return board;
@@ -399,7 +404,7 @@ public class BBoard : MonoBehaviour
                     if (tiles[p.y, p.x].type == BTileType.Block)
                     {
                         tiles[p.y, p.x].type = BTileType.Empty;
-                        SetTile(p.x, p.y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile));
+                        SetTile(p.x, p.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
                         SetTileColor(p.x, p.y, Color.white);
                         repairAttempts++;
                         removedAny = true;
@@ -434,6 +439,8 @@ public class BBoard : MonoBehaviour
             }
         }
 
+        ShowSelectedUI(startPoint.x, startPoint.y);
+
         drawState = BBoardDrawState.None;
     }
 
@@ -465,6 +472,7 @@ public class BBoard : MonoBehaviour
 
         disCurTimer?.Dispose();
 
+        HideselectedUI();
         ForceStopBoardTimer();
         ClearDrawLine();
         SetOwner(null);
@@ -482,7 +490,7 @@ public class BBoard : MonoBehaviour
                 tiles[y, x].type = BTileType.Empty;
                 tiles[y, x].attr = BTileAttribute.None;
 
-                SetTile(x, y, ResourceManager.Instance.GetResource<Sprite>(Commons.ResKey_BaseTile));
+                SetTile(x, y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
                 SetTileColor(x, y, Color.white);
             }
         }
@@ -513,11 +521,31 @@ public class BBoard : MonoBehaviour
                 }
             }
 
+            HideselectedUI();
             ClearDrawLine();
             pointList.Add(startPoint);
-            SetTileColor(startPoint.x, startPoint.y, Color.green);
-            SetTileColor(endPoint.x, endPoint.y, Color.red);
+            SetTile(startPoint.x, startPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_StartTile));
+            SetTile(endPoint.x, endPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_EndTile));
+            ShowSelectedUI(startPoint.x, startPoint.y);
+            //SetTileColor(startPoint.x, startPoint.y, Color.green);
+            //SetTileColor(endPoint.x, endPoint.y, Color.red);
         }
+    }
+
+    public void ShowSelectedUI(int x, int y)
+    {
+        if(TryGetTile(x, y, out BTile tile))
+        {
+            selected.transform.position = tile.transform.position;
+            selected.GetComponent<SpriteRenderer>().sortingOrder = tile.GetComponent<SpriteRenderer>().sortingOrder + 1;
+            
+            selected.SetActive(true);
+        }
+    }
+
+    public void HideselectedUI()
+    {
+        selected.SetActive(false);
     }
 
     public bool TryGetTile(int x, int y, out BTile tile)
@@ -689,6 +717,7 @@ public class BBoard : MonoBehaviour
 
         pointList.Add(new Vector2Int(newX, newY));
         SetTileColor(newX, newY, Color.green);
+        ShowSelectedUI(newX, newY);
 
         if(newX == endPoint.x && newY == endPoint.y)
         {
@@ -868,6 +897,7 @@ public class BBoard : MonoBehaviour
 
         tileGrid.transform.localScale = resizeScale;
         cover.transform.localScale = resizeScale;
+        selected.transform.localScale = resizeScale;
     }
 
     private bool IsAround(Vector2Int center, Vector2Int pos)
@@ -926,7 +956,7 @@ public class BBoard : MonoBehaviour
             }
 
             tiles[c.y, c.x].type = tileType;
-            SetTile(c.x, c.y, ResourceManager.Instance.GetResource<Sprite>(resKey_Tile));
+            SetTile(c.x, c.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, resKey_Tile));
 
             if (tileType == BTileType.Skill && skillList != null)
             {
@@ -1038,8 +1068,10 @@ public class BBoard : MonoBehaviour
         tiles[startPoint.y, startPoint.x].attr = BTileAttribute.StartPoint;
         tiles[endPoint.y, endPoint.x].attr = BTileAttribute.EndPoint;
 
-        SetTileColor(startPoint.x, startPoint.y, Color.green);
-        SetTileColor(endPoint.x, endPoint.y, Color.red);
+        //SetTileColor(startPoint.x, startPoint.y, Color.green);
+        //SetTileColor(endPoint.x, endPoint.y, Color.red);
+        SetTile(startPoint.x, startPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_StartTile));
+        SetTile(endPoint.x, endPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_EndTile));
     }
 
 }

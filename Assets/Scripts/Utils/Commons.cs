@@ -527,6 +527,10 @@ public static class Commons
     public readonly static string ResKey_GuardTile = "GuardTile";
     public readonly static string ResKey_ShieldTile = "ShieldTile";
     public readonly static string ResKey_SkillTile = "SkillTile";
+    public readonly static string ResKey_StartTile = "StartTile";
+    public readonly static string ResKey_EndTile = "EndTile";
+
+    public readonly static string ResKey_Atlas_Tile = "AT_Tile";
 
     public readonly static string SceneName_Init = "InitScene";
     public readonly static string SceneName_Loading = "LoadingScene";
