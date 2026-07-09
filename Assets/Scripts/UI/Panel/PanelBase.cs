@@ -6,17 +6,16 @@ using UnityEngine.UI;
 public abstract class PanelBase : MonoBehaviour
 {
     [SerializeField]
-    private bool isRegisterByName = true;
+    protected bool isRegisterByName = true;
     [SerializeField]
-    private string registedName = string.Empty;
+    protected string registedName = string.Empty;
     [SerializeField]
-    private CanvasGroup canvasGroup = null;
+    protected CanvasGroup canvasGroup = null;
     [SerializeField]
-    private Button exitBtn = null;
+    protected Button exitBtn = null;
 
     protected bool isShow = false;
-
-    private Coroutine coPanel = null;
+    protected Coroutine coPanel = null;
 
     public void Show()
     {
@@ -38,6 +37,18 @@ public abstract class PanelBase : MonoBehaviour
         }
     }
 
+    public void SetOnExitEvent(System.Action act)
+    {
+        if(exitBtn != null)
+        {
+            exitBtn.onClick.RemoveAllListeners();
+            exitBtn.onClick.AddListener(() =>
+            {
+                act?.Invoke();
+            });
+        }
+    }
+
     protected abstract bool OnPanelShow();
     protected abstract bool OnPanelHide();
 
@@ -54,14 +65,15 @@ public abstract class PanelBase : MonoBehaviour
             PanelManager.RegisterPanel(this);
         }
 
-        if(exitBtn != null)
+        SetOnExitEvent(Hide);
+
+        if(canvasGroup == null)
         {
-            exitBtn.onClick.RemoveAllListeners();
-            exitBtn.onClick.AddListener(() => Hide()); //todo close
+            canvasGroup = GetComponent<CanvasGroup>();
         }
 
         StopCoroutine();
-        Hide();
+        ForceHide();
     }
 
     private void OnDestroy()

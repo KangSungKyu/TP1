@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\UI\Panel\PanelBase.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\PanelManager.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\SimpleTextPanel.cs" />
+    <Compile Include="Assets\Scripts\UI\Panel\StageResultPanel.cs" />
     <Compile Include="Assets\Scripts\UI\SceneFadeUI.cs" />
     <Compile Include="Assets\Scripts\Utils\IntArrayConverter.cs" />
     <Compile Include="Assets\Scripts\Utils\CollectionExtensions.cs" />

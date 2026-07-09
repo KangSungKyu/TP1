@@ -58,7 +58,7 @@ public class BattleContent : GameContent
                 int patternLen = mpd.SkillIdx.Count((o) => o > 0);
 
                 needAnim.Add(ad.ControllerKey);
-                needPort.Add($"Portraits[Portraits_{ud.PortraitIdx}]");
+                needPort.Add($"{Commons.ResKey_PortraitUIs}[{Commons.ResKey_PortraitUIs}_{ud.PortraitIdx}]");
 
                 tilePoolCount += (int)((md.BoardDefaultWidth * md.BoardDefaultHeight) * sd.MonsterCount[i]) * patternLen;
                 monsterPoolCount += (int)sd.MonsterCount[i] * patternLen;
@@ -103,26 +103,29 @@ public class BattleContent : GameContent
         //anim defeat ui
         //branch stage select ui and title scene by player selection
 
-        battleStage.ReleaseStage();
-
         Debug.Log($"stage defeat");
 
-        GameNetworkManager.Instance.UpdateDefeatStage((json) =>
+        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(false, () =>
         {
-            APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
+            battleStage.ReleaseStage();
 
-            if (res.data != null)
+            GameNetworkManager.Instance.UpdateDefeatStage((json) =>
             {
-                stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
+                APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-                userData.Exp = 0;
-                userData.MapIdx = userData.SavedMapIdx;
-                userData.StageIdx = userData.SavedStageIdx;
+                if (res.data != null)
+                {
+                    stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
 
-                SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
+                    userData.Exp = 0;
+                    userData.MapIdx = userData.SavedMapIdx;
+                    userData.StageIdx = userData.SavedStageIdx;
 
-                GameSceneManager.Instance.LoadScene(selectStageScene);
-            }
+                    SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
+
+                    GameSceneManager.Instance.LoadScene(selectStageScene);
+                }
+            });
         });
     }
 
@@ -133,37 +136,40 @@ public class BattleContent : GameContent
         //input map change (battle -> ui)
         //goto stage select ui(or scene)
 
-        battleStage.ReleaseStage();
-
         Debug.Log($"stage clear");
 
-        StageData stageData = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
-        uint totalExp = 0;
-
-        for (int i = 0; i < stageData.MonsterIdx.Length; ++i)
+        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(true, () =>
         {
-            if (stageData.MonsterIdx[i] > 0)
+            battleStage.ReleaseStage();
+
+            StageData stageData = DataTableManager.Instance.GetStageData((uint)userData.StageIdx);
+            uint totalExp = 0;
+
+            for (int i = 0; i < stageData.MonsterIdx.Length; ++i)
             {
-                MonsterData monsterData = DataTableManager.Instance.GetMonsterData(stageData.MonsterIdx[i]);
-                RewardData rewardData = DataTableManager.Instance.GetRewardData(stageData.RewardIdx[i]);
+                if (stageData.MonsterIdx[i] > 0)
+                {
+                    MonsterData monsterData = DataTableManager.Instance.GetMonsterData(stageData.MonsterIdx[i]);
+                    RewardData rewardData = DataTableManager.Instance.GetRewardData(stageData.RewardIdx[i]);
 
-                totalExp += (rewardData.Exp * stageData.MonsterCount[i]);
+                    totalExp += (rewardData.Exp * stageData.MonsterCount[i]);
+                }
             }
-        }
 
-        userData.Exp += (int)totalExp;
-        stageClearData.SetState(userData.StageIdx, 1);
+            userData.Exp += (int)totalExp;
+            stageClearData.SetState(userData.StageIdx, 1);
 
-        GameNetworkManager.Instance.UpdateClearStage(userData.StageIdx, (json) =>
-        {
-            APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
-
-            if (res.data != null)
+            GameNetworkManager.Instance.UpdateClearStage(userData.StageIdx, (json) =>
             {
-                stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
+                APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-                GameSceneManager.Instance.LoadScene(selectStageScene);
-            }
+                if (res.data != null)
+                {
+                    stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
+
+                    GameSceneManager.Instance.LoadScene(selectStageScene);
+                }
+            });
         });
     }
 }

@@ -72,6 +72,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21d137d9733e1d344917da825f742f9d
+    m_Address: StageUIs
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2259e3bff607fe34fae2e474c3ad5ed7
     m_Address: StageMapUI_6002
     m_ReadOnly: 0
@@ -86,6 +92,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3326240be52180144ba0b5d4bd3f1731
     m_Address: player_anim
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 38b8de9a2d6b6b3499b1be04b12d5a40
+    m_Address: WinBG
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -130,6 +142,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 53ac51f5309336541bac255fa53c5a9f
     m_Address: StageSelectScene
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6605c5992549ed44db83d7be5574e800
+    m_Address: WinText
     m_ReadOnly: 0
     m_SerializedLabels:
     - Remote
@@ -182,6 +200,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cfa9f0bf8f9d8c42902108daf8c38b8
+    m_Address: DefeatText
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a18cb81764771974ca6226518715a48e
     m_Address: monster4_anim
     m_ReadOnly: 0
@@ -206,6 +230,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - Atlas
+    - Remote
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a83f9c2ad67e2a54687e5c203ea750b6
+    m_Address: DefeatBG
+    m_ReadOnly: 0
+    m_SerializedLabels:
     - Remote
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae2d3c5bee912d54a901933afd785e66

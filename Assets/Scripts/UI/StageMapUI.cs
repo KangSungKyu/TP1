@@ -14,6 +14,7 @@ public class StageMapUI : MonoBehaviour
     {
         foreach (var ui in stageUI)
         {
+            ui.Show();
             ui.SetClickEvent((stageIdx) =>
             {
                 GameNetworkManager.Instance.UpdateEnterUserStage(StageMapIdx, (int)stageIdx, (json) =>

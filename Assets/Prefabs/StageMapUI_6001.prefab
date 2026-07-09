@@ -249,6 +249,10 @@ PrefabInstance:
       value: 7007
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7007
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -286,11 +290,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -374,6 +378,10 @@ PrefabInstance:
       value: 7009
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7009
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -411,11 +419,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -499,6 +507,10 @@ PrefabInstance:
       value: 7005
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7005
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -536,11 +548,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -624,6 +636,10 @@ PrefabInstance:
       value: 7010
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7010
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -661,11 +677,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -749,6 +765,10 @@ PrefabInstance:
       value: 7001
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7001
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -786,11 +806,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -874,6 +894,10 @@ PrefabInstance:
       value: 7008
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7008
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -885,6 +909,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: StageUI (7)
       objectReference: {fileID: 0}
+    - target: {fileID: 5824452643501547977, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -1936357590, guid: 21d137d9733e1d344917da825f742f9d, type: 3}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -911,11 +939,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -999,6 +1027,10 @@ PrefabInstance:
       value: 7002
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7002
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -1040,11 +1072,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1128,6 +1160,10 @@ PrefabInstance:
       value: 7004
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7004
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -1165,11 +1201,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1253,6 +1289,10 @@ PrefabInstance:
       value: 7003
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7003
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -1294,11 +1334,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1382,6 +1422,10 @@ PrefabInstance:
       value: 7006
       objectReference: {fileID: 0}
     - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
+      propertyPath: stageIdx
+      value: 7006
+      objectReference: {fileID: 0}
+    - target: {fileID: 55662645806918185, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: ConnectStageIdx.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -1419,11 +1463,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 160
       objectReference: {fileID: 0}
     - target: {fileID: 9046122674344791973, guid: cf6339cc4bd0ff944bd8f5f1b8f83489, type: 3}
       propertyPath: m_LocalPosition.x

@@ -530,6 +530,13 @@ public static class Commons
     public readonly static string ResKey_StartTile = "StartTile";
     public readonly static string ResKey_EndTile = "EndTile";
 
+    public readonly static string ResKey_PortraitUIs = "Portraits";
+    public readonly static string ResKey_StageUIs = "StageUIs";
+    public readonly static string ResKey_WinBG = "WinBG";
+    public readonly static string ResKey_DefeatBG = "DefeatBG";
+    public readonly static string ResKey_WinText = "WinText";
+    public readonly static string ResKey_DefeatText = "DefeatText";
+
     public readonly static string ResKey_Atlas_Tile = "AT_Tile";
 
     public readonly static string SceneName_Init = "InitScene";

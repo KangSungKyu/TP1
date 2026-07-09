@@ -23,23 +23,24 @@ public class InitScene : MonoBehaviour
     {
         StartCoroutine(ResourceManager.Instance.Init(() =>
         {
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_BaseTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_BlockTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_AttackTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_GuardTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_ShieldTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_SkillTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_StartTile, (o) => Debug.Log($"resource loaded, {o.name}"));
-            //ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_EndTile, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_WinBG, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_DefeatBG, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_WinText, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_DefeatText, (o) => Debug.Log($"resource loaded, {o.name}"));
 
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("Board", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("HPUI", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("MonsterUnit", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("PlayerUnit", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("PortraitUI", (o) => Debug.Log($"resource loaded, {o.name}"));
-            ResourceManager.Instance.LoadAssetAsync<GameObject>("Tile", (o) => Debug.Log($"resource loaded, {o.name}"));
+            for (int i = 0; i < 3; ++i)
+            {
+                ResourceManager.Instance.LoadAssetAsync<Sprite>($"{Commons.ResKey_StageUIs}[{Commons.ResKey_StageUIs}_{i}]", (o) => Debug.Log($"resource loaded, {o.name}"));
+            }
 
-            ResourceManager.Instance.LoadAssetAsync<Sprite>("Portraits[Portraits_1]", (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_Board, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_HPUI, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_MonsterUnit, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_PlayerUnit, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_PortraitUI, (o) => Debug.Log($"resource loaded, {o.name}"));
+            ResourceManager.Instance.LoadAssetAsync<GameObject>(Commons.ResKey_Tile, (o) => Debug.Log($"resource loaded, {o.name}"));
+
+            ResourceManager.Instance.LoadAssetAsync<Sprite>($"{Commons.ResKey_PortraitUIs}[{Commons.ResKey_PortraitUIs}_1]", (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<RuntimeAnimatorController>("player_anim", (o) => Debug.Log($"resource loaded, {o.name}"));
 
             SaveLoadManager.Instance.LoadClientData();
