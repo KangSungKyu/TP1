@@ -154,8 +154,8 @@ public class BattleStage : MonoBehaviour
         boardCursor[1].Value = 0;
         boardPageCursor.Value = 0;
 
-        boardCursor[0].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
-        boardCursor[1].Subscribe((v)=>OnChangedBoardCursor(boardPageCursor.Value, v)).AddTo(this);
+        boardCursor[0].Subscribe((v)=>{ OnChangedBoardCursor(boardPageCursor.Value, v); }).AddTo(this);
+        boardCursor[1].Pairwise().Subscribe((pair)=> { OnPrevBoardCursor(boardPageCursor.Value, pair.Previous); OnChangedBoardCursor(boardPageCursor.Value, pair.Current); }).AddTo(this);
         boardPageCursor.Subscribe(OnChangedBoardPageCursor).AddTo(this);
 
         readyQueue.Clear();
@@ -714,7 +714,6 @@ public class BattleStage : MonoBehaviour
                 }
 
                 monsterUnit.DelBoard(result.CurrentBoard);
-                monsterUnit.DelLastTargetLine();
 
                 if (boardList[1].Count <= 0)
                 {
@@ -953,10 +952,36 @@ public class BattleStage : MonoBehaviour
             SortingBoard(page);
             RepositionUpperBoardList(page);
             RepositionDownBoardList(page);
-            player?.SetTarget(selectedBoard.Owner);
-            player?.DrawTargetLine();
+
+            if(page == 0)
+            {
+                player?.SetTarget(selectedBoard.Owner);
+                player?.DrawTargetLine();
+            }
+            else
+            {
+                MonsterUnit monsterUnit = selectedBoard.Owner as MonsterUnit;
+
+                monsterUnit?.PlaySelectedTargetLine(selectedBoard);
+            }
 
             //Debug.Log(selectedBoard.ToString());
+        }
+    }
+
+    private void OnPrevBoardCursor(int page, int cursor)
+    {
+        PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
+
+        if(page == 1)
+        {
+            for(int i = 0; i < boardList[page].Count; ++i)
+            {
+                BBoard board = boardList[page][i];
+                MonsterUnit monsterUnit = board.Owner as MonsterUnit;
+
+                monsterUnit?.StopSelectedTargetLine(board);
+            }
         }
     }
 

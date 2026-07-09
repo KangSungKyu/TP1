@@ -16,8 +16,9 @@ public class MonsterUnit : UnitBase
     private List<BBoard> dfsBoardList = null;
     private MonsterData monsterData = default(MonsterData);
     private MonsterPatternData monsterPatternData = default(MonsterPatternData);
-
     private List<uint> cachedPatternList = new List<uint>();
+    private Dictionary<int, QuadraticBezierRenderer> dictargetLine = new Dictionary<int, QuadraticBezierRenderer>();
+
 
     public override void LoadFromSO(uint idx)
     {
@@ -63,6 +64,7 @@ public class MonsterUnit : UnitBase
                 this.dfsBoardList.Add(board);
 
                 DrawTargetLine();
+                dictargetLine.Add(board.GetHashCode(), targetLineList.Last());
             }
         }
     }
@@ -80,8 +82,46 @@ public class MonsterUnit : UnitBase
                 this.dfsBoardList.Remove(board);
             }
 
+            int code = board.GetHashCode();
+
+            if(dictargetLine.ContainsKey(code))
+            {
+                DelTargetLine(dictargetLine[code]);
+                dictargetLine.Remove(code);
+            }
+
             board.ReleaseBoard();
             Factory.Instance.ReleaseBoard(board);
+        }
+    }
+
+    public void PlaySelectedTargetLine(BBoard board)
+    {
+        if(board != null)
+        {
+            int code = board.GetHashCode();
+
+            if(dictargetLine.ContainsKey(code))
+            {
+                QuadraticBezierRenderer targetLine = dictargetLine[code];
+
+                targetLine.PlayColorAnim();
+            }
+        }
+    }
+
+    public void StopSelectedTargetLine(BBoard board)
+    {
+        if (board != null)
+        {
+            int code = board.GetHashCode();
+
+            if (dictargetLine.ContainsKey(code))
+            {
+                QuadraticBezierRenderer targetLine = dictargetLine[code];
+
+                targetLine.StopColorAnim();
+            }
         }
     }
 
