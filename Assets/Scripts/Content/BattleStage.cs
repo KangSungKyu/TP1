@@ -484,6 +484,13 @@ public class BattleStage : MonoBehaviour
 
                 if(board != null)
                 {
+                    if(board.Width <= 0 || board.Height <= 0)
+                    {
+                        Factory.Instance.ReleaseBoard(board);
+                        Debug.LogError($"invalid board, {i}");
+                        yield break;
+                    }
+
                     board.ForceStopBoardTimer();
                     ClearBoard(board);
                     board.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());

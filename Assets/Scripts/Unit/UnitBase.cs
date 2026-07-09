@@ -122,7 +122,7 @@ public abstract class UnitBase : MonoBehaviour
     public void SetPortraitUI(Image port)
     {
         portrait = port;
-        portrait.sprite = ResourceManager.Instance.GetResource<Sprite>($"Portraits[Portraits_{info.PortraitIdx}]");
+        portrait.sprite = ResourceManager.Instance.GetResource<Sprite>($"{Commons.ResKey_PortraitUIs}[{Commons.ResKey_PortraitUIs}_{info.PortraitIdx}]");
     }
 
     public virtual void ApplyDamage(float damage)
@@ -248,7 +248,10 @@ public abstract class UnitBase : MonoBehaviour
     public void DelLastTargetLine()
     {
         //todo : 이왕이면 생성될때와 지워질때 짝 맞추기
-        Factory.Instance.ReleaseTargetLine(targetLineList.Last());
+        if(targetLineList != null && targetLineList.Count > 0)
+        {
+            Factory.Instance.ReleaseTargetLine(targetLineList.Last());
+        }
     }
 
     public abstract void DrawTargetLine();
