@@ -254,6 +254,11 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
 
+    public void DelTargetLine(QuadraticBezierRenderer targetLine)
+    {
+        Factory.Instance.ReleaseTargetLine(targetLine);
+    }
+
     public abstract void DrawTargetLine();
 
     protected abstract void Init();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DG.Tweening;
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ public class QuadraticBezierRenderer : MonoBehaviour
 
     private Color lineColor = Color.white;
     private LineRenderer lineRenderer = null;
+    private Tweener doAnim = null;
 
     public void SetBezierPoints(Vector3 pA, Vector3 ctrlP, Vector3 pB)
     {
@@ -35,6 +37,33 @@ public class QuadraticBezierRenderer : MonoBehaviour
         lineRenderer.startColor = lineColor;
         lineRenderer.endColor = lineColor;
         endPoint.transform.GetChild(0).GetComponent<SpriteRenderer>().color = lineColor;
+    }
+
+    public void PlayColorAnim()
+    {
+        if(doAnim != null)
+        {
+            doAnim.Restart();
+        }
+        else
+        {
+            Color alphaColor = new Color(lineColor.r, lineColor.g, lineColor.b, 0.0f);
+            Color2 startColor = new Color2(lineColor, lineColor);
+            Color2 endColor = new Color2(alphaColor, alphaColor);
+
+            doAnim = lineRenderer.DOColor(startColor, endColor, 1.5f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+
+            doAnim.Play();
+        }
+    }
+
+    public void StopColorAnim()
+    {
+        doAnim?.Kill();
+        doAnim = null;
+
+        lineRenderer.startColor = lineColor;
+        lineRenderer.endColor = lineColor;
     }
 
     public void Render()
