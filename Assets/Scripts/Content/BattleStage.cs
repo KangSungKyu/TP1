@@ -942,7 +942,7 @@ public class BattleStage : MonoBehaviour
 
     private void OnChangedBoardCursor(int page, int cursor)
     {
-        if (cursor > -1)
+        if (cursor > -1 && cursor < boardList[page].Count)
         {
             PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
             BBoard selectedBoard = boardList[page][cursor];
