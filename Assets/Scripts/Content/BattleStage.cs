@@ -533,8 +533,8 @@ public class BattleStage : MonoBehaviour
                     tempBoard.FillBoard(BBoardType.Defensive);
                     monsterUnit.AddBoard(tempBoard);
 
-                    boardPageCursor.Value = 1;
-                    boardCursor[1].SetValueAndForceNotify(boardList[1].Count - 1);
+                    //boardPageCursor.Value = 1;
+                    //boardCursor[1].SetValueAndForceNotify(boardList[1].Count - 1);
 
                     SortingBoard(1);
                     RepositionUpperBoardList(1);
@@ -900,7 +900,7 @@ public class BattleStage : MonoBehaviour
                 if (monster != null)
                 {
                     monster.Release();
-                    monster.DelAttackBoardList();
+                    monster.DelDefensivekBoardList();
                     Factory.Instance.ReleasePortraitUI(monster.PortraitUI);
                     currentBoard.ReleaseBoard();
                     boardList[boardPageCursor.Value].Remove(currentBoard);
@@ -958,7 +958,7 @@ public class BattleStage : MonoBehaviour
                 player?.SetTarget(selectedBoard.Owner);
                 player?.DrawTargetLine();
             }
-            else
+            else if(page == 1)
             {
                 MonsterUnit monsterUnit = selectedBoard.Owner as MonsterUnit;
 

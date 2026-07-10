@@ -140,7 +140,7 @@ public class MonsterUnit : UnitBase
         return null;
     }
 
-    public void DelAttackBoardList()
+    public void DelDefensivekBoardList()
     {
         for (int i = 1; i < this.dfsBoardList.Count; i++)
         {
