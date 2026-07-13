@@ -11,32 +11,32 @@ start
 while (isBattleActive?) is (yes)
   :Add ATB ticks to all units (AddATBTick);
 
-  if (readyQueue not empty?) then (yes)
-	:Dequeue attacker;
+	while (readyQueue not empty?) is (yes)
+	:Dequeue ready unit (readyQueue.Dequeue);
 	if (attacker is PlayerUnit?) then (yes)
-	  :Create Puzzle for attacker;
+	  :Create Puzzle boards for player (board.FillBoard / StartBoardTimer);
 	  fork
-		:Player has puzzle time to solve;
+		:Player solves puzzle or waits until board timer expires;
 	  fork again
-		:Puzzle timer countdown (expire if timeout);
+		:Board timer counts down (Board.StartBoardTimer -> OnPuzzleExpired);
 	  end fork
 	  if (Puzzle Completed?) then (yes)
-		:OnPuzzleCompleted -> build Result (skills/targets);
+		:OnPuzzleCompleted(result) -> build PuzzleResult (SkillList, TargetList);
 	  else (expired)
-		:OnPuzzleExpired -> build Result (enemy pattern or default attack);
+		:OnPuzzleExpired(result) -> build PuzzleResult (monster pattern or default attack);
 	  endif
 	else (monster)
-	  :Monster prepares pattern;
-	  :When pattern timer ends -> enqueue Result;
+	  :Monster creates defensive board (Factory.GetBoard) and starts timer;
+	  :When board timer ends -> OnPuzzleExpired / OnPuzzleCompleted -> enqueue result;
 	endif
-  endif
+  endwhile
 
   if (resultQueue not empty?) then (yes)
 	:Dequeue Result;
 	:Process Skill/Attack sequence;
 	:ApplyDamage / ApplyStatus to targets;
 	if (target HP <= 0?) then (yes)
-	  :Handle Death (FadeOut, Release, Drop loot);
+	  :Handle Death (IEPlayAction(Death) -> Release resources);
 	endif
 	if (All Monsters Dead?) then (yes)
 	  :Trigger OnStageClear -> break loop;
@@ -54,8 +54,8 @@ stop
 
 note right
   주요 이벤트:
-  - readyQueue: ATB가 차면 유닛이 진입
-  - resultQueue: 퍼즐 완료/만료 또는 몬스터 패턴으로부터 생성
+	- readyQueue: ATB가 차면 유닛이 진입 (Unit.OnATBReady -> readyQueue.Enqueue)
+  - resultQueue: 퍼즐 완료/만료 또는 몬스터 패턴으로부터 생성 (OnPuzzleCompleted/OnPuzzleExpired -> resultQueue.Enqueue)
   - 퍼즐은 결과 생성 지연(유예시간) 역할
 end note
 
