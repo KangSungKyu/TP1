@@ -947,11 +947,7 @@ public class BattleStage : MonoBehaviour
             PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
             BBoard selectedBoard = boardList[page][cursor];
 
-            DownToBoard(page);
-            UpToBoard(page, cursor);
-            SortingBoard(page);
-            RepositionUpperBoardList(page);
-            RepositionDownBoardList(page);
+            SelectBoard(page, cursor);
 
             if(page == 0)
             {
@@ -983,6 +979,15 @@ public class BattleStage : MonoBehaviour
                 monsterUnit?.StopSelectedTargetLine(board);
             }
         }
+    }
+
+    private void SelectBoard(int page, int cursor)
+    {
+        DownToBoard(page);
+        UpToBoard(page, cursor);
+        SortingBoard(page);
+        RepositionUpperBoardList(page);
+        RepositionDownBoardList(page);
     }
 
     private void UpToBoard(int page, int cursor)
