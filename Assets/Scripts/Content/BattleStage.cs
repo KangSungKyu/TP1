@@ -1,9 +1,6 @@
-﻿using NUnit.Framework.Internal;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Resources;
-using System.Text;
 using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -33,8 +30,6 @@ public class BattleStage : MonoBehaviour
     private RectTransform[] boardContainer_U_RT = null;
     [SerializeField]
     private Transform[] boardContainer = null;
-    [SerializeField]
-    private Transform[] boardContainer_U = null;
     [SerializeField]
     private GameObject PlayerSpawnGO = null;
     [SerializeField]
@@ -140,10 +135,8 @@ public class BattleStage : MonoBehaviour
         playerCount.Subscribe(OnChangedPlayerCount).AddTo(this);
         monsterCount.Subscribe(OnChangedMonsterCount).AddTo(this);
 
-        SortingBoard(0);
-        DownToBoard(0);
-        RepositionUpperBoardList(0);
-        RepositionDownBoardList(0);
+        SortingBoardZOrder(0);
+        RepositionBoardList(0);
 
         for (int i = 0; i < boardList[0].Count; i++)
         {
@@ -511,9 +504,8 @@ public class BattleStage : MonoBehaviour
                 }
             }
 
-            SortingBoard(0);
-            RepositionUpperBoardList(0);
-            RepositionDownBoardList(0);
+            SortingBoardZOrder(0);
+            RepositionBoardList(0);
         }
         else if (unit is MonsterUnit monsterUnit)
         {
@@ -533,12 +525,8 @@ public class BattleStage : MonoBehaviour
                     tempBoard.FillBoard(BBoardType.Defensive);
                     monsterUnit.AddBoard(tempBoard);
 
-                    //boardPageCursor.Value = 1;
-                    //boardCursor[1].SetValueAndForceNotify(boardList[1].Count - 1);
-
-                    SortingBoard(1);
-                    RepositionUpperBoardList(1);
-                    RepositionDownBoardList(1);
+                    SortingBoardZOrder(1);
+                    RepositionBoardList(1);
 
                     PuzzleResult resultData = new PuzzleResult()
                     {
@@ -566,8 +554,6 @@ public class BattleStage : MonoBehaviour
             {
                 if (playerUnit.TargetUnit != null)
                 {
-                    TestPrintPointList();
-
                     ApplyStatusData applyAttackerStatus = result.CurrentBoard.GetApplyStatusFromPath();
 
                     for(int i = 0; i < result.TargetList.Count; ++i)
@@ -834,34 +820,6 @@ public class BattleStage : MonoBehaviour
         }
     }
 
-    private void TestPrintPointList()
-    {
-        /*
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-        BBoard selectedBoard = boardList[boardPageCursor.Value][currentBoardCursor];
-
-        if (selectedBoard.DrawState == BBoardDrawState.Finished)
-        {
-            List<Vector2Int> pointList = selectedBoard.PointList;
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("Point List: ");
-
-            for (int i = 0; i < pointList.Count; i++)
-            {
-                BTile btile = null;
-
-                if (selectedBoard.TryGetTile(pointList[i].x, pointList[i].y, out btile))
-                {
-                    sb.Append($"[{btile.type}] ");
-                }
-            }
-
-            Debug.Log(sb.ToString());
-        }
-        //*/
-    }
-
     private void OnPlayerDeath(PlayerUnit player, float hp)
     {
         if (hp <= 0)
@@ -983,51 +941,27 @@ public class BattleStage : MonoBehaviour
 
     private void SelectBoard(int page, int cursor)
     {
-        DownToBoard(page);
-        UpToBoard(page, cursor);
-        SortingBoard(page);
-        RepositionUpperBoardList(page);
-        RepositionDownBoardList(page);
+        SortingBoardZOrder(page);
+        RepositionBoardList(page);
     }
 
-    private void UpToBoard(int page, int cursor)
+    private void RepositionBoardList(int page)
     {
-        BBoard selectedBoard = boardList[page][cursor];
-
-        selectedBoard.transform.SetParent(boardContainer_U[page]);
-    }
-
-    private void RepositionUpperBoardList(int page)
-    {
-        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_U_RT[page]));
-
-        for (int i = 0; i < boardContainer_U[page].childCount; ++i)
+        for(int i = 0; i < boardList[page].Count; ++i)
         {
-            boardContainer_U[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
-        }
-    }
+            Vector3 startPos = Vector3.zero;
 
-    private void RepositionDownBoardList(int page)
-    {
-        Vector3 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
+            if(i == boardCursor[page].Value)
+            {
+                startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_U_RT[page]));
+            }
+            else
+            {
+                startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
+            }
 
-        for (int i = 0; i < boardContainer[page].childCount; ++i)
-        {
             boardContainer[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
         }
-    }
-
-    private void DownToBoard(int page)
-    {
-        Transform prev = boardContainer_U[page].childCount > 0 ? boardContainer_U[page].GetChild(0) : null;
-
-        prev?.SetParent(boardContainer[page]);
-
-    }
-
-    private Vector3 OverlayToWorld(RectTransform rectTransform)
-    {
-        return OverlayToWorld(rectTransform.position);
     }
 
     private Vector3 OverlayToWorld(Vector3 screen)
@@ -1045,18 +979,20 @@ public class BattleStage : MonoBehaviour
         return rectTransform.TransformPoint(bound.center);
     }
 
-    private void SortingBoard(int page)
+    private void SortingBoardZOrder(int page)
     {
-        for(int i = 0; i < boardContainer_U[page].childCount; ++i)
+        for(int i = 0; i < boardList[page].Count; ++i)
         {
-            BBoard board = boardContainer_U[page].GetChild(i).GetComponent<BBoard>();
-            board.GetComponent<SortingGroup>().sortingOrder = 1000 - (i * 10);
-        }
+            BBoard board = boardList[page][i];
 
-        for (int i = 0; i < boardContainer[page].childCount; ++i)
-        {
-            BBoard board = boardContainer[page].GetChild(i).GetComponent<BBoard>();
-            board.GetComponent<SortingGroup>().sortingOrder = 100 - (i * 10);
+            if(i == boardCursor[page].Value)
+            {
+                board.GetComponent<SortingGroup>().sortingOrder = 1000 - (i * 10);
+            }
+            else
+            {
+                board.GetComponent<SortingGroup>().sortingOrder = 100 - (i * 10);
+            }
         }
     }
 
@@ -1068,7 +1004,7 @@ public class BattleStage : MonoBehaviour
         }
         else
         {
-
+            //nothing
         }
     }
 
@@ -1080,7 +1016,7 @@ public class BattleStage : MonoBehaviour
         }
         else
         {
-
+            //nothing
         }
     }
 }
