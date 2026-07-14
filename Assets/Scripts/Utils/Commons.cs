@@ -350,6 +350,8 @@ public class SkillData
     public int RequireLevel { get; set; }
     [Name("quota")]
     public int Quota { get; set; }
+    [Name("tileres")]
+    public string TileRes { get; set; }
 }
 
 [System.Serializable]

@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using UniRx;
 using UnityEngine;
@@ -180,20 +179,15 @@ public class BBoard : MonoBehaviour
                         tile.transform.SetParent(board.tilePivot, false);
 
                         tile.transform.localPosition = new Vector2(tx, ty);
-
-                        board.SetTile(x, y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
-                        // track pooled tile so we can release it later
-                        board.pooledTiles.Add(tile);
-
                         board.tiles[y, x] = tile;
+
+                        // track pooled tile so we can release it later
+                        board.SetTile(x, y, null);
+                        board.pooledTiles.Add(tile);
                     }
                     else
                     {
                         Debug.LogError("CreateEmptyBoard: failed to get tile from pool - creating fallback Image");
-                        GameObject go = new GameObject($"Tile_{x}_{y}", typeof(Transform), typeof(BTile));
-                        SpriteRenderer spr = go.GetComponent<SpriteRenderer>();
-                        spr.sprite = ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile);
-                        go.transform.SetParent(board.tilePivot.transform, false);
                     }
                 }
             }
@@ -404,7 +398,7 @@ public class BBoard : MonoBehaviour
                     if (tiles[p.y, p.x].type == BTileType.Block)
                     {
                         tiles[p.y, p.x].type = BTileType.Empty;
-                        SetTile(p.x, p.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
+                        SetTile(p.x, p.y, null);
                         SetTileColor(p.x, p.y, Color.white);
                         repairAttempts++;
                         removedAny = true;
@@ -490,7 +484,7 @@ public class BBoard : MonoBehaviour
                 tiles[y, x].type = BTileType.Empty;
                 tiles[y, x].attr = BTileAttribute.None;
 
-                SetTile(x, y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_BaseTile));
+                SetTile(x, y, null);
                 SetTileColor(x, y, Color.white);
             }
         }
@@ -709,17 +703,19 @@ public class BBoard : MonoBehaviour
             return;
         }
 
-        if (pointList.Contains(new Vector2Int(newX, newY)))
+        Vector2Int newPos = new Vector2Int(newX, newY);
+
+        if (pointList.Contains(newPos))
         {
             //Debug.Log($"DoMove: cannot move to already visited tile at ({newX},{newY})");
             return;
         }
 
-        pointList.Add(new Vector2Int(newX, newY));
-        SetTileColor(newX, newY, Color.green);
-        ShowSelectedUI(newX, newY);
+        pointList.Add(newPos);
+        SetTileColor(newPos.x, newPos.y, Color.green);
+        ShowSelectedUI(newPos.x, newPos.y);
 
-        if(newX == endPoint.x && newY == endPoint.y)
+        if(newPos.x == endPoint.x && newPos.y == endPoint.y)
         {
             drawState = BBoardDrawState.Finished;
             onPathComplete?.Invoke();
@@ -792,13 +788,8 @@ public class BBoard : MonoBehaviour
     public void SetTile(int x, int y, Sprite tile)
     {
         if (0 <= x && x < width && 0 <= y && y < height)
-        { 
-            int idx = y * width + x;
-            
-            if(idx < tilePivot.transform.childCount)
-            {
-                tilePivot.transform.GetChild(idx).GetComponent<SpriteRenderer>().sprite = tile;
-            }
+        {
+            tiles[y, x].SetTile(tile);
         }
     }
     
@@ -806,12 +797,7 @@ public class BBoard : MonoBehaviour
     {
         if (0 <= x && x < width && 0 <= y && y < height)
         {
-            int idx = y * width + x;
-
-            if (idx < tilePivot.transform.childCount)
-            {
-                tilePivot.transform.GetChild(idx).GetComponent<SpriteRenderer>().color = col;
-            }
+            tiles[y, x].SetColor(col);
         }
     }
 
@@ -969,10 +955,12 @@ public class BBoard : MonoBehaviour
                 uint skillIdx = skillList[UnityEngine.Random.Range(0, skillList.Length)];
                 tiles[c.y, c.x].skillIdx = skillIdx; //009001 
 
-                string ht = $"#ff{0:00}{skillIdx}";
+                SkillData sd = DataTableManager.Instance.GetSkillData(skillIdx);
 
-                if (ColorUtility.TryParseHtmlString(ht, out var col))
-                    SetTileColor(c.x, c.y, col);
+                if(sd != null)
+                {
+                    SetTile(c.x, c.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, sd.TileRes));
+                }
             }
         }
     }
@@ -1068,8 +1056,8 @@ public class BBoard : MonoBehaviour
         tiles[startPoint.y, startPoint.x].attr = BTileAttribute.StartPoint;
         tiles[endPoint.y, endPoint.x].attr = BTileAttribute.EndPoint;
 
-        //SetTileColor(startPoint.x, startPoint.y, Color.green);
-        //SetTileColor(endPoint.x, endPoint.y, Color.red);
+        SetTileColor(startPoint.x, startPoint.y, Color.green);
+        SetTileColor(endPoint.x, endPoint.y, Color.red);
         SetTile(startPoint.x, startPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_StartTile));
         SetTile(endPoint.x, endPoint.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, Commons.ResKey_EndTile));
     }

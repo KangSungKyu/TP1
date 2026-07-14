@@ -1,6 +1,6 @@
-﻿idx,type,targettype,targetcount,pervalue,requirelevel,quota
-9001,1,0,1,1000,1,-1
-9002,1,1,3,500,2,4
-9003,1,0,1,1250,3,3
-9004,1,0,1,1250,3,2
-9005,1,0,1,2000,4,2
+idx,type,targettype,targetcount,pervalue,requirelevel,quota,tileres
+9001,1,0,1,1000,1,-1,AttackTile
+9002,1,1,3,500,2,4,SkillTile_9002
+9003,1,0,1,1250,3,3,SkillTile_9003
+9004,1,0,1,1250,3,2,SkillTile_9004
+9005,1,0,1,2000,4,2,SkillTIle_9005
