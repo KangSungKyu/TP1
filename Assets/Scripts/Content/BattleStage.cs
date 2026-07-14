@@ -486,7 +486,7 @@ public class BattleStage : MonoBehaviour
 
                     board.ForceStopBoardTimer();
                     ClearBoard(board);
-                    board.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                    board.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkill());
                     board.PlayFadeCover();
 
                     UnitBase defender = board.Owner;
@@ -603,7 +603,7 @@ public class BattleStage : MonoBehaviour
 
                     result.CurrentBoard.ForceStopBoardTimer();
                     ClearBoard(result.CurrentBoard);
-                    result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                    result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkill());
                     result.CurrentBoard.PlayFadeCover();
                 }
             }
@@ -636,7 +636,7 @@ public class BattleStage : MonoBehaviour
             if(result.Attacker is PlayerUnit playerUnit)
             {
                 ClearBoard(result.CurrentBoard);
-                result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
+                result.CurrentBoard.FillBoard(BBoardType.Offensive, SaveLoadManager.Instance.UserSkillData.GetEquipedSkill());
                 result.CurrentBoard.PlayFadeCover();
             }
             else if(result.Attacker is MonsterUnit monsterUnit)
@@ -960,7 +960,12 @@ public class BattleStage : MonoBehaviour
                 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
             }
 
-            boardContainer[page].GetChild(i).position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
+            Transform tr = boardContainer[page].GetChild(i);
+            
+            if(tr != null)
+            {
+                tr.position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
+            }
         }
     }
 

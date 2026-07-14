@@ -491,6 +491,18 @@ public class UserSkillData
     {
         return SkillSlots.Where((o) => o.Slot > 0 && o.Quota > 0).Select((s) => (uint)s.SkillIdx).ToArray();
     }
+
+    public uint GetEquipedSkill()
+    {
+        var skills = GetEquipedSkills();
+
+        if(skills != null && skills.Length > 0)
+        {
+            return skills[UnityEngine.Random.Range(0, skills.Length)];
+        }
+
+        return 0;
+    }
 }
 
 [System.Serializable]

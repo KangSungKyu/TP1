@@ -213,7 +213,6 @@ public class BBoard : MonoBehaviour
         if (isInit)
             return;
 
-        //FillBoard(type, skillList);
         OnOffCover(true);
 
         isInit = true;
@@ -229,7 +228,7 @@ public class BBoard : MonoBehaviour
         cover.DOFade(0.0f, 1.0f).OnComplete(()=>OnOffCover(false)).Play();
     }
 
-    public void FillBoard(BBoardType boardType, uint[] skillList = null)
+    public void FillBoard(BBoardType boardType, uint skillIdx = 0)
     {
         //offensive -> block, attack, skill, shield
         //defensive -> block, guard, skill
@@ -245,7 +244,7 @@ public class BBoard : MonoBehaviour
                     BlockCount = UnityEngine.Random.Range(0, (int)(width * height * 0.15f)),
                     AttackCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                     GuardCount = 0,
-                    SkillCount = skillList != null ? UnityEngine.Random.Range(0, skillList.Length + 1) : 0,
+                    SkillCount = skillIdx > 0 ? 1 : 0,
                     ShieldCount = UnityEngine.Random.Range(1, (int)(width * height * 0.25f)),
                 };
                 break;
@@ -297,7 +296,7 @@ public class BBoard : MonoBehaviour
         FillTile(config, cells, ref idx, BTileType.Block, Commons.ResKey_BlockTile);
         FillTile(config, cells, ref idx, BTileType.Attack, Commons.ResKey_AttackTile);
         FillTile(config, cells, ref idx, BTileType.Guard, Commons.ResKey_GuardTile);
-        FillTile(config, cells, ref idx, BTileType.Skill, Commons.ResKey_SkillTile, skillList); //skill
+        FillTile(config, cells, ref idx, BTileType.Skill, Commons.ResKey_SkillTile, skillIdx); //skill
         FillTile(config, cells, ref idx, BTileType.Shield, Commons.ResKey_ShieldTile);
 
         // After placement, ensure there is at least one path between start and end.
@@ -911,7 +910,7 @@ public class BBoard : MonoBehaviour
         return res;
     }
 
-    private void FillTile(FillBoardTileConfig config, List<(int x, int y, float noise)> cells, ref int idx, BTileType tileType, string resKey_Tile, uint[] skillList = null)
+    private void FillTile(FillBoardTileConfig config, List<(int x, int y, float noise)> cells, ref int idx, BTileType tileType, string resKey_Tile, uint skillIdx = 0)
     {
         int total = cells.Count;
 
@@ -942,20 +941,14 @@ public class BBoard : MonoBehaviour
             }
 
             tiles[c.y, c.x].type = tileType;
+
             SetTile(c.x, c.y, ResourceManager.Instance.GetSpriteFromAtlas(Commons.ResKey_Atlas_Tile, resKey_Tile));
 
-            if (tileType == BTileType.Skill && skillList != null)
+            if (tileType == BTileType.Skill && skillIdx != 0)
             {
-                if(skillList.Length <= 0)
-                {
-                    Debug.Log($"skillList : len{skillList.Length}, x:{c.x}, y:{c.y}, owner:{Owner.UnitName}");
-                    continue;
-                }
-
-                uint skillIdx = skillList[UnityEngine.Random.Range(0, skillList.Length)];
-                tiles[c.y, c.x].skillIdx = skillIdx; //009001 
-
                 SkillData sd = DataTableManager.Instance.GetSkillData(skillIdx);
+
+                tiles[c.y, c.x].skillIdx = skillIdx; //009001 
 
                 if(sd != null)
                 {
