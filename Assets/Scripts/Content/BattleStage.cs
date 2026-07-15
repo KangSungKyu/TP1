@@ -850,8 +850,21 @@ public class BattleStage : MonoBehaviour
         if (hp <= 0)
         {
             int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
+
+            // guard: ensure cursor is within range
+            if (currentBoardCursor < 0 || currentBoardCursor >= boardList[boardPageCursor.Value].Count)
+            {
+                return;
+            }
+
             BBoard currentBoard = boardList[boardPageCursor.Value][currentBoardCursor];
-            MonsterUnit monster = (MonsterUnit)currentBoard.Owner;
+
+            if (currentBoard == null)
+            {
+                return;
+            }
+
+            MonsterUnit monster = currentBoard.Owner as MonsterUnit;
 
             System.Action act = () =>
             {
