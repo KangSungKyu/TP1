@@ -58,8 +58,10 @@
     <Compile Include="Assets\Scripts\DataForm\MonsterPatternDataForm.cs" />
     <Compile Include="Assets\Scripts\DataForm\SkillDataForm.cs" />
     <Compile Include="Assets\Scripts\Effect\HitEffect.cs" />
+    <Compile Include="Assets\Scripts\Manager\BBoardManager.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Manager\AlterMsgSystem.cs" />
+    <Compile Include="Assets\Scripts\Utils\UnitSpawnerService.cs" />
     <Compile Include="Assets\Scripts\UI\AlterMsg.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\PanelBase.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\PanelManager.cs" />
