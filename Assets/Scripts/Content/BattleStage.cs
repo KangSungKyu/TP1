@@ -123,19 +123,7 @@ public class BattleStage : MonoBehaviour
 
         isBattleActive = false;
 
-        for(int i = 0; i < unitList.Count; ++i)
-        {
-            unitList[i]?.Release();
-
-            if (unitList[i] is PlayerUnit)
-            {
-                Factory.Instance.ReleasePlayerUnit(unitList[i] as PlayerUnit);
-            }
-            else
-            {
-                Factory.Instance.ReleaseMonsterUnit(unitList[i] as MonsterUnit);
-            }
-        }
+        UnitSpawnerService.DespawnUnitList(unitList);
 
         unitList.Clear();
         readyQueue.Clear();

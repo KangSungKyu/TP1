@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -53,5 +54,22 @@ public class UnitSpawnerService
         }
 
         return monsterUnit;
+    }
+
+    public static void DespawnUnitList(List<UnitBase> unitList)
+    {
+        for (int i = 0; i < unitList.Count; ++i)
+        {
+            unitList[i]?.Release();
+
+            if (unitList[i] is PlayerUnit)
+            {
+                Factory.Instance.ReleasePlayerUnit(unitList[i] as PlayerUnit);
+            }
+            else
+            {
+                Factory.Instance.ReleaseMonsterUnit(unitList[i] as MonsterUnit);
+            }
+        }
     }
 }
