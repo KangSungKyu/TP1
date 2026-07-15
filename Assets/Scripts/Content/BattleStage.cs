@@ -19,17 +19,12 @@ using static Commons;
 //총 퍼즐의 양은 적 * 유저 공격 퍼즐 + a(적의 공격 빈도에 따라 유동적으로, 단 전체적인 atb 길이에 비해 방어 퍼즐의 유예시간은 짧게 유지)
 public class BattleStage : MonoBehaviour
 {
-
+    [SerializeField]
+    private BBoardManager boardManager = null;
     [SerializeField]
     private RectTransform uiPoolTempContainer = null;
     [SerializeField]
     private RectTransform hpBarContainer = null;
-    [SerializeField]
-    private RectTransform[] boardContainer_RT = null;
-    [SerializeField]
-    private RectTransform[] boardContainer_U_RT = null;
-    [SerializeField]
-    private Transform[] boardContainer = null;
     [SerializeField]
     private GameObject PlayerSpawnGO = null;
     [SerializeField]
@@ -41,12 +36,9 @@ public class BattleStage : MonoBehaviour
 
     private bool isBattleActive = false;
 
-    private ReactiveProperty<int> boardPageCursor = new ReactiveProperty<int>(0); //0 right, 1 left
-    private ReactiveProperty<int>[] boardCursor = new ReactiveProperty<int>[] { new ReactiveProperty<int>(-1), new ReactiveProperty<int>(-1) };
     private ReactiveProperty<int> playerCount = new ReactiveProperty<int>(0);
     private ReactiveProperty<int> monsterCount = new ReactiveProperty<int>(0);
     private List<UnitBase> unitList = new List<UnitBase>();
-    private List<BBoard>[] boardList = new List<BBoard>[] { new List<BBoard>(), new List<BBoard>() };
     private Queue<UnitBase> readyQueue = new Queue<UnitBase>();
     private Queue<PuzzleResult> resultQueue = new Queue<PuzzleResult>();
     private List<Coroutine> resultQueueList = new List<Coroutine>();
@@ -62,29 +54,16 @@ public class BattleStage : MonoBehaviour
     public void InitStage(UserData userData, StageData stageData)
     {
         isBattleActive = true;
+        
+        PlayerUnit playerUnit = null;
 
         if (unitList.Count <= 0)
         {
-            unitList.Add(Factory.Instance.GetPlayerUnit(transform, PlayerSpawnGO.transform.position) as PlayerUnit);
+            playerUnit = UnitSpawnerService.SpawnPlayer(transform, PlayerSpawnGO.transform.position, (uint)userData.Level, hpBarContainer, OnPlayerDeath, OnReadyEnqueue, atbGaugeBG, OnATBGauge);
+            
+            unitList.Add(playerUnit);
         }
 
-        LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
-
-        PlayerUnit player = unitList[0] as PlayerUnit;
-
-        player.LoadFromSO(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1)); 
-        player.SetLevelBase(lbd);
-        player.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
-        player.Subscribe_HP((v) => OnPlayerDeath(player, v));
-        player.OnATBReady.Subscribe((o) => readyQueue.Enqueue(o)).AddTo(player);
-
-        Image playerPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
-
-        playerPort.rectTransform.SetParent(atbGaugeBG);
-        player.SetPortraitUI(playerPort);
-        player.Subscribe_ATBGauge((v) => OnATBGauge(playerPort, player.ATBRatio));
-
-        //monster position -> start + up-down graph
         Vector3 monsterStartPos = MonsterSpawnGO.transform.position;
         float prevX = 0.0f;
         float spawnY = 0.0f;
@@ -94,35 +73,16 @@ public class BattleStage : MonoBehaviour
         {
             for (int j = 0; j < stageData.MonsterCount[i]; ++j)
             {
-                MonsterUnit monsterUnit = Factory.Instance.GetMonsterUnit(transform, MonsterSpawnGO.transform.position) as MonsterUnit;
+                spawnY = ((unitList.Count - 1) % spawnRow - (spawnRow / 2)) * 1.0f;
+                Vector2 spawnPos = new Vector2(monsterStartPos.x + prevX, monsterStartPos.y + spawnY);
+                MonsterUnit monsterUnit = UnitSpawnerService.SpawnMonster(transform, spawnPos, playerUnit, stageData.MonsterIdx[i], hpBarContainer, OnMonsterDeath, OnReadyEnqueue, atbGaugeBG, OnATBGauge);
 
                 if (monsterUnit != null)
                 {
-                    spawnY = ((unitList.Count - 1) % spawnRow - (spawnRow / 2)) * 1.0f;
-                    //test
-                    monsterUnit.transform.position = new Vector3(monsterStartPos.x + prevX, monsterStartPos.y + spawnY, 0.0f);
-
-                    monsterUnit.SetTarget(player);
-                    monsterUnit.LoadFromSO(stageData.MonsterIdx[i]);
-                    monsterUnit.SetHPUI(Factory.Instance.GetHPUI(hpBarContainer));
-                    monsterUnit.Subscribe_HP(OnMonsterDeath);
-                    monsterUnit.OnATBReady.Subscribe((o) => readyQueue.Enqueue(o)).AddTo(monsterUnit);
-
-                    BBoard board = Factory.Instance.GetBoard(BBoardType.Offensive, boardContainer[0], (int)monsterUnit.MonsterData.BoardDefaultWidth, (int)monsterUnit.MonsterData.BoardDefaultHeight, monsterUnit.Spd);
-
-                    board.SetOwner(monsterUnit);
-                    monsterUnit.AddBoard(board);
-
-                    boardList[0].Add(board);
+                    boardManager.SpawnOffensiveBoard(monsterUnit);
                     unitList.Add(monsterUnit);
 
-                    Image monsterPort = Factory.Instance.GetPortraitUI(uiPoolTempContainer);
-
-                    monsterPort.rectTransform.SetParent(atbGaugeBG);
-                    monsterUnit.SetPortraitUI(monsterPort);
-                    monsterUnit.Subscribe_ATBGauge((v) => OnATBGauge(monsterPort, monsterUnit.ATBRatio));
-
-                    Vector2 monsterSize = monsterUnit.transform.Find("Renderer/Sprite").GetComponent<SpriteRenderer>().bounds.size;
+                    Vector2 monsterSize = monsterUnit.GetUnitBounds().size;
 
                     prevX += monsterSize.x * 0.5f;
                 }
@@ -135,21 +95,11 @@ public class BattleStage : MonoBehaviour
         playerCount.Subscribe(OnChangedPlayerCount).AddTo(this);
         monsterCount.Subscribe(OnChangedMonsterCount).AddTo(this);
 
-        SortingBoardZOrder(0);
-        RepositionBoardList(0);
+        boardManager.SortingBoardZOrder(0);
+        boardManager.RepositionBoardList(0);
 
-        for (int i = 0; i < boardList[0].Count; i++)
-        {
-            boardList[0][i].InitBoard(SaveLoadManager.Instance.UserSkillData.GetEquipedSkills());
-        }
-
-        boardCursor[0].Value = 0;
-        boardCursor[1].Value = 0;
-        boardPageCursor.Value = 0;
-
-        boardCursor[0].Subscribe((v)=>{ OnChangedBoardCursor(boardPageCursor.Value, v); }).AddTo(this);
-        boardCursor[1].Pairwise().Subscribe((pair)=> { OnPrevBoardCursor(boardPageCursor.Value, pair.Previous); OnChangedBoardCursor(boardPageCursor.Value, pair.Current); }).AddTo(this);
-        boardPageCursor.Subscribe(OnChangedBoardPageCursor).AddTo(this);
+        boardManager.InitBoardList();
+        boardManager.SetCursorEvent(OnChangedBoardCursor, OnPrevBoardCursor, OnChangedBoardPageCursor);
 
         readyQueue.Clear();
 
@@ -173,19 +123,7 @@ public class BattleStage : MonoBehaviour
 
         isBattleActive = false;
 
-        for(int i = 0; i < unitList.Count; ++i)
-        {
-            unitList[i]?.Release();
-
-            if (unitList[i] is PlayerUnit)
-            {
-                Factory.Instance.ReleasePlayerUnit(unitList[i] as PlayerUnit);
-            }
-            else
-            {
-                Factory.Instance.ReleaseMonsterUnit(unitList[i] as MonsterUnit);
-            }
-        }
+        UnitSpawnerService.DespawnUnitList(unitList);
 
         unitList.Clear();
         readyQueue.Clear();
@@ -202,16 +140,7 @@ public class BattleStage : MonoBehaviour
 
         resultQueueList.Clear();
 
-        for (int i = 0; i < boardList.Length; ++i)
-        {
-            for(int j = 0; j < boardList[i].Count; ++j)
-            {
-                boardList[i][j].ReleaseBoard();
-                Factory.Instance.ReleaseBoard(boardList[i][j]);
-            }
-
-            boardList[i].Clear();
-        }
+        boardManager.ReleaseBoardList();
 
         for(int i = 0; i < hpBarContainer.childCount; ++i)
         {
@@ -379,8 +308,8 @@ public class BattleStage : MonoBehaviour
         playerInput.Battle.PuzzleDrawLeft.performed += ctx => OnPuzzleDrawLeft();
         playerInput.Battle.PuzzleDrawRight.performed += ctx => OnPuzzleDrawRight();
 
-        playerInput.Battle.PuzzleSelectL.performed += ctx => OnPuzzleSelectL(boardPageCursor.Value);
-        playerInput.Battle.PuzzleSelectR.performed += ctx => OnPuzzleSelectR(boardPageCursor.Value);
+        playerInput.Battle.PuzzleSelectL.performed += ctx => OnPuzzleSelectL(boardManager.BoardPageCursor);
+        playerInput.Battle.PuzzleSelectR.performed += ctx => OnPuzzleSelectR(boardManager.BoardPageCursor);
 
         playerInput.Battle.PuzzlePageL.performed += ctx => OnPuzzlePageL();
         playerInput.Battle.PuzzlePageR.performed += ctx => OnPuzzlePageR();
@@ -437,6 +366,11 @@ public class BattleStage : MonoBehaviour
         //}
     }
 
+    private void OnReadyEnqueue(UnitBase unit)
+    {
+        readyQueue.Enqueue(unit);
+    }
+
     private IEnumerator IEBattleLoop()
     {
         while(isBattleActive)
@@ -471,16 +405,14 @@ public class BattleStage : MonoBehaviour
 
         if (unit is PlayerUnit playerUnit)
         {
-            for(int i = 0; i < boardList[0].Count; ++i)
+            foreach(BBoard board in boardManager.GetBoardList(0))
             {
-                BBoard board = boardList[0][i];
-
                 if(board != null)
                 {
                     if(board.Width <= 0 || board.Height <= 0)
                     {
                         Factory.Instance.ReleaseBoard(board);
-                        Debug.LogError($"invalid board, {i}");
+                        Debug.LogError($"invalid board");
                         yield break;
                     }
 
@@ -504,8 +436,8 @@ public class BattleStage : MonoBehaviour
                 }
             }
 
-            SortingBoardZOrder(0);
-            RepositionBoardList(0);
+            boardManager.SortingBoardZOrder(0);
+            boardManager.RepositionBoardList(0);
         }
         else if (unit is MonsterUnit monsterUnit)
         {
@@ -513,20 +445,13 @@ public class BattleStage : MonoBehaviour
 
             if (player != null)
             {
-                int prevListCount = boardList[1].Count;
-                BBoard tempBoard = Factory.Instance.GetBoard(BBoardType.Defensive, boardContainer[1], monsterUnit.GetBoardWidth(), monsterUnit.GetBoardHeight(), monsterUnit.Spd * 0.85f);
+                int prevListCount = boardManager.GetBoardCount(1);
+                BBoard tempBoard = boardManager.SpawnDefensiveBoard(monsterUnit);
 
                 if (tempBoard != null)
                 {
-                    tempBoard.SetOwner(monsterUnit);
-                    boardList[1].Add(tempBoard);
-                    tempBoard.InitBoard();
-                    tempBoard.PlayFadeCover();
-                    tempBoard.FillBoard(BBoardType.Defensive);
-                    monsterUnit.AddBoard(tempBoard);
-
-                    SortingBoardZOrder(1);
-                    RepositionBoardList(1);
+                    boardManager.SortingBoardZOrder(1);
+                    boardManager.RepositionBoardList(1);
 
                     PuzzleResult resultData = new PuzzleResult()
                     {
@@ -619,15 +544,7 @@ public class BattleStage : MonoBehaviour
                     result.CurrentBoard.ForceBoardTimeOver();
                     ClearBoard(result.CurrentBoard);
 
-                    if (boardList[1].Count <= 0)
-                    {
-                        boardPageCursor.Value = 0;
-                    }
-                    else
-                    {
-                        OnPuzzleSelectR(1);
-                        OnChangedBoardCursor(1, boardCursor[1].Value);
-                    }
+                    boardManager.AutoSelectBoard_L(result.CurrentBoard, OnChangedBoardCursor);
                 }
             }
         }
@@ -692,24 +609,8 @@ public class BattleStage : MonoBehaviour
                 ClearBoard(result.CurrentBoard);
                 result.CurrentBoard.ReleaseBoard();
 
-                int idx = boardList[1].IndexOf(result.CurrentBoard);
-
-                if (idx >= 0)
-                {
-                    boardList[1].RemoveAt(idx);
-                }
-
                 monsterUnit.DelBoard(result.CurrentBoard);
-
-                if (boardList[1].Count <= 0)
-                {
-                    boardPageCursor.Value = 0;
-                }
-                else
-                {
-                    OnPuzzleSelectR(1);
-                    OnChangedBoardCursor(1, boardCursor[1].Value);
-                }
+                boardManager.AutoSelectBoard_L(result.CurrentBoard, OnChangedBoardCursor);
             }
         }
     }
@@ -722,102 +623,47 @@ public class BattleStage : MonoBehaviour
 
     private void OnPuzzleReset()
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-
-        if (currentBoardCursor > -1)
-        {
-            boardList[boardPageCursor.Value][currentBoardCursor].ResetDrawLine();
-        }
+        boardManager.ResetCurrentPuzzle();
     }
 
     private void OnPuzzlePageR()
     {
-        if (boardList[0].Count > 0)
-        {
-            boardPageCursor.Value = 0;
-        }
+        boardManager.SelectPuzzlePage_R();
     }
 
     private void OnPuzzlePageL()
     {
-        if (boardList[1].Count > 0)
-        {
-            boardPageCursor.Value = 1;
-        }
+        boardManager.SelectPuzzlePage_L();
     }
 
     private void OnPuzzleSelectR(int pageCursor)
     {
-        int currentBoardCursor = boardCursor[pageCursor].Value;
-
-        if (currentBoardCursor < boardList[pageCursor].Count)
-        {
-            currentBoardCursor += 1;
-        }
-
-        if (currentBoardCursor >= boardList[pageCursor].Count)
-        {
-            currentBoardCursor = 0;
-        }
-
-        boardCursor[pageCursor].Value = currentBoardCursor;
+        boardManager.SelectPuzzle_R(pageCursor);
     }
 
     private void OnPuzzleSelectL(int pageCursor)
     {
-        int currentBoardCursor = boardCursor[pageCursor].Value;
-
-        if (currentBoardCursor > 0)
-        {
-            currentBoardCursor -= 1;
-        }
-
-        if (currentBoardCursor < 0)
-        {
-            currentBoardCursor = boardList[pageCursor].Count - 1;
-        }
-
-        boardCursor[pageCursor].Value = currentBoardCursor;
+        boardManager.SelectPuzzle_L(pageCursor);
     }
 
     private void OnPuzzleDrawRight()
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-
-        if (-1 < currentBoardCursor && currentBoardCursor < boardList[boardPageCursor.Value].Count)
-        {
-            boardList[boardPageCursor.Value][currentBoardCursor].SetDirection(1, 0);
-        }
+        boardManager.DrawCurrentPuzzle_ToRight();
     }
 
     private void OnPuzzleDrawLeft()
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-
-        if (-1 < currentBoardCursor && currentBoardCursor < boardList[boardPageCursor.Value].Count)
-        {
-            boardList[boardPageCursor.Value][currentBoardCursor].SetDirection(-1, 0);
-        }
+        boardManager.DrawCurrentPuzzle_ToLeft();
     }
 
     private void OnPuzzleDrawDown()
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-
-        if (-1 < currentBoardCursor && currentBoardCursor < boardList[boardPageCursor.Value].Count)
-        {
-            boardList[boardPageCursor.Value][currentBoardCursor].SetDirection(0, -1);
-        }
+        boardManager.DrawCurrentPuzzle_ToDown();
     }
 
     private void OnPuzzleDrawUp()
     {
-        int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
-
-        if (-1 < currentBoardCursor && currentBoardCursor < boardList[boardPageCursor.Value].Count)
-        {
-            boardList[boardPageCursor.Value][currentBoardCursor].SetDirection(0, 1);
-        }
+        boardManager.DrawCurrentPuzzle_ToUp();
     }
 
     private void OnPlayerDeath(PlayerUnit player, float hp)
@@ -849,17 +695,9 @@ public class BattleStage : MonoBehaviour
     {
         if (hp <= 0)
         {
-            int currentBoardCursor = boardCursor[boardPageCursor.Value].Value;
+            BBoard currentBoard = boardManager.GetCurrentSelectedBoard();
 
-            // guard: ensure cursor is within range
-            if (currentBoardCursor < 0 || currentBoardCursor >= boardList[boardPageCursor.Value].Count)
-            {
-                return;
-            }
-
-            BBoard currentBoard = boardList[boardPageCursor.Value][currentBoardCursor];
-
-            if (currentBoard == null)
+            if(currentBoard == null)
             {
                 return;
             }
@@ -873,16 +711,18 @@ public class BattleStage : MonoBehaviour
                     monster.Release();
                     monster.DelDefensivekBoardList();
                     Factory.Instance.ReleasePortraitUI(monster.PortraitUI);
-                    currentBoard.ReleaseBoard();
-                    boardList[boardPageCursor.Value].Remove(currentBoard);
+                    boardManager.RemoveBoard(currentBoard);
                     Factory.Instance.ReleaseBoard(currentBoard);
                     Factory.Instance.ReleaseMonsterUnit(monster);
                     Factory.Instance.ReleaseHPUI(monster.HpUI);
                     unitList.Remove(monster);
 
-                    boardCursor[boardPageCursor.Value].SetValueAndForceNotify(boardList[boardPageCursor.Value].Count - 1);
-
                     monsterCount.Value = unitList.Count((o) => o is MonsterUnit);
+
+                    if(monsterCount.Value > 0)
+                    {
+                        boardManager.SelectLastPuzzle();
+                    }
                 }
             };
 
@@ -913,27 +753,23 @@ public class BattleStage : MonoBehaviour
 
     private void OnChangedBoardCursor(int page, int cursor)
     {
-        if (cursor > -1 && cursor < boardList[page].Count)
+        boardManager.ChangedBoardCursor(page, cursor);
+
+        BBoard selectedBoard = boardManager.GetBoard(page, cursor);
+        PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
+
+        if (page == 0)
         {
-            PlayerUnit player = unitList.FirstOrDefault((o) => o is PlayerUnit) as PlayerUnit;
-            BBoard selectedBoard = boardList[page][cursor];
-
-            SelectBoard(page, cursor);
-
-            if(page == 0)
-            {
-                player?.SetTarget(selectedBoard.Owner);
-                player?.DrawTargetLine();
-            }
-            else if(page == 1)
-            {
-                MonsterUnit monsterUnit = selectedBoard.Owner as MonsterUnit;
-
-                monsterUnit?.PlaySelectedTargetLine(selectedBoard);
-            }
-
-            //Debug.Log(selectedBoard.ToString());
+            player?.SetTarget(selectedBoard.Owner);
+            player?.DrawTargetLine();
         }
+        else if (page == 1)
+        {
+            MonsterUnit monsterUnit = selectedBoard.Owner as MonsterUnit;
+
+            monsterUnit?.PlaySelectedTargetLine(selectedBoard);
+        }
+
     }
 
     private void OnPrevBoardCursor(int page, int cursor)
@@ -942,74 +778,11 @@ public class BattleStage : MonoBehaviour
 
         if(page == 1)
         {
-            for(int i = 0; i < boardList[page].Count; ++i)
+            foreach(BBoard board in boardManager.GetBoardList(page))
             {
-                BBoard board = boardList[page][i];
                 MonsterUnit monsterUnit = board.Owner as MonsterUnit;
 
                 monsterUnit?.StopSelectedTargetLine(board);
-            }
-        }
-    }
-
-    private void SelectBoard(int page, int cursor)
-    {
-        SortingBoardZOrder(page);
-        RepositionBoardList(page);
-    }
-
-    private void RepositionBoardList(int page)
-    {
-        for(int i = 0; i < boardList[page].Count; ++i)
-        {
-            Vector3 startPos = Vector3.zero;
-
-            if(i == boardCursor[page].Value)
-            {
-                startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_U_RT[page]));
-            }
-            else
-            {
-                startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
-            }
-
-            Transform tr = boardContainer[page].GetChild(i);
-            
-            if(tr != null)
-            {
-                tr.position = startPos + new Vector3(0.25f * i, 0.0f, 0.0f);
-            }
-        }
-    }
-
-    private Vector3 OverlayToWorld(Vector3 screen)
-    {
-        Vector3 screenPos = new Vector3(screen.x, screen.y, 10.0f);
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(screenPos);
-
-        return worldPosition;
-    }
-
-    private Vector3 OverlayRectTransformCenter(RectTransform rectTransform)
-    {
-        Bounds bound = RectTransformUtility.CalculateRelativeRectTransformBounds(rectTransform);
-
-        return rectTransform.TransformPoint(bound.center);
-    }
-
-    private void SortingBoardZOrder(int page)
-    {
-        for(int i = 0; i < boardList[page].Count; ++i)
-        {
-            BBoard board = boardList[page][i];
-
-            if(i == boardCursor[page].Value)
-            {
-                board.GetComponent<SortingGroup>().sortingOrder = 1000 - (i * 10);
-            }
-            else
-            {
-                board.GetComponent<SortingGroup>().sortingOrder = 100 - (i * 10);
             }
         }
     }
