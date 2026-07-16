@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -97,26 +97,28 @@ public class RestContent : GameContent
         UpdateSkillPanel();
         UpdateSkillSlots();
 
-        SaveLoadManager.Instance.SaveUserData((json) =>
+        try
         {
-            Debug.Log($"save current stage");
-        }, 
-        (json) => 
+            await SaveLoadManager.Instance.SaveUserDataAsync(this.GetCancellationTokenOnDestroy());
+        }
+        catch (Exception ex)
         {
-            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(ex.Message);
 
             AlterMsgSystem.Instance.ShowMsg($"response : {dump.response}");
 
             Debug.LogError($"server log, {dump.response}");
-        });
+        }
 
-        GameNetworkManager.Instance.SaveStageClearData((uint)userData.StageIdx, 2, (json) => 
+        try
         {
+            string json = await GameNetworkManager.Instance.SaveStageClearDataAsync((uint)userData.StageIdx, 2, this.GetCancellationTokenOnDestroy());
+
             APIResponseData<ClearData> res = GameNetworkManager.CreateAPIResponseDataFromJson<ClearData>(json);
 
-            if(res.data != null)
+            if (res.data != null)
             {
-                if(!stageClearData.ClearDatas.ContainsKey(res.data.StageIdx))
+                if (!stageClearData.ClearDatas.ContainsKey(res.data.StageIdx))
                 {
                     stageClearData.ClearDatas.Add(res.data.StageIdx, res.data);
                 }
@@ -125,21 +127,21 @@ public class RestContent : GameContent
                     stageClearData.ClearDatas[res.data.StageIdx] = res.data;
                 }
             }
-        },
-        (json) =>
+        }
+        catch(Exception ex)
         {
-            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+            APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(ex.Message);
 
             if(dump != null)
             {
                 AlterMsgSystem.Instance.ShowMsg($"error : {dump.response}");
             }
-        });
+        }
 
         await Task.CompletedTask;
     }
 
-    private void OnUserLevelUp()
+    private async void OnUserLevelUp()
     {
         //test
         LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
@@ -156,29 +158,33 @@ public class RestContent : GameContent
             userData.Level += 1;
         }
 
-        GameNetworkManager.Instance.UpdateUserLevel((json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.UpdateUserLevelAsync(this.GetCancellationTokenOnDestroy());
             APIResponseData<(int Level, int Exp)> res = GameNetworkManager.CreateAPIResponseDataFromJson<(int Level, int Exp)>(json);
 
-            if(res.data != default)
+            if (res.data != default)
             {
+                LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
+                LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
 
+                nextExp = 0;
+
+                if (nextLBD != null)
+                {
+                    nextExp = (int)nextLBD.NeedExp;
+                }
+
+                levelText.SetText($"Lv:{userData.Level}");
+                expText.SetText($"Exp : {userData.Exp} / {nextExp}");
+
+                UpdateStatus(currLBD, nextLBD);
             }
-
-            LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
-            LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
-            int nextExp = 0;
-
-            if (nextLBD != null)
-            {
-                nextExp = (int)nextLBD.NeedExp;
-            }
-
-            levelText.SetText($"Lv:{userData.Level}");
-            expText.SetText($"Exp : {userData.Exp} / {nextExp}");
-
-            UpdateStatus(currLBD, nextLBD);
-        });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 
     private void OnGoStage()
@@ -255,20 +261,25 @@ public class RestContent : GameContent
         }
     }
 
-    private void OnBuySkill(int skillIdx)
+    private async void OnBuySkill(int skillIdx)
     {
-        GameNetworkManager.Instance.UpdateBuyUserSkill(skillIdx, (json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.UpdateBuyUserSkillAsync(skillIdx, this.GetCancellationTokenOnDestroy());
             APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
-            if(res.data != null)
+            if (res.data != null)
             {
                 SaveLoadManager.Instance.UserSkillData.SkillSlots = res.data;
             }
 
             UpdateSkillPanel();
             UpdateSkillSlots();
-        });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 
     private void UpdateSkillSlots()
@@ -298,10 +309,11 @@ public class RestContent : GameContent
         }
     }
 
-    private void OnEqiupSkill(int skillIdx, int slot)
+    private async void OnEqiupSkill(int skillIdx, int slot)
     {
-        GameNetworkManager.Instance.UpdateEquipUserSkill(skillIdx, slot, (json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.UpdateEquipUserSkillAsync(skillIdx, slot, this.GetCancellationTokenOnDestroy());
             APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if (res.data != null)
@@ -310,13 +322,18 @@ public class RestContent : GameContent
             }
 
             UpdateSkillSlots();
-        });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 
-    private void OnUnEquipSkill(int slot)
+    private async void OnUnEquipSkill(int slot)
     {
-        GameNetworkManager.Instance.UpdateUnEquipUserSkill(slot, (json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.UpdateUnEquipUserSkillAsync(slot, this.GetCancellationTokenOnDestroy());
             APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
             if (res.data != null)
@@ -325,6 +342,10 @@ public class RestContent : GameContent
             }
 
             UpdateSkillSlots();
-        });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 }

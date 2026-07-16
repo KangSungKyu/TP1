@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,20 +98,17 @@ public class BattleContent : GameContent
         battleStage.InitStage(userData, sd);
     }
 
-    private void OnStageDefeat()
+    private async void OnStageDefeat()
     {
-        //player stage progress to last save point(stage)
-        //anim defeat ui
-        //branch stage select ui and title scene by player selection
-
         Debug.Log($"stage defeat");
 
-        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(false, () =>
+        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(false, async () =>
         {
             battleStage.ReleaseStage();
 
-            GameNetworkManager.Instance.UpdateDefeatStage((json) =>
+            try
             {
+                string json = await GameNetworkManager.Instance.UpdateDefeatStageAsync(this.GetCancellationTokenOnDestroy());
                 APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
                 if (res.data != null)
@@ -121,24 +119,22 @@ public class BattleContent : GameContent
                     userData.MapIdx = userData.SavedMapIdx;
                     userData.StageIdx = userData.SavedStageIdx;
 
-                    SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
-
-                    GameSceneManager.Instance.LoadScene(selectStageScene);
+                    await SaveLoadManager.Instance.SaveUserDataAsync(this.GetCancellationTokenOnDestroy());
+                    await GameSceneManager.Instance.LoadSceneAsync(selectStageScene, this.GetCancellationTokenOnDestroy());
                 }
-            });
+            }
+            catch(System.Exception e)
+            {
+                Debug.LogError(e);
+            }
         });
     }
 
-    private void OnStageClear()
+    private async void OnStageClear()
     {
-        //clear ui
-        //calc reward
-        //input map change (battle -> ui)
-        //goto stage select ui(or scene)
-
         Debug.Log($"stage clear");
 
-        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(true, () =>
+        PanelManager.GetPanel<StageResultPanel>("StageResultPanel").Show(true, async () =>
         {
             battleStage.ReleaseStage();
 
@@ -159,8 +155,9 @@ public class BattleContent : GameContent
             userData.Exp += (int)totalExp;
             stageClearData.SetState(userData.StageIdx, 1);
 
-            GameNetworkManager.Instance.UpdateClearStage(userData.StageIdx, (json) =>
+            try
             {
+                string json = await GameNetworkManager.Instance.UpdateClearStageAsync(userData.StageIdx, this.GetCancellationTokenOnDestroy());
                 APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
                 if (res.data != null)
@@ -169,7 +166,11 @@ public class BattleContent : GameContent
 
                     GameSceneManager.Instance.LoadScene(selectStageScene);
                 }
-            });
+            }
+            catch(System.Exception ex)
+            {
+                Debug.LogError(ex);
+            }
         });
     }
 }
