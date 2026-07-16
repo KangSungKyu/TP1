@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using UnityEngine;
 
 public class StageMapUI : MonoBehaviour
@@ -15,27 +16,28 @@ public class StageMapUI : MonoBehaviour
         foreach (var ui in stageUI)
         {
             ui.Show();
-            ui.SetClickEvent((stageIdx) =>
+            ui.SetClickEvent(async (stageIdx) =>
             {
-                GameNetworkManager.Instance.UpdateEnterUserStage(StageMapIdx, (int)stageIdx, (json) =>
+                try
                 {
+                    string json = await GameNetworkManager.Instance.UpdateEnterUserStageAsync(StageMapIdx, (int)stageIdx, this.GetCancellationTokenOnDestroy());
                     APIResponseData<EnterUserStageData> res = GameNetworkManager.CreateAPIResponseDataFromJson<EnterUserStageData>(json);
 
-                    if(res.data != null)
+                    if (res.data != null)
                     {
                         userData.MapIdx = res.data.MapIdx;
                         userData.StageIdx = res.data.StageIdx;
 
-                        SaveLoadManager.Instance.SaveUserData((t) => { Debug.Log("save"); }, (json) => { Debug.Log("save fail"); });
+                        await SaveLoadManager.Instance.SaveUserDataAsync(this.GetCancellationTokenOnDestroy());
                         sceneChange?.Invoke();
                     }
-                },
-                (json) =>
-                {
-                    APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+                }
+                catch(System.Exception ex)
+                { 
+                    APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(ex.Message);
 
                     AlterMsgSystem.Instance.ShowMsg($"response : {dump.response}");
-                });
+                }
             });
         }
     }

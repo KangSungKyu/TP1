@@ -1,14 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Networking;
 using static Commons;
 
 public class GameNetworkManager : Singleton<GameNetworkManager>
 {
+    private enum SendRequestMethodType
+    {
+        POST = 0,
+        GET,
+
+        SendRequestMethodType_End
+    }
+
     [SerializeField]
     private bool isDebugMode = true;
     [SerializeField]
@@ -30,23 +40,23 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         return res;
     }
 
-    public void SaveUserData(UserData userData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> SaveUserDataAsync(UserData userData, CancellationToken cancellationToken = default)
     {
         string json = Util.ToJson(userData);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_userdata", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_userdata", SendRequestMethodType.POST, json, cancellationToken);
     }
 
-    public void LogIn(ClientData clientData, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> LogInAsync(ClientData clientData, CancellationToken cancellationToken = default)
     {
         string json = Util.ToJson(clientData);
 
-        StartCoroutine(IEPostRequest($"{server_url}/login_user", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/login_user", SendRequestMethodType.POST, json);
     }
 
-    public void LogOut(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> LogOutAsync(CancellationToken cancellationToken = default)
     {
-        if(SaveLoadManager.Instance != null)
+        if (SaveLoadManager.Instance != null)
         {
             int userId = SaveLoadManager.Instance.UserData.UserId;
             var dto = new
@@ -55,11 +65,13 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             };
             string json = Util.ToJson(dto);
 
-            StartCoroutine(IEPostRequest($"{server_url}/logout_user", json, onComplete, onFailed));
+            return await SendWebRequestAsync($"{server_url}/logout_user", SendRequestMethodType.POST, json);
         }
+
+        return string.Empty;
     }
 
-    public void SaveStageClearData(uint stageIdx, uint clearState, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> SaveStageClearDataAsync(uint stageIdx, uint clearState, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -70,15 +82,15 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_stagecleardata", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_stagecleardata", SendRequestMethodType.POST, json);
     }
 
-    public void LoadStageClearData(uint userId, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> LoadStageClearDataAsync(uint userId, CancellationToken cancellationToken = default)
     {
-        StartCoroutine(IEGetRequest($"{server_url}/get_stagecleardata/{userId}", onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/get_stagecleardata/{userId}", SendRequestMethodType.GET);
     }
 
-    public void UpdateUserLevel(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> UpdateUserLevelAsync(CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         int level = SaveLoadManager.Instance.UserData.Level;
@@ -91,10 +103,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_userlevel", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_userlevel", SendRequestMethodType.POST, json);
     }
-
-    public void UpdateDefeatStage(System.Action<string> onComplete = null, System.Action<string> onFailed = null)
+    
+    public async UniTask<string> UpdateDefeatStageAsync(CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -103,10 +115,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_defeatstage", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_defeatstage", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateClearStage(int stageIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> UpdateClearStageAsync(int stageIdx, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -116,15 +128,15 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_clearstage", json, onComplete, onFailed));
-    }
-    
-    public void LoadUserSkillData(uint userId, Action<string> onComplete = null, Action<string> onFailed = null)
-    {
-        StartCoroutine(IEGetRequest($"{server_url}/get_userskilldata/{userId}", onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_clearstage", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateBuyUserSkill(int skillIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> LoadUserSkillDataAsync(uint userId, CancellationToken cancellationToken = default)
+    {
+        return await SendWebRequestAsync($"{server_url}/get_userskilldata/{userId}", SendRequestMethodType.GET);
+    }
+
+    public async UniTask<string> UpdateBuyUserSkillAsync(int skillIdx, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -134,10 +146,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_buyuserskill", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_buyuserskill", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateEquipUserSkill(int skillIdx, int slot, Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> UpdateEquipUserSkillAsync(int skillIdx, int slot, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -148,10 +160,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_equipuserskill", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_equipuserskill", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateUnEquipUserSkill(int slot, Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> UpdateUnEquipUserSkillAsync(int slot, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -161,10 +173,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_unequipuserskill", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_unequipuserskill", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateEnterUserStage(int mapIdx, int stageIdx, Action<string> onComplete = null, System.Action<string> onFailed = null)
+    public async UniTask<string> UpdateEnterUserStageAsync(int mapIdx, int stageIdx, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -175,10 +187,10 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_enteruserstage", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_enteruserstage", SendRequestMethodType.POST, json);
     }
 
-    public void UpdateUsedUserSkill(UsedUserSkillData[] usedSkillList, Action<string> onComplete = null, Action<string> onFailed = null)
+    public async UniTask<string> UpdateUsedUserSkillAsync(UsedUserSkillData[] usedSkillList, CancellationToken cancellationToken = default)
     {
         int userId = SaveLoadManager.Instance.UserData.UserId;
         var dto = new
@@ -188,12 +200,48 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        StartCoroutine(IEPostRequest($"{server_url}/update_useduserskill", json, onComplete, onFailed));
+        return await SendWebRequestAsync($"{server_url}/update_useduserskill", SendRequestMethodType.POST, json);
     }
 
     private void OnOffProgressUI(bool onoff)
     {
         progressCanvas.enabled = onoff;
+    }
+
+    private async UniTask<string> SendWebRequestAsync(string url, SendRequestMethodType method, string json = null, CancellationToken cancellationToken = default)
+    {
+        using (UnityWebRequest www = new UnityWebRequest(url, $"{method}"))
+        {
+            if(method == SendRequestMethodType.POST && !string.IsNullOrEmpty(json))
+            {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+
+                www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            }
+
+            www.downloadHandler = new DownloadHandlerBuffer();
+            www.SetRequestHeader("Content-Type", "application/json");
+
+            OnOffProgressUI(true);
+
+            try
+            {
+                await www.SendWebRequest().ToUniTask(cancellationToken: cancellationToken);
+
+                if (www.result == UnityWebRequest.Result.Success)
+                {
+                    return www.downloadHandler.text;
+                }
+                else
+                {
+                    throw new System.Exception(www.downloadHandler.text);
+                }
+            }
+            finally
+            {
+                OnOffProgressUI(false);
+            }
+        }
     }
 
     private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
@@ -266,8 +314,8 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         OnOffProgressUI(false);
     }
 
-    private void OnApplicationQuit()
+    private async void OnApplicationQuit()
     {
-        LogOut();
+        await LogOutAsync();
     }
 }
