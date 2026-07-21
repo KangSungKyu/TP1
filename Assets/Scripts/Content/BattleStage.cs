@@ -762,7 +762,7 @@ public class BattleStage : MonoBehaviour
 
         if (page == 0)
         {
-            player?.SetTarget(selectedBoard.Owner);
+            player?.SetTarget(selectedBoard?.Owner);
             player?.DrawTargetLine();
         }
         else if (page == 1)
