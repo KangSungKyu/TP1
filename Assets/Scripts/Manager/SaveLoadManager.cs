@@ -5,6 +5,9 @@ using UnityEngine;
 using Newtonsoft.Json;
 using static Commons;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using System.Threading;
+using System;
 
 public class SaveLoadManager : Singleton<SaveLoadManager>
 {
@@ -32,75 +35,112 @@ public class SaveLoadManager : Singleton<SaveLoadManager>
         }
     }
 
-    public void SaveUserData(System.Action<string> onComp, System.Action<string> onFail)
+    //public void SaveUserData(System.Action<string> onComp, System.Action<string> onFail)
+    //{
+    //    ClientData.ClientId = UserData.ClientId;
+    //
+    //    GameNetworkManager.Instance.SaveUserData(UserData, onComp, onFail);
+    //}
+
+    public async UniTask SaveUserDataAsync(CancellationToken cancellationToken = default)
     {
         ClientData.ClientId = UserData.ClientId;
-
-        GameNetworkManager.Instance.SaveUserData(UserData, onComp, onFail);
+    
+        try
+        {
+            string json = await GameNetworkManager.Instance.SaveUserDataAsync(UserData, cancellationToken);
+        }
+        catch(Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 
-    public void LoadUserData(System.Action onComp, System.Action<string> onFail)
+    public async void LoadUserData(System.Action onComp, System.Action<string> onFail)
     {
-        GameNetworkManager.Instance.LogIn(ClientData, (json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.LogInAsync(ClientData, this.GetCancellationTokenOnDestroy());
             APIResponseData<LoginData> res = GameNetworkManager.CreateAPIResponseDataFromJson<LoginData>(json);
 
-            if(res.data.userData != null)
+            if (res.data.userData != null)
             {
                 UserData = res.data.userData;
                 ClientData.ClientId = UserData.ClientId;
             }
-            
-            if(res.data.stageClearData != null)
+
+            if (res.data.stageClearData != null)
             {
                 StageClearData.UserId = UserData.UserId;
                 StageClearData.ClearDatas = res.data.stageClearData.ToDictionary((o) => o.StageIdx);
             }
 
-            if(res.data.userSkillData != null)
+            if (res.data.userSkillData != null)
             {
                 UserSkillData = new UserSkillData() { SkillSlots = res.data.userSkillData };
             }
 
             onComp?.Invoke();
-        }, onFail);
-    }
-
-    public void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action<string> onFail)
-    {
-        GameNetworkManager.Instance.SaveStageClearData((uint)stageIdx, (uint)clearState, onComp, onFail);
-    }
-
-    public void LoadStageClearData(System.Action onComp, System.Action<string> onFail)
-    {
-        GameNetworkManager.Instance.LoadStageClearData((uint)UserData.UserId, (json) =>
+        }
+        catch(System.Exception ex)
         {
-            //savedStageClearData = Load<SavedStageClearData>("stageClearData.json");
+            onFail?.Invoke(ex.Message);
+        }
+    }
+
+    public async void SaveStageClearData(int stageIdx, int clearState, System.Action<string> onComp, System.Action<string> onFail)
+    {
+        try
+        {
+            string json = await GameNetworkManager.Instance.SaveStageClearDataAsync((uint)stageIdx, (uint)clearState, this.GetCancellationTokenOnDestroy());
+
+            onComp?.Invoke(json);
+        }
+        catch (System.Exception ex)
+        {
+            onFail?.Invoke(ex.Message);
+        }
+    }
+
+    public async void LoadStageClearData(System.Action onComp, System.Action<string> onFail)
+    {
+        try
+        {
+            string json = await GameNetworkManager.Instance.LoadStageClearDataAsync((uint)UserData.UserId, this.GetCancellationTokenOnDestroy());
             APIResponseData<List<ClearData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<ClearData>>(json);
 
-            if(res.data != null)
+            if (res.data != null)
             {
                 StageClearData.UserId = UserData.UserId;
                 StageClearData.ClearDatas = res.data.ToDictionary((o) => o.StageIdx);
 
                 onComp?.Invoke();
             }
-        }, onFail);
+        }
+        catch(System.Exception ex)
+        {
+            onFail?.Invoke(ex.Message);
+        }
     }
 
-    public void LoadUserSkillData(System.Action onComp, System.Action<string> onFail)
+    public async void LoadUserSkillData(System.Action onComp, System.Action<string> onFail)
     {
-        GameNetworkManager.Instance.LoadUserSkillData((uint)UserData.UserId, (json) =>
+        try
         {
+            string json = await GameNetworkManager.Instance.LoadUserSkillDataAsync((uint)UserData.UserId, this.GetCancellationTokenOnDestroy());
             APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
-            if(res.data != null)
+            if (res.data != null)
             {
                 UserSkillData.SkillSlots = res.data;
 
                 onComp?.Invoke();
             }
-        }, onFail);
+        }
+        catch (System.Exception ex)
+        {
+            onFail?.Invoke(ex.Message);
+        }
     }
 
     public void Save<T>(string fileName, T data) where T : class, new()

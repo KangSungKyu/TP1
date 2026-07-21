@@ -234,7 +234,12 @@ public class BBoardManager : MonoBehaviour
 
     public BBoard GetBoard(int page, int cursor)
     {
-        return boardList[page][cursor];
+        if (0 <= cursor && cursor < boardList[page].Count)
+        {
+            return boardList[page][cursor];
+        }
+
+        return null;
     }
 
     public IEnumerable<BBoard> GetBoardList(int page)
@@ -298,7 +303,12 @@ public class BBoardManager : MonoBehaviour
                 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
             }
 
-            Transform tr = boardContainer[page].GetChild(i);
+            Transform tr = null;
+
+            if (i < boardContainer[page].childCount)
+            {
+                tr = boardContainer[page].GetChild(i);
+            }
 
             if (tr != null)
             {

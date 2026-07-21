@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
@@ -187,7 +188,7 @@ public class BattleStage : MonoBehaviour
         onStageClear += act;
     }
 
-    public void OnPuzzleCompleted(PuzzleResult resultData)
+    public async void OnPuzzleCompleted(PuzzleResult resultData)
     {
         resultData.ResultType = PuzzleResultType.Completed;
 
@@ -210,25 +211,26 @@ public class BattleStage : MonoBehaviour
                     resultData.SkillList.AddRange(sdList);
 
                     UsedUserSkillData[] usedSkillList = sdList.GroupBy((o) => o.Idx).Select((s) => new UsedUserSkillData { SkillIdx = (int)s.Key, Count = s.Count() }).ToArray();
-                    
-                    GameNetworkManager.Instance.UpdateUsedUserSkill(usedSkillList, (json) =>
+
+                    try
                     {
+                        string json = await GameNetworkManager.Instance.UpdateUsedUserSkillAsync(usedSkillList, this.GetCancellationTokenOnDestroy());
                         APIResponseData<List<SkillSlotData>> res = GameNetworkManager.CreateAPIResponseDataFromJson<List<SkillSlotData>>(json);
 
-                        if(res.data != null)
+                        if (res.data != null)
                         {
                             SaveLoadManager.Instance.UserSkillData.SkillSlots = res.data;
                         }
-                    },
-                    (json) =>
+                    }
+                    catch(System.Exception ex)
                     {
-                        APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(json);
+                        APIResponseData<DumpData> dump = GameNetworkManager.CreateAPIResponseDataFromJson<DumpData>(ex.Message);
 
-                        if(dump.response != ResponseType.Success)
+                        if (dump.response != ResponseType.Success)
                         {
 
                         }
-                    });
+                    }
                 }
             }
 
@@ -760,7 +762,7 @@ public class BattleStage : MonoBehaviour
 
         if (page == 0)
         {
-            player?.SetTarget(selectedBoard.Owner);
+            player?.SetTarget(selectedBoard?.Owner);
             player?.DrawTargetLine();
         }
         else if (page == 1)
