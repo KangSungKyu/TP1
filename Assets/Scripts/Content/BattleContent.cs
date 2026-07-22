@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -98,7 +99,7 @@ public class BattleContent : GameContent
         battleStage.InitStage(userData, sd);
     }
 
-    private async void OnStageDefeat()
+    private void OnStageDefeat()
     {
         Debug.Log($"stage defeat");
 
@@ -120,7 +121,7 @@ public class BattleContent : GameContent
                     userData.StageIdx = userData.SavedStageIdx;
 
                     await SaveLoadManager.Instance.SaveUserDataAsync(this.GetCancellationTokenOnDestroy());
-                    await GameSceneManager.Instance.LoadSceneAsync(selectStageScene, this.GetCancellationTokenOnDestroy());
+                    await GameSceneManager.Instance.LoadSceneAsync(selectStageScene, CancellationToken.None);
                 }
             }
             catch(System.Exception e)
@@ -130,7 +131,7 @@ public class BattleContent : GameContent
         });
     }
 
-    private async void OnStageClear()
+    private void OnStageClear()
     {
         Debug.Log($"stage clear");
 
@@ -164,7 +165,7 @@ public class BattleContent : GameContent
                 {
                     stageClearData.ClearDatas = res.data.ToDictionary((o) => { return o.StageIdx; });
 
-                    GameSceneManager.Instance.LoadScene(selectStageScene);
+                    await GameSceneManager.Instance.LoadSceneAsync(selectStageScene, CancellationToken.None);
                 }
             }
             catch(System.Exception ex)

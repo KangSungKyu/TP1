@@ -470,6 +470,13 @@ public class LoginData
 }
 
 [System.Serializable]
+public class UserLevelExpData
+{
+    public int Level;
+    public int Exp;
+}
+
+[System.Serializable]
 public class SkillSlotData
 {
     public int SkillIdx;
