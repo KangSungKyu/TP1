@@ -35,7 +35,24 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
 
     public static APIResponseData<T> CreateAPIResponseDataFromJson<T>(string json)
     {
-        var res = Util.FromJson<APIResponseData<T>>(json);
+        APIResponseData<T> res = default;
+        
+        try
+        {
+            res = Util.FromJson<APIResponseData<T>>(json);
+        }
+        catch
+        {
+            string txt = json;
+            int findJsonIdx = txt.IndexOf('{');
+
+            if (findJsonIdx > -1)
+            {
+                txt = txt.Substring(findJsonIdx);
+            }
+
+            res = Util.FromJson<APIResponseData<T>>(txt);
+        }
 
         return res;
     }
@@ -51,7 +68,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
     {
         string json = Util.ToJson(clientData);
 
-        return await SendWebRequestAsync($"{server_url}/login_user", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/login_user", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> LogOutAsync(CancellationToken cancellationToken = default)
@@ -65,7 +82,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
             };
             string json = Util.ToJson(dto);
 
-            return await SendWebRequestAsync($"{server_url}/logout_user", SendRequestMethodType.POST, json);
+            return await SendWebRequestAsync($"{server_url}/logout_user", SendRequestMethodType.POST, json, cancellationToken);
         }
 
         return string.Empty;
@@ -82,12 +99,12 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_stagecleardata", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_stagecleardata", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> LoadStageClearDataAsync(uint userId, CancellationToken cancellationToken = default)
     {
-        return await SendWebRequestAsync($"{server_url}/get_stagecleardata/{userId}", SendRequestMethodType.GET);
+        return await SendWebRequestAsync($"{server_url}/get_stagecleardata/{userId}", SendRequestMethodType.GET, string.Empty, cancellationToken);
     }
 
     public async UniTask<string> UpdateUserLevelAsync(CancellationToken cancellationToken = default)
@@ -103,7 +120,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_userlevel", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_userlevel", SendRequestMethodType.POST, json, cancellationToken);
     }
     
     public async UniTask<string> UpdateDefeatStageAsync(CancellationToken cancellationToken = default)
@@ -115,7 +132,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_defeatstage", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_defeatstage", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> UpdateClearStageAsync(int stageIdx, CancellationToken cancellationToken = default)
@@ -128,12 +145,12 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_clearstage", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_clearstage", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> LoadUserSkillDataAsync(uint userId, CancellationToken cancellationToken = default)
     {
-        return await SendWebRequestAsync($"{server_url}/get_userskilldata/{userId}", SendRequestMethodType.GET);
+        return await SendWebRequestAsync($"{server_url}/get_userskilldata/{userId}", SendRequestMethodType.GET, string.Empty, cancellationToken);
     }
 
     public async UniTask<string> UpdateBuyUserSkillAsync(int skillIdx, CancellationToken cancellationToken = default)
@@ -146,7 +163,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_buyuserskill", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_buyuserskill", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> UpdateEquipUserSkillAsync(int skillIdx, int slot, CancellationToken cancellationToken = default)
@@ -160,7 +177,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_equipuserskill", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_equipuserskill", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> UpdateUnEquipUserSkillAsync(int slot, CancellationToken cancellationToken = default)
@@ -173,7 +190,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_unequipuserskill", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_unequipuserskill", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> UpdateEnterUserStageAsync(int mapIdx, int stageIdx, CancellationToken cancellationToken = default)
@@ -187,7 +204,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_enteruserstage", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_enteruserstage", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     public async UniTask<string> UpdateUsedUserSkillAsync(UsedUserSkillData[] usedSkillList, CancellationToken cancellationToken = default)
@@ -200,7 +217,7 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         };
         string json = Util.ToJson(dto);
 
-        return await SendWebRequestAsync($"{server_url}/update_useduserskill", SendRequestMethodType.POST, json);
+        return await SendWebRequestAsync($"{server_url}/update_useduserskill", SendRequestMethodType.POST, json, cancellationToken);
     }
 
     private void OnOffProgressUI(bool onoff)

@@ -140,6 +140,7 @@ public class BattleStage : MonoBehaviour
                 while (readyQueue.Count > 0 && !ct.IsCancellationRequested)
                 {
                     var readyUnit = readyQueue.Dequeue();
+
                     await RunUnitTurnAsync(readyUnit, ct);
                 }
 
@@ -350,24 +351,56 @@ public class BattleStage : MonoBehaviour
         }
     }
 
-    // ---------------------------------------------------------------
-    // Remaining helper methods (unchanged except removal of IEnumerator versions)
-    // ---------------------------------------------------------------
     private void ClearBoard(BBoard board)
     {
         board.ClearBoard();
         board.ClearDrawLine();
     }
 
-    private void OnPuzzleReset() => boardManager.ResetCurrentPuzzle();
-    private void OnPuzzlePageR() => boardManager.SelectPuzzlePage_R();
-    private void OnPuzzlePageL() => boardManager.SelectPuzzlePage_L();
-    private void OnPuzzleSelectR(int pageCursor) => boardManager.SelectPuzzle_R(pageCursor);
-    private void OnPuzzleSelectL(int pageCursor) => boardManager.SelectPuzzle_L(pageCursor);
-    private void OnPuzzleDrawRight() => boardManager.DrawCurrentPuzzle_ToRight();
-    private void OnPuzzleDrawLeft() => boardManager.DrawCurrentPuzzle_ToLeft();
-    private void OnPuzzleDrawDown() => boardManager.DrawCurrentPuzzle_ToDown();
-    private void OnPuzzleDrawUp() => boardManager.DrawCurrentPuzzle_ToUp();
+    private void OnPuzzleReset() 
+    {
+        boardManager.ResetCurrentPuzzle(); 
+    }
+
+    private void OnPuzzlePageR()
+    {
+        boardManager.SelectPuzzlePage_R();
+    }
+
+    private void OnPuzzlePageL()
+    {
+        boardManager.SelectPuzzlePage_L();
+    }
+
+    private void OnPuzzleSelectR(int pageCursor)
+    {
+        boardManager.SelectPuzzle_R(pageCursor);
+    }
+
+    private void OnPuzzleSelectL(int pageCursor)
+    {
+        boardManager.SelectPuzzle_L(pageCursor);
+    }
+
+    private void OnPuzzleDrawRight()
+    {
+        boardManager.DrawCurrentPuzzle_ToRight();
+    }
+
+    private void OnPuzzleDrawLeft()
+    {
+        boardManager.DrawCurrentPuzzle_ToLeft();
+    }
+
+    private void OnPuzzleDrawDown()
+    {
+        boardManager.DrawCurrentPuzzle_ToDown();
+    }
+
+    private void OnPuzzleDrawUp()
+    {
+        boardManager.DrawCurrentPuzzle_ToUp();
+    }
 
     private void OnPlayerDeath(PlayerUnit player, float hp)
     {
@@ -549,7 +582,7 @@ public class BattleStage : MonoBehaviour
 
                         if (dump.response != ResponseType.Success)
                         {
-
+                            AlterMsgSystem.Instance.ShowMsg($"{dump.response}");
                         }
                     }
                 }
