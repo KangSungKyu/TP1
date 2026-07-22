@@ -135,7 +135,7 @@ public class BBoardManager : MonoBehaviour
     {
         int currentBoardCursor = boardCursor[pageCursor].Value;
 
-        if (currentBoardCursor > 0)
+        if (currentBoardCursor >= 0)
         {
             currentBoardCursor -= 1;
         }

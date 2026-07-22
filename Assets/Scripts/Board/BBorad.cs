@@ -108,6 +108,7 @@ public class BBoard : MonoBehaviour
 
     public void SubscribeOnPathComplete(System.Action callback)
     {
+        onPathComplete = null;
         onPathComplete += callback;
     }
 
