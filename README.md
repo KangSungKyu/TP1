@@ -22,7 +22,7 @@
 
 ## 🛠 기술 스택 및 개발 환경
 
-- **Engine & Language**: Unity (2022 3.x+), C#
+- **Engine & Language**: Unity (6.4), C#
 - **Asynchronous & Reactive**:
   - **UniTask (Cysharp)**: 프로젝트 전역 비동기 패턴 통일 (Coroutine 100% 마이그레이션 완료)
   - **UniRx**: `ReactiveProperty` 기반 상태 및 UI 반응형 바인딩
