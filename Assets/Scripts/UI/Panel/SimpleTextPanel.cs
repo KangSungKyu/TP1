@@ -1,6 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class SimpleTextPanel : PanelBase
 {
@@ -12,8 +13,8 @@ public class SimpleTextPanel : PanelBase
     public void Show(string text)
     {
         this.text = text;
-
-        Show();
+        // Use async fire‑and‑forget version of Show from PanelBase
+        ShowAsync().Forget();
     }
 
     protected override bool OnPanelShow()

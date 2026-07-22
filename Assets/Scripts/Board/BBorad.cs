@@ -312,6 +312,9 @@ public class BBoard : MonoBehaviour
             // Helper: find a path that minimizes the number of block tiles traversed using 0-1 BFS
             System.Func<List<Vector2Int>> FindMinBlockPath = () =>
             {
+                if (startPoint.x == -1 || startPoint.y == -1 || endPoint.x == -1 || endPoint.y == -1)
+                    return null;
+
                 int INF = 1000000000;
                 int[,] dist = new int[height, width];
                 int[,] px = new int[height, width];

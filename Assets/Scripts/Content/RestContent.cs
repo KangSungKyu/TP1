@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -61,21 +62,8 @@ public class RestContent : GameContent
 
         await base.Enter();
 
-        LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
-        LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
-        int nextExp = 0;
-
         stageUI.SetText($"{sd.Stage} - {sd.SubStage}");
 
-        if(nextLBD != null)
-        {
-            nextExp = (int)nextLBD.NeedExp;
-        }
-
-        //test
-        levelText.SetText($"Lv:{userData.Level}");
-        expText.SetText($"Exp : {userData.Exp} / {nextExp}");
-        
         lvupBtn.onClick.RemoveAllListeners();
         lvupBtn.onClick.AddListener(OnUserLevelUp);
         stageBtn.onClick.RemoveAllListeners();
@@ -93,7 +81,8 @@ public class RestContent : GameContent
             skillSlotUI[i].transform.Find("UnEquipBtn").GetComponent<Button>()?.onClick.AddListener(() => OnUnEquipSkill(id + 1));
         }
 
-        UpdateStatus(currLBD, nextLBD);
+        UpdateLevelExp();
+        UpdateStatus();
         UpdateSkillPanel();
         UpdateSkillSlots();
 
@@ -161,24 +150,15 @@ public class RestContent : GameContent
         try
         {
             string json = await GameNetworkManager.Instance.UpdateUserLevelAsync(this.GetCancellationTokenOnDestroy());
-            APIResponseData<(int Level, int Exp)> res = GameNetworkManager.CreateAPIResponseDataFromJson<(int Level, int Exp)>(json);
+            APIResponseData<UserLevelExpData> res = GameNetworkManager.CreateAPIResponseDataFromJson<UserLevelExpData>(json);
 
             if (res.data != default)
             {
-                LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
-                LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
+                userData.Level = res.data.Level;
+                userData.Exp = res.data.Exp;
 
-                nextExp = 0;
-
-                if (nextLBD != null)
-                {
-                    nextExp = (int)nextLBD.NeedExp;
-                }
-
-                levelText.SetText($"Lv:{userData.Level}");
-                expText.SetText($"Exp : {userData.Exp} / {nextExp}");
-
-                UpdateStatus(currLBD, nextLBD);
+                UpdateLevelExp();
+                UpdateStatus();
             }
         }
         catch (Exception ex)
@@ -187,22 +167,40 @@ public class RestContent : GameContent
         }
     }
 
-    private void OnGoStage()
+    private void UpdateLevelExp()
     {
-        GameSceneManager.Instance.LoadScene(selectStageScene);
+        LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
+        LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
+
+        int nextExp = 0;
+
+        if (nextLBD != null)
+        {
+            nextExp = (int)nextLBD.NeedExp;
+        }
+
+        levelText.SetText($"Lv:{userData.Level}");
+        expText.SetText($"Exp : {userData.Exp} / {nextExp}");
     }
 
-    private void UpdateStatus(LevelBaseData currentLBD, LevelBaseData nextLBD)
+    private async void OnGoStage()
     {
+        await GameSceneManager.Instance.LoadSceneAsync(selectStageScene, CancellationToken.None);
+    }
+
+    private void UpdateStatus()
+    {
+        LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
+        LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
         UnitData playerData = DataTableManager.Instance.GetUnitData(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1));
 
-        if(currentLBD != null)
+        if(currLBD != null)
         {
-            hpText[0].SetText($"maxHP : {playerData.MaxHp + currentLBD.MaxHp}");
-            atkText[0].SetText($"atk : {playerData.Atk + currentLBD.Atk}");
-            defText[0].SetText($"def : {playerData.Def + currentLBD.Def}");
-            dodgeText[0].SetText($"dodge : {playerData.Dodge + currentLBD.Dodge}");
-            spdText[0].SetText($"spd : {playerData.Spd + currentLBD.Spd}");
+            hpText[0].SetText($"maxHP : {playerData.MaxHp + currLBD.MaxHp}");
+            atkText[0].SetText($"atk : {playerData.Atk + currLBD.Atk}");
+            defText[0].SetText($"def : {playerData.Def + currLBD.Def}");
+            dodgeText[0].SetText($"dodge : {playerData.Dodge + currLBD.Dodge}");
+            spdText[0].SetText($"spd : {playerData.Spd + currLBD.Spd}");
         }
         else
         {

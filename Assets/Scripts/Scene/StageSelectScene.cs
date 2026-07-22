@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
@@ -68,11 +70,6 @@ public class StageSelectScene : MonoBehaviour
             stageMapUIList.Add(stageMapUI);
         }
 
-        //prevBtn.transform.SetAsLastSibling();
-        //nextBtn.transform.SetAsLastSibling();
-        //exitBtn.transform.SetAsLastSibling();
-        //tutoBtn.transform.SetAsLastSibling();
-
         prevBtn.onClick.AddListener(() =>
         {
             int idx = Mathf.Max(0, stageMapIdx - 1);
@@ -103,9 +100,9 @@ public class StageSelectScene : MonoBehaviour
         fadeUI.Play();
     }
 
-    private void LoadMainScene()
+    private async void LoadMainScene()
     {
-        GameSceneManager.Instance.LoadScene(mainScene);
+        await GameSceneManager.Instance.LoadSceneAsync(mainScene, CancellationToken.None);
     }
 
     private async void LoadMap(int mapIdx)

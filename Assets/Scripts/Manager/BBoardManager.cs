@@ -303,7 +303,12 @@ public class BBoardManager : MonoBehaviour
                 startPos = OverlayToWorld(OverlayRectTransformCenter(boardContainer_RT[page]));
             }
 
-            Transform tr = boardContainer[page].GetChild(i);
+            Transform tr = null;
+
+            if (i < boardContainer[page].childCount)
+            {
+                tr = boardContainer[page].GetChild(i);
+            }
 
             if (tr != null)
             {

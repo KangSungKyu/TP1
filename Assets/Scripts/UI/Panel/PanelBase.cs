@@ -1,6 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class PanelBase : MonoBehaviour
@@ -15,22 +17,34 @@ public abstract class PanelBase : MonoBehaviour
     protected Button exitBtn = null;
 
     protected bool isShow = false;
-    protected Coroutine coPanel = null;
+    // UniTask based panel handling; no Coroutine needed
 
     public void Show()
     {
-        OnPanel();
+        // Fire‑and‑forget async panel show
+        OnPanelAsync(this.GetCancellationTokenOnDestroy()).Forget();
     }
 
     public void Hide()
     {
-        OffPanel();
+        // Fire‑and‑forget async panel hide
+        OffPanelAsync(this.GetCancellationTokenOnDestroy()).Forget();
+    }
+
+    // Async versions for external callers to await panel show/hide operations
+    public async UniTask ShowAsync(CancellationToken ct = default)
+    {
+        await OnPanelAsync(ct);
+    }
+
+    public async UniTask HideAsync(CancellationToken ct = default)
+    {
+        await OffPanelAsync(ct);
     }
 
     public void ForceHide()
     {
-        StopCoroutine();
-
+        // Immediately hide without awaiting
         if (OnPanelHide())
         {
             this.gameObject.SetActive(false);
@@ -72,7 +86,6 @@ public abstract class PanelBase : MonoBehaviour
             canvasGroup = GetComponent<CanvasGroup>();
         }
 
-        StopCoroutine();
         ForceHide();
     }
 
@@ -88,32 +101,17 @@ public abstract class PanelBase : MonoBehaviour
         }
     }
 
-    private void StopCoroutine()
-    {
-        if (coPanel != null)
-        {
-            StopCoroutine(coPanel);
-
-            coPanel = null;
-        }
-    }
-
     private void OnPanel()
     {
-        if(coPanel == null)
-        {
-            this.gameObject.SetActive(true);
-
-            coPanel = StartCoroutine(IEOnPanel());
-        }
+        this.gameObject.SetActive(true);
+        // Start async panel show without tracking
+        OnPanelAsync(this.GetCancellationTokenOnDestroy()).Forget();
     }
 
     private void OffPanel()
     {
-        if(coPanel == null)
-        {
-            coPanel = StartCoroutine(IEOffPanel());
-        }
+        // Start async panel hide without tracking
+        OffPanelAsync(this.GetCancellationTokenOnDestroy()).Forget();
     }
 
     private void OnOffCanvasGroup(bool onoff)
@@ -123,27 +121,21 @@ public abstract class PanelBase : MonoBehaviour
         canvasGroup.interactable = onoff;
     }
 
-    private IEnumerator IEOnPanel()
+    private async UniTask OnPanelAsync(CancellationToken ct = default)
     {
+        this.gameObject.SetActive(true);
         OnOffCanvasGroup(false);
-        
-        yield return new WaitUntil(() => OnPanelShow());
-        yield return null;
-        
+        await UniTask.WaitUntil(() => OnPanelShow(), cancellationToken: ct);
+        await UniTask.Yield(PlayerLoopTiming.Update, ct);
         OnOffCanvasGroup(true);
-
-        coPanel = null;
     }
 
-    private IEnumerator IEOffPanel()
+    private async UniTask OffPanelAsync(CancellationToken ct = default)
     {
-        yield return new WaitUntil(() => OnPanelHide());
-
+        await UniTask.WaitUntil(() => OnPanelHide(), cancellationToken: ct);
         OnOffCanvasGroup(false);
-
-        coPanel = null;
-
-        Invoke("DeactivePanel", 0.5f);
+        await UniTask.Delay(System.TimeSpan.FromSeconds(0.5), cancellationToken: ct);
+        DeactivePanel();
     }
 
     private void DeactivePanel()

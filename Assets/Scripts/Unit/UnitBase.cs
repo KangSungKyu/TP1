@@ -1,10 +1,12 @@
-﻿using DG.Tweening;
+﻿using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using DG.Tweening.Core;
 using DG.Tweening.Plugins.Options;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
@@ -185,6 +187,16 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
 
+    public async UniTask FadeOutAsync(float duration)
+    {
+        if (spriteRenderer != null)
+        {
+            fadeDo = spriteRenderer.DOFade(0.0f, duration);
+
+            await fadeDo.Play().AsyncWaitForCompletion();
+        }
+    }
+
     public void FadeIn(float duration)
     {
         if (spriteRenderer != null)
@@ -195,15 +207,67 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
 
-    public IEnumerator IEPlayAction(UnitActionData actionData)
+    // ★ 비동기 액션 실행
+    public async UniTask PlayActionAsync(UnitActionData actionData, CancellationToken ct = default)
     {
-        IEnumerator proc = actionData.Type switch 
-        { 
-            UnitActionType.Move => IELerpMove(transform, TargetUnit != null ? TargetUnit.transform : null),
-            _ => null
-        };
+        string anim = actionData.Type.ToString();
+        bool isLoop = actionData.Type == UnitActionType.Idle || actionData.Type == UnitActionType.Move;
 
-        return IEPlayAction(actionData, proc);
+        if (isLoop)
+        {
+            animator.SetBool(anim, true);
+        }
+        else
+        {
+            animator.SetTrigger(anim);
+
+            await UniTask.Yield(PlayerLoopTiming.Update, ct);
+
+            var clipList = animator.GetCurrentAnimatorClipInfo(0);
+
+            float duration = (clipList != null && clipList.Length > 0 ? clipList[0].clip.length : 0f);
+
+            if (actionData.Type == UnitActionType.Death)
+            {
+                duration += 1.0f;
+
+                FadeOutAsync(duration).Forget();
+            }
+
+            await UniTask.Delay(TimeSpan.FromSeconds(duration), cancellationToken: ct);
+        }
+
+        if (actionData.Type == UnitActionType.Move)
+        {
+            await LerpMoveAsync(transform, TargetUnit?.transform, ct);
+        }
+
+        if (isLoop && actionData.Type != UnitActionType.Idle)
+            animator.SetBool(anim, false);
+
+        actionData.AfterAction?.Invoke();
+    }
+
+    private async UniTask LerpMoveAsync(Transform unitTransform, Transform targetTransform, CancellationToken ct)
+    {
+        if (unitTransform == null || targetTransform == null) 
+            return;
+
+        while (Vector2.Distance(unitTransform.position, targetTransform.position) > 1.5f)
+        {
+            await UniTask.Yield(PlayerLoopTiming.Update, ct);
+
+            Vector2 dir = (targetTransform.position - unitTransform.position).normalized;
+            unitTransform.position += (Vector3)dir * Spd * Time.deltaTime;
+
+            UpdateHpBarPosition();
+        }
+    }
+
+    // 기존 fire‑and‑forget 래퍼 (호환용)
+    public void PlayAction(UnitActionData data)
+    {
+        PlayActionAsync(data).Forget();
     }
 
     public void AddATBTick(float dt)
@@ -296,70 +360,4 @@ public abstract class UnitBase : MonoBehaviour
 
         uiRT.anchoredPosition = uiPos;
     }
-
-    private IEnumerator IEPlayAction(UnitActionData actionData, IEnumerator procCustomFunc = null)
-    {
-        actionData.BeforeAction?.Invoke();
-
-        string anim = actionData.Type.ToString(); // Enum 이름을 트리거로 사용
-        bool isLoopAnimType = actionData.Type == UnitActionType.Idle || actionData.Type == UnitActionType.Move;
-
-        if (isLoopAnimType)
-        {
-            animator.SetBool(anim, true);
-        }
-        else
-        {
-            animator.SetTrigger(anim);
-
-            yield return null;
-
-            var clipList = animator.GetCurrentAnimatorClipInfo(0);
-
-            float duration = (clipList != null && clipList.Length > 0 ? clipList[0].clip.length : 0f);
-
-            if(actionData.Type == UnitActionType.Death)
-            {
-                duration += 1.0f;
-
-                FadeOut(duration);
-            }
-
-            yield return new WaitForSeconds(duration);
-        }
-
-        if (procCustomFunc != null)
-        {
-            yield return StartCoroutine(procCustomFunc);
-        }
-
-        if (procCustomFunc != null && isLoopAnimType)
-        {
-            animator.SetBool(anim, false);
-        }
-
-        actionData.AfterAction?.Invoke();
-    }
-
-    private IEnumerator IELerpMove(Transform unitTransform, Transform targetTransform)
-    {
-        if (unitTransform == null || targetTransform == null)
-        {
-            yield break;
-        }
-
-        while (Vector2.Distance((Vector2)unitTransform.position, (Vector2)targetTransform.position) > 1.5f)
-        {
-            yield return null;
-
-            Vector2 dir = (targetTransform.position - unitTransform.position).normalized;
-
-            unitTransform.position += (Vector3)dir * Spd * Time.deltaTime;
-
-            UpdateHpBarPosition();
-        }
-
-        yield return null;
-    }
-
 }

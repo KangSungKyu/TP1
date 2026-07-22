@@ -1,7 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
+using System.Threading;
 using DG.Tweening;
 
 public class StageResultPanel : PanelBase
@@ -17,22 +19,24 @@ public class StageResultPanel : PanelBase
     private float startY = 0f;
     private float endY = 0f;
 
-    public void Show(bool isWin, System.Action act)
+    public async UniTask ShowAsync(bool isWin, System.Action act, CancellationToken ct = default)
     {
         this.isWin = isWin;
 
         SetOnExitEvent(() =>
         {
             act?.Invoke();
-            //Hide();
+            //Hide(); // optional, keep panel open until user closes
         });
-        Show();
+
+        // Show panel async (base implementation)
+        await base.ShowAsync(ct);
 
         canvasGroup.interactable = false;
 
         float duration = 1.0f;
-        Sequence seq = DOTween.Sequence();
-        var moveTw = DOTween.To(() => 0f, x =>
+        var seq = DOTween.Sequence();
+        var moveTw = DG.Tweening.DOTween.To(() => 0f, x =>
         {
             float t = resultImgCurve.Evaluate(x);
             resultImg.rectTransform.anchoredPosition = new Vector2(0.0f, Mathf.LerpUnclamped(startY, endY, t));
@@ -40,7 +44,15 @@ public class StageResultPanel : PanelBase
 
         seq.Insert(0, resultImg.DOFade(1.0f, duration));
         seq.Insert(0, moveTw);
-        seq.OnComplete(() => canvasGroup.interactable = true).Play();
+        seq.OnComplete(() => canvasGroup.interactable = true);
+
+        await seq.AsyncWaitForCompletion();
+    }
+
+    // Legacy fire‑and‑forget wrapper for compatibility
+    public void Show(bool isWin, System.Action act)
+    {
+        ShowAsync(isWin, act).Forget();
     }
 
     protected override bool OnPanelShow()
