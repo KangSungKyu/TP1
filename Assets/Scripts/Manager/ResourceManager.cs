@@ -357,15 +357,6 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
         }
     }
 
-    private IEnumerator IELoadAssetsAsync<T>(IList<IResourceLocation> locList, Action<T> onComp)
-    {
-        var loadHandle = Addressables.LoadAssetsAsync<T>(locList, onComp);
-
-        yield return loadHandle;
-
-        Addressables.Release(loadHandle);
-    }
-
     private void OnAtlasRequested(string tag, Action<SpriteAtlas> onComplete)
     {
         string addrKey = tag;
