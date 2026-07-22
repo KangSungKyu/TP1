@@ -65,8 +65,8 @@ public class BBoardManager : MonoBehaviour
 
     public void SetCursorEvent(System.Action<int, int> onChangedBoardCursor, System.Action<int, int> onPrevBoardCursor, System.Action<int> onChangedBoardPageCursor)
     {
-        boardCursor[0].Subscribe((v) => { onChangedBoardCursor(boardPageCursor.Value, v); }).AddTo(this);
-        boardCursor[1].Pairwise().Subscribe((pair) => { onPrevBoardCursor(boardPageCursor.Value, pair.Previous); onChangedBoardCursor(boardPageCursor.Value, pair.Current); }).AddTo(this);
+        boardCursor[0].Subscribe((v) => { onChangedBoardCursor(0, v); }).AddTo(this);
+        boardCursor[1].Pairwise().Subscribe((pair) => { onPrevBoardCursor(1, pair.Previous); onChangedBoardCursor(1, pair.Current); }).AddTo(this);
         boardPageCursor.Subscribe(onChangedBoardPageCursor).AddTo(this);
     }
 
