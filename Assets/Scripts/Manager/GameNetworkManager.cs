@@ -244,67 +244,6 @@ public class GameNetworkManager : Singleton<GameNetworkManager>
         }
     }
 
-    private IEnumerator IEPostRequest(string url, string json, System.Action<string> onComplete = null, System.Action<string> onFailed = null)
-    {
-        using (UnityWebRequest www = new UnityWebRequest(url, "POST"))
-        {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
-            
-            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-
-            OnOffProgressUI(true);
-
-            yield return www.SendWebRequest();
-
-            OnOffProgressUI(false);
-
-            if (www.result == UnityWebRequest.Result.Success)
-            {
-                string resultJson = www.downloadHandler.text;
-
-                onComplete?.Invoke(resultJson);
-            }
-            else
-            {
-                string resultJson = www.downloadHandler.text;
-
-                onFailed?.Invoke(resultJson);
-                Debug.LogError(www.error);
-            }
-        }
-    }
-
-    private IEnumerator IEGetRequest(string url, System.Action<string> onComplete = null, System.Action<string> onFailed = null) 
-    {
-        using (UnityWebRequest www = new UnityWebRequest(url, "GET"))
-        {
-            www.downloadHandler = new DownloadHandlerBuffer();
-            www.SetRequestHeader("Content-Type", "application/json");
-
-            OnOffProgressUI(true);
-
-            yield return www.SendWebRequest();
-
-            OnOffProgressUI(false);
-
-            if (www.result == UnityWebRequest.Result.Success)
-            {
-                string resultJson = www.downloadHandler.text;
-
-                onComplete?.Invoke(resultJson);
-            }
-            else
-            {
-                string resultJson = www.downloadHandler.text;
-
-                onFailed?.Invoke(resultJson);
-                Debug.LogError(www.error);
-            }
-        }
-    }
-
     protected override void OnSingletonAwake()
     {
         base.OnSingletonAwake();

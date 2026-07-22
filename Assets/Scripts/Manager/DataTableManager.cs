@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cysharp.Threading.Tasks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -182,7 +183,7 @@ public class DataTableManager : Singleton<DataTableManager>
     {
         base.OnSingletonAwake();
 
-        StartCoroutine(IEPreloadDataTables());
+        PreloadDataTables();
     }
 
     protected override void OnSingletonDestroyed()
@@ -197,16 +198,15 @@ public class DataTableManager : Singleton<DataTableManager>
         base.OnSingletonDestroyed();
     }
 
-    private IEnumerator IEPreloadDataTables()
+    private async void PreloadDataTables()
     {
         // 'Data' 라벨을 가진 에셋들만 로드
         //csv파일이라 수정필요
         //idx에서 테이블 종류를 구분
         string targetLabel = "Data";
-
         var locationsHandle = Addressables.LoadResourceLocationsAsync(targetLabel, typeof(TextAsset));
 
-        yield return locationsHandle;
+        await locationsHandle;
 
         if (locationsHandle.Status == AsyncOperationStatus.Succeeded)
         {
@@ -227,7 +227,7 @@ public class DataTableManager : Singleton<DataTableManager>
                         Debug.Log($"Data Loaded: {asset.name}");
                     }
                 }
-            });
+            }, this.GetCancellationTokenOnDestroy());
         }
 
         Addressables.Release(locationsHandle);

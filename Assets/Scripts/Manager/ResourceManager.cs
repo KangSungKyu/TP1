@@ -1,7 +1,9 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -19,15 +21,13 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
     private readonly Dictionary<string, AsyncOperationHandle> loadHandles = new Dictionary<string, AsyncOperationHandle>();
     private readonly List<AsyncOperationHandle> instantiateHandles = new List<AsyncOperationHandle>();
 
-    public IEnumerator Init(Action onComplete = null)
+    public async UniTask InitAsync(Action onComplete = null, CancellationToken cancellationToken = default)
     {
-        // 1. 초기화
-        yield return Addressables.InitializeAsync();
+        await Addressables.InitializeAsync().ToUniTask(cancellationToken: cancellationToken);
 
-        // 2. [필수] 서버에서 카탈로그 정보를 새로 받아와야 합니다!
         var updateHandle = Addressables.CheckForCatalogUpdates(false);
 
-        yield return updateHandle;
+        await updateHandle;
 
         if (updateHandle.Status == AsyncOperationStatus.Succeeded)
         {
@@ -35,61 +35,18 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
 
             if (catalogs.Count > 0)
             {
-                yield return Addressables.UpdateCatalogs(catalogs);
+                await Addressables.UpdateCatalogs(catalogs).ToUniTask(cancellationToken: cancellationToken);
             }
         }
 
-        Addressables.Release(updateHandle);
+        if(updateHandle.IsValid())
+        {
+            Addressables.Release(updateHandle);
+        }
 
-        yield return StartCoroutine(IEStartDownload(onComplete));
+        await StartDownloadAsync(onComplete, cancellationToken);
     }
 
-    public IEnumerator IEStartDownload(System.Action onResourceLoad)
-    {
-        var locationHandle = Addressables.LoadResourceLocationsAsync(labelName, typeof(object));
-
-        yield return locationHandle;
-
-        if (locationHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            Debug.Log($"찾은 결과 개수: {locationHandle.Result.Count}");
-            // 2. 다운로드 시작
-            AsyncOperationHandle handle = Addressables.DownloadDependenciesAsync(locationHandle.Result);
-
-            // 3. 다운로드 완료까지 진행률 추적
-            while (!handle.IsDone)
-            {
-                float progress = handle.PercentComplete;
-                Debug.Log($"다운로드 중: {progress * 100}%");
-                // UI에 업데이트 (예: slider.value = progress)
-                yield return null;
-            }
-
-            if (handle.Status == AsyncOperationStatus.Succeeded)
-            {
-                Debug.Log("다운로드 완료!");
-                // 이제 리소스를 로드해도 됩니다.
-                onResourceLoad?.Invoke();
-            }
-            else
-            {
-                Debug.LogError("다운로드 실패: " + handle.OperationException);
-            }
-
-            Addressables.Release(handle);
-        }
-        else
-        {
-            Debug.LogError($"그룹을 찾을 수 없습니다. (상태: {locationHandle.Status})");
-            // 발견된 모든 그룹을 출력해서 이름이 일치하는지 확인
-            foreach (var location in locationHandle.Result)
-            {
-                Debug.Log($"발견된 키: {location.PrimaryKey}");
-            }
-        }
-
-        Addressables.Release(locationHandle);
-    }
 
     public void LoadAssetAsync<T>(string key, Action<T> onLoaded) where T : class
     {
@@ -190,10 +147,28 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
         }
     }
 
-
-    public void LoadAssetsAsync<T>(IList<IResourceLocation> locList, Action<T> onComp)
+    public async void LoadAssetsAsync<T>(IList<IResourceLocation> locList, Action<T> onComp, CancellationToken cancellationToken = default)
     {
-        StartCoroutine(IELoadAssetsAsync(locList, onComp));
+        if (locList == null || locList.Count < 0)
+            return;
+
+        var loadHandle = Addressables.LoadAssetsAsync<T>(locList, onComp);
+
+        try
+        {
+            var resultList = await loadHandle.ToUniTask(cancellationToken: cancellationToken);
+        }
+        catch(System.Exception ex)
+        {
+            Debug.LogError(ex);
+        }
+        finally
+        {
+            if(loadHandle.IsValid())
+            {
+                Addressables.Release(loadHandle);
+            }
+        }
     }
 
     public async Task<GameObject> InstantiateAsyncTask(string key, Transform parent = null, Vector3? position = null, Quaternion? rotation = null)
@@ -326,6 +301,60 @@ public class ResourceManager : Commons.Singleton<ResourceManager>
 
         base.OnSingletonDestroyed();
         //ReleaseAll();
+    }
+
+    private async UniTask StartDownloadAsync(System.Action onResourceLoad, CancellationToken cancellationToken = default)
+    {
+        var locationHandle = Addressables.LoadResourceLocationsAsync(labelName, typeof(object));
+
+        await locationHandle;
+
+        if (locationHandle.Status == AsyncOperationStatus.Succeeded)
+        {
+            Debug.Log($"찾은 결과 개수: {locationHandle.Result.Count}");
+            // 2. 다운로드 시작
+            AsyncOperationHandle handle = Addressables.DownloadDependenciesAsync(locationHandle.Result);
+
+            try
+            {
+                await handle.ToUniTask(progress: Progress.Create<float>((progress) =>
+                {
+                    Debug.Log($"다운로드 중: {progress * 100}%");
+                }), cancellationToken: cancellationToken);
+
+                if (handle.Status == AsyncOperationStatus.Succeeded)
+                {
+                    Debug.Log("다운로드 완료!");
+                    // 이제 리소스를 로드해도 됩니다.
+                    onResourceLoad?.Invoke();
+                }
+                else
+                {
+                    Debug.LogError("다운로드 실패: " + handle.OperationException);
+                }
+            }
+            finally
+            {
+                if(handle.IsValid())
+                {
+                    Addressables.Release(handle);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError($"그룹을 찾을 수 없습니다. (상태: {locationHandle.Status})");
+            // 발견된 모든 그룹을 출력해서 이름이 일치하는지 확인
+            foreach (var location in locationHandle.Result)
+            {
+                Debug.Log($"발견된 키: {location.PrimaryKey}");
+            }
+        }
+
+        if(locationHandle.IsValid())
+        {
+            Addressables.Release(locationHandle);
+        }
     }
 
     private IEnumerator IELoadAssetsAsync<T>(IList<IResourceLocation> locList, Action<T> onComp)

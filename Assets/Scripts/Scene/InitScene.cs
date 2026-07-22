@@ -1,5 +1,7 @@
-﻿
+
+using Cysharp.Threading.Tasks;
 using System.Collections;
+using System.Threading;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -19,9 +21,9 @@ public class InitScene : MonoBehaviour
         Init();
     }
 
-    private void Init()
+    private async void Init()
     {
-        StartCoroutine(ResourceManager.Instance.Init(() =>
+        await ResourceManager.Instance.InitAsync(() =>
         {
             ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_WinBG, (o) => Debug.Log($"resource loaded, {o.name}"));
             ResourceManager.Instance.LoadAssetAsync<Sprite>(Commons.ResKey_DefeatBG, (o) => Debug.Log($"resource loaded, {o.name}"));
@@ -57,12 +59,19 @@ public class InitScene : MonoBehaviour
                     AfterLoadUserData();
                 });
 
-        }));
+        }, this.GetCancellationTokenOnDestroy());
     }
 
-    private void AfterLoadUserData()
+    private async void AfterLoadUserData()
     {
-        GameSceneManager.Instance.LoadScene(selectSceneRef);
+        try
+        {
+            await GameSceneManager.Instance.LoadSceneAsync(selectSceneRef, CancellationToken.None);
+        }
+        catch (System.OperationCanceledException)
+        {
+            // Swallow cancellation when the InitScene object is destroyed during scene load.
+        }
     }
 
 }
