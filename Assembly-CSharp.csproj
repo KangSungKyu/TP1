@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Utils\UnitSpawnerService.cs" />
+    <Compile Include="Assets\Scripts\Utils\Singleton.cs" />
     <Compile Include="Assets\Scripts\Utils\QuadraticBezierRenderer.cs" />
     <Compile Include="Assets\Scripts\Effect\HitEffect.cs" />
     <Compile Include="Assets\Scripts\Manager\AlterMsgSystem.cs" />
@@ -57,14 +58,17 @@
     <Compile Include="Assets\Scripts\Unit\UnitBase.cs" />
     <Compile Include="Assets\Scripts\UI\Panel\PanelBase.cs" />
     <Compile Include="Assets\Scripts\UI\HpBar.cs" />
+    <Compile Include="Assets\Scripts\Utils\Util.cs" />
     <Compile Include="Assets\Scripts\Manager\DataTableManager.cs" />
     <Compile Include="Assets\Scripts\DataForm\SkillDataForm.cs" />
     <Compile Include="Assets\Scripts\Scene\InitScene.cs" />
     <Compile Include="Assets\Scripts\UI\SceneFadeUI.cs" />
     <Compile Include="Assets\Scripts\Scene\StageSelectScene.cs" />
     <Compile Include="Assets\Scripts\Board\BTile.cs" />
+    <Compile Include="Assets\Scripts\Manager\SimplePoolManager.cs" />
     <Compile Include="Assets\Scripts\Manager\GameNetworkManager.cs" />
     <Compile Include="Assets\Scripts\Utils\Commons.cs" />
+    <Compile Include="Assets\Scripts\Utils\SimplePool.cs" />
     <Compile Include="Assets\Scripts\Manager\UnitSpawner.cs" />
     <Compile Include="Assets\Scripts\Manager\BBoardManager.cs" />
     <Compile Include="Assets\Scripts\Manager\GameSceneManager.cs" />

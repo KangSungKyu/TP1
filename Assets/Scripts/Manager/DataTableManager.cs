@@ -9,6 +9,13 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using static Commons;
 
+public interface IDataLoad
+{
+    public int GetDataCount();
+    public void LoadData(string csvText);
+    public void Release();
+}
+
 public class DataTableManager : Singleton<DataTableManager>
 {
     private readonly Dictionary<DataTableType, IDataLoad> dataList = new Dictionary<DataTableType, IDataLoad>()
@@ -218,7 +225,7 @@ public class DataTableManager : Singleton<DataTableManager>
                     string secondLine = reader.ReadLine();
                     string[] headers = secondLine.Split(',');
 
-                    DataTableType dataTableType = Commons.Util.GetDataTableType(uint.Parse(headers[0]));
+                    DataTableType dataTableType = Util.GetDataTableType(uint.Parse(headers[0]));
 
                     if(dataList.ContainsKey(dataTableType))
                     {

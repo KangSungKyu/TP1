@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using static Commons;
+using Cysharp.Threading.Tasks;
 
 public class Factory : Singleton<Factory>
 {
@@ -12,19 +13,6 @@ public class Factory : Singleton<Factory>
     private Transform gobjContainer = null;
     [SerializeField]
     private RectTransform uiContainer = null;
-
-    private SimplePool<AlterMsg> alterMsgPool = null;
-
-    private SimplePool<UnitBase> playerPool = null;
-    private SimplePool<UnitBase> monsterPool = null;
-    private SimplePool<BBoard> boardPool = null;
-    private SimplePool<BTile> tileUIPool = null;
-    private SimplePool<HpBar> hpBarPool = null;
-    private SimplePool<Image> portraitPool = null;
-    private SimplePool<DamageFont> damageFontPool = null;
-    private SimplePool<HitEffect> hitEffectPool = null;
-    private SimplePool<QuadraticBezierRenderer> targetLinePool = null;
-
 
     // Public InitAsync wrapper to orchestrate pool initialization. If containers were not provided, create fallbacks but log a warning.
     public async Task<bool> InitAsync()
@@ -38,171 +26,58 @@ public class Factory : Singleton<Factory>
 
     public async Task<bool> Init_SystemResAsync()
     {
-        if(alterMsgPool == null)
-        {
-            alterMsgPool = new SimplePool<AlterMsg>(10, Commons.ResKey_AlterMsg, uiContainer, onGet_AlterMsg);
-
-            try
-            {
-                await alterMsgPool.PrewarmAsync(10);
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"Init_SystemResAsync: prewarmAsync failed: {ex}");
-            }
-        }
-
-        bool res = alterMsgPool != null;
-
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<AlterMsg>(Commons.ResKey_AlterMsg, 10, 10, uiContainer, onGet_AlterMsg).AsTask();
     }
 
     public async Task<bool> Init_UnitPoolAsync(int monsterCount)
     {
-        // Use addressable-backed pools. Prewarm a few instances.
-        playerPool = new SimplePool<UnitBase>(1, Commons.ResKey_PlayerUnit, gobjContainer);
-        monsterPool = new SimplePool<UnitBase>(monsterCount, Commons.ResKey_MonsterUnit, gobjContainer);
+        bool p = await SimplePoolManager.Instance.CreatePoolAsync<UnitBase>(Commons.ResKey_PlayerUnit, 1, 1, gobjContainer).AsTask();
+        bool m = await SimplePoolManager.Instance.CreatePoolAsync<UnitBase>(Commons.ResKey_MonsterUnit, monsterCount, monsterCount, gobjContainer).AsTask();
 
-        // Prewarm minimal instances
-        try
-        {
-            await playerPool.PrewarmAsync(1);
-            await monsterPool.PrewarmAsync(monsterCount);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_UnitPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = playerPool != null && monsterPool != null;
-
-        return res;
+        return p && m;
     }
 
     public async Task<bool> Init_HitEffectPoolAsync(int hitEffectCount)
     {
-        hitEffectPool = new SimplePool<HitEffect>(hitEffectCount, Commons.ResKey_HitEffect, gobjContainer, onGet_HitEffect);
-
-        try
-        {
-            await hitEffectPool.PrewarmAsync(hitEffectCount);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_HitEffectPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = hitEffectPool != null;
-        
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<HitEffect>(Commons.ResKey_HitEffect, hitEffectCount, hitEffectCount, gobjContainer, onGet_HitEffect).AsTask();
     }
 
     public async Task<bool> Init_TargetLinePoolAsync(int count)
     {
-        targetLinePool = new SimplePool<QuadraticBezierRenderer>(count, Commons.ResKey_TargetLine, gobjContainer, onGet_TargetLine);
-
-        try
-        {
-            await targetLinePool.PrewarmAsync(count);
-        }
-        catch(System.Exception ex)
-        {
-            Debug.LogError($"Init_TargetLinePoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = targetLinePool != null;
-
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<QuadraticBezierRenderer>(Commons.ResKey_TargetLine, count, count, gobjContainer, onGet_TargetLine).AsTask();
     }
 
     public async Task<bool> Init_BoardPoolAsync(int boardCount, int tileCount)
     {
-        tileUIPool = new SimplePool<BTile>(tileCount, Commons.ResKey_Tile, gobjContainer, OnGet_Tile);
-        boardPool = new SimplePool<BBoard>(boardCount, Commons.ResKey_Board, gobjContainer, OnGet_Board, OnRelease_Board);
+        bool t = await SimplePoolManager.Instance.CreatePoolAsync<BTile>(Commons.ResKey_Tile, tileCount, tileCount, gobjContainer, OnGet_Tile).AsTask();
+        bool b = await SimplePoolManager.Instance.CreatePoolAsync<BBoard>(Commons.ResKey_Board, boardCount, boardCount, gobjContainer, OnGet_Board, OnRelease_Board).AsTask();
 
-        try
-        {
-            await tileUIPool.PrewarmAsync(tileCount);
-            await boardPool.PrewarmAsync(boardCount);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_BoardPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = tileUIPool != null && boardPool != null;
-
-        return res;
+        return t && b;
     }
 
     public async Task<bool> Init_UIPoolAsync()
     {
-        portraitPool = new SimplePool<Image>(100, Commons.ResKey_PortraitUI, uiContainer, OnGet_Portrait);
-
-        try
-        {
-            await portraitPool.PrewarmAsync(10);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_UIPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = portraitPool != null;
-
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<Image>(Commons.ResKey_PortraitUI, 10, 10, uiContainer, OnGet_Portrait).AsTask();
     }
 
     public async Task<bool> Init_HPUIPoolAsync()
     {
-        hpBarPool = new SimplePool<HpBar>(100, Commons.ResKey_HPUI, uiContainer, OnGet_HPUI);
-
-        try
-        {
-            await hpBarPool.PrewarmAsync(10);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_UIPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = hpBarPool != null;
-
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<HpBar>(Commons.ResKey_HPUI, 10, 10, uiContainer, OnGet_HPUI).AsTask();
     }
 
     public async Task<bool> Init_DamageFontPoolAsync()
     {
-        damageFontPool = new SimplePool<DamageFont>(10, Commons.ResKey_DamageFont, gobjContainer, onGet_DamageFont);
-
-        try
-        {
-            await damageFontPool.PrewarmAsync(10);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Init_UIPoolAsync: PrewarmAsync failed: {ex}");
-        }
-
-        bool res = hpBarPool != null;
-
-        return res;
+        return await SimplePoolManager.Instance.CreatePoolAsync<DamageFont>(Commons.ResKey_DamageFont, 10, 10, gobjContainer, onGet_DamageFont).AsTask();
     }
 
     public void Release()
     {
-        playerPool?.Clear();
-        monsterPool?.Clear();
-        boardPool?.Clear();
-        tileUIPool?.Clear();
-        hpBarPool?.Clear();
-        portraitPool?.Clear();
-        damageFontPool?.Clear();
+        SimplePoolManager.Instance?.ClearAll();
     }
 
     public UnitBase GetPlayerUnit(Transform container, Vector3? position = null, Quaternion? quaternion = null)
     {
-        UnitBase unit = playerPool.Get();
+        UnitBase unit = SimplePoolManager.Instance.Get<UnitBase>(Commons.ResKey_PlayerUnit);
 
         if (unit != null)
         {
@@ -215,7 +90,7 @@ public class Factory : Singleton<Factory>
 
     public UnitBase GetMonsterUnit(Transform container, Vector3? position = null, Quaternion? quaternion = null)
     {
-        UnitBase unit = monsterPool.Get();
+        UnitBase unit = SimplePoolManager.Instance.Get<UnitBase>(Commons.ResKey_MonsterUnit);
 
         if(unit != null)
         {
@@ -228,7 +103,7 @@ public class Factory : Singleton<Factory>
 
     public HpBar GetHPUI(RectTransform container)
     {
-        HpBar hpBar = hpBarPool.Get();
+        HpBar hpBar = SimplePoolManager.Instance.Get<HpBar>(Commons.ResKey_HPUI);
 
         if(hpBar != null)
         {
@@ -240,7 +115,7 @@ public class Factory : Singleton<Factory>
 
     public Image GetPortraitUI(RectTransform container)
     {
-        Image portrait = portraitPool.Get();
+        Image portrait = SimplePoolManager.Instance.Get<Image>(Commons.ResKey_PortraitUI);
 
         if(portrait != null)
         {
@@ -252,14 +127,14 @@ public class Factory : Singleton<Factory>
 
     public BBoard GetBoard(BBoardType type, Transform container, int boardWidth, int boardHeight, float maxTimer)
     {
-        BBoard board = BBoard.CreateEmptyBoard(type, boardPool, tileUIPool, container, boardWidth, boardHeight, maxTimer);
+        BBoard board = BBoard.CreateEmptyBoard(type, container, boardWidth, boardHeight, maxTimer);
 
         return board;
     }
 
     public DamageFont GetDamageFont(Transform container, float damage)
     {
-        DamageFont damageFont = damageFontPool.Get();
+        DamageFont damageFont = SimplePoolManager.Instance.Get<DamageFont>(Commons.ResKey_DamageFont);
 
         if(damageFont != null)
         {
@@ -271,7 +146,7 @@ public class Factory : Singleton<Factory>
 
     public HitEffect GetHitEffect(Transform container)
     {
-        HitEffect hitEffect = hitEffectPool.Get();
+        HitEffect hitEffect = SimplePoolManager.Instance.Get<HitEffect>(Commons.ResKey_HitEffect);
 
         if (hitEffect != null)
         {
@@ -283,14 +158,14 @@ public class Factory : Singleton<Factory>
 
     public AlterMsg GetAlterMsg()
     {
-        AlterMsg alter = alterMsgPool.Get();
+        AlterMsg alter = SimplePoolManager.Instance.Get<AlterMsg>(Commons.ResKey_AlterMsg);
 
         return alter;
     }
 
     public QuadraticBezierRenderer GetTargetLine(Transform container, Color color)
     {
-        QuadraticBezierRenderer targetLine = targetLinePool.Get();
+        QuadraticBezierRenderer targetLine = SimplePoolManager.Instance.Get<QuadraticBezierRenderer>(Commons.ResKey_TargetLine);
 
         if(targetLine != null)
         {
@@ -308,7 +183,7 @@ public class Factory : Singleton<Factory>
             player.transform.SetParent(gobjContainer);
         }
 
-        playerPool.Release(player);
+        SimplePoolManager.Instance.Release<UnitBase>(Commons.ResKey_PlayerUnit, player);
     }
 
     public void ReleaseHPUI(HpBar hpUI)
@@ -318,7 +193,7 @@ public class Factory : Singleton<Factory>
             hpUI.transform.SetParent(uiContainer);
         }
         
-        hpBarPool.Release(hpUI);
+        SimplePoolManager.Instance.Release<HpBar>(Commons.ResKey_HPUI, hpUI);
     }
 
     public void ReleaseBoard(BBoard currentBoard)
@@ -328,7 +203,7 @@ public class Factory : Singleton<Factory>
             currentBoard.transform.SetParent(gobjContainer);
         }
 
-        boardPool.Release(currentBoard);
+        SimplePoolManager.Instance.Release<BBoard>(Commons.ResKey_Board, currentBoard);
     }
 
     public void ReleaseMonsterUnit(MonsterUnit monster)
@@ -338,7 +213,7 @@ public class Factory : Singleton<Factory>
             monster.transform.SetParent(gobjContainer);
         }
 
-        monsterPool.Release(monster);
+        SimplePoolManager.Instance.Release<UnitBase>(Commons.ResKey_MonsterUnit, monster);
     }
 
     public void ReleasePortraitUI(Image portraitUI)
@@ -348,7 +223,7 @@ public class Factory : Singleton<Factory>
             portraitUI.transform.SetParent(uiContainer);
         }
 
-        portraitPool.Release(portraitUI);
+        SimplePoolManager.Instance.Release<Image>(Commons.ResKey_PortraitUI, portraitUI);
     }
 
     public void ReleaseDamageFont(DamageFont damageFont)
@@ -358,7 +233,7 @@ public class Factory : Singleton<Factory>
             damageFont.transform.SetParent(gobjContainer);
         }
 
-        damageFontPool.Release(damageFont);
+        SimplePoolManager.Instance.Release<DamageFont>(Commons.ResKey_DamageFont, damageFont);
     }
 
     public void ReleaseAlterMsg(AlterMsg alterMsg)
@@ -368,7 +243,7 @@ public class Factory : Singleton<Factory>
             alterMsg.SetParent(uiContainer);
         }
 
-        alterMsgPool.Release(alterMsg);
+        SimplePoolManager.Instance.Release<AlterMsg>(Commons.ResKey_AlterMsg, alterMsg);
     }
 
     public void ReleaseHitEffect(HitEffect hitEffect)
@@ -378,7 +253,7 @@ public class Factory : Singleton<Factory>
             hitEffect.transform.SetParent(gobjContainer);
         }
 
-        hitEffectPool.Release(hitEffect);
+        SimplePoolManager.Instance.Release<HitEffect>(Commons.ResKey_HitEffect, hitEffect);
     }
 
     public void ReleaseTargetLine(QuadraticBezierRenderer targetLine)
@@ -388,7 +263,7 @@ public class Factory : Singleton<Factory>
             targetLine.transform.SetParent(gobjContainer);
         }
 
-        targetLinePool.Release(targetLine);
+        SimplePoolManager.Instance.Release<QuadraticBezierRenderer>(Commons.ResKey_TargetLine, targetLine);
     }
 
     protected override void OnSingletonDestroyed()

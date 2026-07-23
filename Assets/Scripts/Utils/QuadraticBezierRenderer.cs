@@ -73,7 +73,7 @@ public class QuadraticBezierRenderer : MonoBehaviour
         for(int i = 0; i <= segmentCount; i++) 
         {
             float t = (float)i / segmentCount;
-            Vector3 pos = Commons.Util.CalcBezierPoint_Quadratic(t, pointA, controlPoint, pointB);
+            Vector3 pos = Util.CalcBezierPoint_Quadratic(t, pointA, controlPoint, pointB);
 
             lineRenderer.SetPosition(i, pos);
         }

@@ -192,7 +192,7 @@ public class RestContent : GameContent
     {
         LevelBaseData currLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level);
         LevelBaseData nextLBD = DataTableManager.Instance.GetLevelBaseData((uint)userData.Level + 1);
-        UnitData playerData = DataTableManager.Instance.GetUnitData(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1));
+        UnitData playerData = DataTableManager.Instance.GetUnitData(Util.CreateDataIdx(DataTableType.UnitData, 1));
 
         if(currLBD != null)
         {
@@ -233,7 +233,7 @@ public class RestContent : GameContent
     {
         List<int> haveList = SaveLoadManager.Instance.UserSkillData.SkillSlots.Select((s) => s.SkillIdx).ToList();
         List<int> allList = DataTableManager.Instance.GetDB<SkillDataForm>(DataTableType.SkillData).DB
-            .Where((s)=>s.Key != Commons.Util.CreateDataIdx(DataTableType.SkillData, 1) && s.Value.RequireLevel <= userData.Level)
+            .Where((s)=>s.Key != Util.CreateDataIdx(DataTableType.SkillData, 1) && s.Value.RequireLevel <= userData.Level)
             .Select((s) => (int)s.Key)
             .ToList();
         List<int> rndList = allList.Except(haveList).Shuffle().ToList();
