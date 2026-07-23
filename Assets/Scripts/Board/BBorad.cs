@@ -55,9 +55,6 @@ public class BBoard : MonoBehaviour
     private ReactiveProperty<float> maxTimer = new ReactiveProperty<float>(0.0f);
     private IDisposable disTimer = null;
     private IDisposable disCurTimer = null;
-    // reference to owner pool for tile images so we can return them on release
-    private SimplePool<BTile> tilePoolRef = null;
-    // track Image instances acquired from the pool for this board
     private List<BTile> pooledTiles = new List<BTile>();
 
     public override string ToString()
@@ -112,9 +109,9 @@ public class BBoard : MonoBehaviour
         onPathComplete += callback;
     }
 
-    public static BBoard CreateEmptyBoard(BBoardType type, SimplePool<BBoard> pool, SimplePool<BTile> tilePool, Transform attachParent, int width, int height, float maxTimer)
+    public static BBoard CreateEmptyBoard(BBoardType type, Transform attachParent, int width, int height, float maxTimer)
     {
-        BBoard board = pool.Get();
+        BBoard board = SimplePoolManager.Instance.Get<BBoard>(Commons.ResKey_Board);
 
         if(board != null)
         {
@@ -132,9 +129,6 @@ public class BBoard : MonoBehaviour
             board.width = calcWidth;
             board.height = calcHeight;
             board.tiles = new BTile[calcHeight, calcWidth];
-
-            // remember tile pool reference for release
-            board.tilePoolRef = tilePool;
 
             float boardW = board.width * Commons.DEFAULT_TILE_WIDTH;
             float boardH = board.height * Commons.DEFAULT_TILE_HEIGHT;
@@ -163,7 +157,7 @@ public class BBoard : MonoBehaviour
                 for (int x = 0; x < calcWidth; x++)
                 {
                     // get tile from pool; if null, create a fallback Image to ensure grid consistency
-                    BTile tile = tilePool.Get();
+                    BTile tile = SimplePoolManager.Instance.Get<BTile>(Commons.ResKey_Tile);
 
                     if (tile != null)
                     {
@@ -452,20 +446,15 @@ public class BBoard : MonoBehaviour
         width = 0;
         height = 0;
 
-        // release tile images back to their pool
-        if (tilePoolRef != null)
+        foreach (var img in pooledTiles)
         {
-            foreach (var img in pooledTiles)
+            if (img != null)
             {
-                if (img != null)
-                {
-                    tilePoolRef.Release(img);
-                }
+                SimplePoolManager.Instance.Release<BTile>(Commons.ResKey_Tile, img);
             }
-
-            pooledTiles.Clear();
-            tilePoolRef = null;
         }
+
+        pooledTiles.Clear();
 
         disCurTimer?.Dispose();
 

@@ -46,7 +46,7 @@ public class StageSelectScene : MonoBehaviour
 
         for(int i = 0; i < mapCount; ++i)
         {
-            uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(i + 1));
+            uint idx = Util.CreateDataIdx(DataTableType.MapData, (uint)(i + 1));
             MapData mapdata = DataTableManager.Instance.GetMapData(idx);
 
             if (mapdata.Idx == 0)
@@ -96,7 +96,7 @@ public class StageSelectScene : MonoBehaviour
             PanelManager.GetPanel<SimpleTextPanel>("TutorialPanel")?.Show(text);
         });
 
-        LoadMap((int)Commons.Util.GetDataInnerId((uint)userData.MapIdx) - 1);
+        LoadMap((int)Util.GetDataInnerId((uint)userData.MapIdx) - 1);
         fadeUI.Play();
     }
 
@@ -115,7 +115,7 @@ public class StageSelectScene : MonoBehaviour
             stageMapUIList[prevIdx].gameObject.SetActive(false);
             stageMapUIList[stageMapIdx].gameObject.SetActive(true);
 
-            uint idx = Commons.Util.CreateDataIdx(DataTableType.MapData, (uint)(stageMapIdx + 1));
+            uint idx = Util.CreateDataIdx(DataTableType.MapData, (uint)(stageMapIdx + 1));
             MapData mapdata = DataTableManager.Instance.GetMapData(idx);
 
             if (mapdata.Idx == 0)

@@ -17,7 +17,7 @@ public class UnitSpawnerService
             player = unit as PlayerUnit;
             LevelBaseData lbd = DataTableManager.Instance.GetLevelBaseData(level);
 
-            player.LoadFromSO(Commons.Util.CreateDataIdx(DataTableType.UnitData, 1));
+            player.LoadFromSO(Util.CreateDataIdx(DataTableType.UnitData, 1));
             player.SetLevelBase(lbd);
             player.SetHPUI(Factory.Instance.GetHPUI(hpUIContainter));
             player.Subscribe_HP((v) => onChangeHP(player, v));
