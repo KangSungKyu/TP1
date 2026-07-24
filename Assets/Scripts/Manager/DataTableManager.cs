@@ -9,6 +9,23 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using static Commons;
 
+public enum DataTableType : uint //1~999
+{
+    None = 0,
+    TextData,
+    UnitData,
+    LevelBaseData,
+    MonsterData,
+    AnimationData,
+    MapData,
+    StageData,
+    RewardData,
+    SkillData,
+    MonsterPatternData,
+
+    DataTableType_End
+}
+
 public interface IDataLoad
 {
     public int GetDataCount();

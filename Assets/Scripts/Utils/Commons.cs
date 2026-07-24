@@ -25,23 +25,6 @@ public enum ResponseType : uint
     ResponseType_End
 }
 
-public enum DataTableType : uint //1~999
-{
-    None = 0,
-    TextData,
-    UnitData,
-    LevelBaseData,
-    MonsterData,
-    AnimationData,
-    MapData,
-    StageData,
-    RewardData,
-    SkillData,
-    MonsterPatternData,
-
-    DataTableType_End
-}
-
 public enum BBoardType
 {
     None = 0,
